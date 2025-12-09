@@ -340,7 +340,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-300 mb-1" title="Max characters per line (approximate)">Max Characters Per Line</label>
-                        <input type="number" id="settingCpl" value="11" min="1" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-slate-500" />
+                        <input type="number" id="settingCpl" value="42" min="1" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-slate-500" />
                         <p class="text-xs text-slate-500 mt-1">Words are never split. Lines may exceed limit to fit long words.</p>
                     </div>
                     <div>
@@ -1039,9 +1039,9 @@
                     }
                 }
 
-                // 1. RESOLVE OVERLAPS (Generic for all speakers/CC) - RAW INPUTS
-                // Fixes overlap before splitting logic
-                let resolvedEntries = resolveOverlaps(allEntries);
+                // 1. FLATTEN TIME SLICES (Merge overlapping CC/Dialogue)
+                // Creates a linear, non-overlapping stream with composite Text
+                let flattenedEntries = flattenTracks(allEntries);
 
                 // 2. APPLY SUBTITLE LIMITS (Optional)
                 const cpl = parseInt(document.getElementById('settingCpl').value) || 11;
@@ -1049,9 +1049,9 @@
                 const enableLimits = document.getElementById('toggleLimits').checked;
                 
                 if (enableLimits) {
-                    processedData = applyLimits(resolvedEntries, cpl, maxLines);
+                    processedData = applyLimits(flattenedEntries, cpl, maxLines);
                 } else {
-                    processedData = resolvedEntries;
+                    processedData = flattenedEntries;
                 }
                 
                 previewMode = currentMode; // Store which mode generated this preview
@@ -1062,31 +1062,184 @@
             }
         }
         
-        function resolveOverlaps(entries) {
-            // Sort by start time just to be safe
-            entries.sort((a, b) => a.startSeconds - b.startSeconds);
+        function flattenTracks(entries) {
+            if (entries.length === 0) return [];
             
-            const resolved = [];
-            for (let i = 0; i < entries.length; i++) {
-                let current = { ...entries[i] }; // Clone to avoid mutation issues
+            // HELPER: Normalize text for comparison (lowercase, no punctuation)
+            const normalizeText = (str) => str.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+            
+            // HELPER: Smart merge text - avoids duplicates and subsets
+            const smartMergeText = (currentText, nextText) => {
+                const currentNorm = normalizeText(currentText);
+                const nextNorm = normalizeText(nextText);
                 
-                // If not last entry, check overlap with next
-                if (i < entries.length - 1) {
-                    const next = entries[i + 1];
+                // If texts are identical (normalized), keep current
+                if (currentNorm === nextNorm) {
+                    return currentText;
+                }
+                
+                // If next is a subset of current, keep current
+                if (currentNorm.includes(nextNorm)) {
+                    return currentText;
+                }
+                
+                // If current is a subset of next, prefer next (it's more complete)
+                if (nextNorm.includes(currentNorm)) {
+                    return nextText;
+                }
+                
+                // Genuinely different content - combine them
+                return currentText + " " + nextText;
+            };
+            
+            // 0. SEPARATE TRACKS
+            const ccEntries = [];
+            const diagEntries = [];
+            
+            entries.forEach(e => {
+                if (e.speaker === '[CC]') {
+                    ccEntries.push(e);
+                } else {
+                    diagEntries.push(e);
+                }
+            });
+            
+            // 1. CLEAN & MERGE CC TRACKS (Aggressive Merge for identical SFX)
+            // Goal: Overlapping "(Phone Beeps)" from multiple files should become ONE entry.
+            function mergeCC(cclist) {
+                if (cclist.length === 0) return [];
+                // Sort by Start Time for merging logic
+                cclist.sort((a, b) => a.startSeconds - b.startSeconds);
+                
+                const merged = [];
+                let current = { ...cclist[0] };
+                
+                for (let i = 1; i < cclist.length; i++) {
+                    const next = cclist[i];
                     
-                    // If current ends AFTER next starts, trim current
-                    if (current.endSeconds > next.startSeconds) {
-                        current.endSeconds = next.startSeconds;
-                        current.timecode = `[${formatTimecode(current.startSeconds)} - ${formatTimecode(current.endSeconds)}]`;
+                    // Overlap?
+                    if (next.startSeconds < current.endSeconds + 0.1) {
+                        // If same text, merge them into one long block
+                        if (current.text === next.text) {
+                            current.endSeconds = Math.max(current.endSeconds, next.endSeconds);
+                            // Keep earliest start
+                        } else {
+                            // Different CC text overlapping?
+                            // Just flow them naturally. 
+                            // If Next starts before Current ends, we can't easily merge different texts in CC without clutter.
+                            // But usually CC is sparse. Let's push current and start new.
+                            merged.push(current);
+                            current = { ...next };
+                        }
+                    } else {
+                        merged.push(current);
+                        current = { ...next };
                     }
                 }
-                
-                // Filter out invalid/zero duration entries
-                if (current.endSeconds > current.startSeconds) {
-                    resolved.push(current);
-                }
+                merged.push(current);
+                return merged;
             }
-            return resolved;
+            
+            const cleanCC = mergeCC(ccEntries);
+            
+            // 2. CLEAN & MERGE DIALOGUE TRACKS (Heal fragmented lines)
+            // Goal: If "Samantha" is split into two parts by "Theodore" in the input file (old logic artifact),
+            // or if the user uploads a file with split lines, we want to re-join them into one "block" 
+            // so they sort correctly by End Time.
+            function mergeDialogue(dlist) {
+                if (dlist.length === 0) return [];
+                // Sort by Start Time to find adjacent fragments
+                dlist.sort((a, b) => a.startSeconds - b.startSeconds);
+                
+                const merged = [];
+                let current = { ...dlist[0] };
+                
+                for (let i = 1; i < dlist.length; i++) {
+                    const next = dlist[i];
+                    
+                    // Check strict adjacency (Gap < 0.5s) AND Same Speaker
+                    // We assume inputs are "Tracks", so same speaker name = same person.
+                    const gap = next.startSeconds - current.endSeconds;
+                    const isSameSpeaker = current.speaker === next.speaker;
+                    
+                    // Allow small overlap or small gap
+                    const isAdjacent = gap < 0.5; // 0.5s tolerance for "sentence pause"
+                    
+                    if (isSameSpeaker && (isAdjacent || next.startSeconds < current.endSeconds)) {
+                        // MERGE
+                        current.endSeconds = Math.max(current.endSeconds, next.endSeconds);
+                        current.startSeconds = Math.min(current.startSeconds, next.startSeconds); // Should be current.start, but safety
+                        
+                        // Merge Text (Smart deduplication)
+                        current.text = smartMergeText(current.text, next.text);
+                    } else {
+                         merged.push(current);
+                         current = { ...next };
+                    }
+                }
+                merged.push(current);
+                return merged;
+            }
+
+            const cleanDialogue = mergeDialogue(diagEntries);
+            
+            // 3. COMBINE & SORT BY END TIME (User Request: "Who stops talking last")
+            // This ensures short interjections (ending early) appear before the long speech (ending late) finishes.
+            
+            let allClean = [...cleanCC, ...cleanDialogue];
+            
+            // SORT LOGIC: End Time ASC, then Start Time ASC
+            allClean.sort((a, b) => {
+                if (Math.abs(a.endSeconds - b.endSeconds) > 0.05) {
+                    return a.endSeconds - b.endSeconds;
+                }
+                return a.startSeconds - b.startSeconds;
+            });
+            
+            // 4. FINAL PASS: MERGE ADJACENT SAME-SPEAKER
+            // If the sorted list has two adjacent entries from SAME speaker, merge them.
+            // This handles the case where we just sorted them together.
+            
+            const finalMerged = [];
+            if (allClean.length > 0) {
+                let current = allClean[0];
+                
+                for (let i = 1; i < allClean.length; i++) {
+                    const next = allClean[i];
+                    
+                    const isSameSpeaker = current.speaker === next.speaker;
+                    // Check adjacency (current end ~ next start) OR Overlap
+                    // Since we sorted by End Time, 'next' could actually start BEFORE 'current'.
+                    // Merge if:
+                    // 1. Same Speaker
+                    // 2. Gap is small (< 0.5s) OR Overlapping
+                    const gap = next.startSeconds - current.endSeconds;
+                    const isClose = gap < 0.5; // Allow small silence to bridge
+                    // Also check if 'next' is completely contained or overlapping significantly?
+                    // If we merge, we extend End Time.
+                    
+                    if (isSameSpeaker && (isClose || next.startSeconds < current.endSeconds)) {
+                        // MERGE
+                        // Update End
+                        current.endSeconds = Math.max(current.endSeconds, next.endSeconds);
+                        // Update Start (if next started earlier, which is possible with End-Sort)
+                        current.startSeconds = Math.min(current.startSeconds, next.startSeconds);
+                        
+                        // Merge Text (Smart deduplication)
+                        current.text = smartMergeText(current.text, next.text);
+                        
+                        // Update Timecode
+                        current.timecode = `[${formatTimecode(current.startSeconds)} - ${formatTimecode(current.endSeconds)}]`;
+                        
+                    } else {
+                        finalMerged.push(current);
+                        current = next;
+                    }
+                }
+                finalMerged.push(current);
+            }
+            
+            return finalMerged;
         }
         
         // LIMIT LOGIC
@@ -1094,6 +1247,38 @@
             let newEntries = [];
             
             entries.forEach(entry => {
+                // 1. PURE CC: Pass through (Exempt)
+                if (entry.speaker === '[CC]') {
+                    newEntries.push(entry);
+                    return;
+                }
+
+                // 2. COMPOSITE CARD (CC Header + Dialogue Body)
+                // Identified by empty speaker (baked into text)
+                if (entry.speaker === '') {
+                    const lines = entry.text.split('\n');
+                    if (lines.length > 1) {
+                         // Detach CC Header
+                         const header = lines[0];
+                         const body = lines.slice(1).join('\n');
+                         
+                         // Process Body (Dialogue) against limits
+                         // We create a temp entry for the splitter
+                         const tempEntry = { ...entry, text: body };
+                         const splitEntries = createLimitEntries(tempEntry, cplLimit, maxLinesLimit);
+                         
+                         // Re-attach Header to the FIRST card only
+                         if (splitEntries.length > 0) {
+                             splitEntries[0].text = header + '\n' + splitEntries[0].text;
+                         }
+                         
+                         newEntries = newEntries.concat(splitEntries);
+                         return;
+                    }
+                    // Fallback if split failed or single line? Treat as normal.
+                }
+
+                // 3. STANDARD DIALOGUE
                 const splitEntries = createLimitEntries(entry, cplLimit, maxLinesLimit);
                 newEntries = newEntries.concat(splitEntries);
             });
@@ -1181,6 +1366,16 @@
             const entries = [];
             const blocks = content.split(/\n(?=\[)/);
 
+            // 1. Detect forced CC mode
+            let isForcedCC = false;
+            if (speakerLabelOverride) {
+                const norm = speakerLabelOverride.trim().toLowerCase();
+                if (['cc', 'sfx', 'sound', 'sound effects'].includes(norm)) {
+                    isForcedCC = true;
+                    speakerLabelOverride = '[CC]';
+                }
+            }
+
             blocks.forEach(block => {
                 const lines = block.trim().split('\n');
                 if (!lines[0].startsWith('[')) return;
@@ -1219,46 +1414,58 @@
                     }
                 }
 
-                // Process Text Lines for CC
-                const rawLines = lines.slice(textStart);
-                const ccLines = [];
-                const dialogueLines = [];
+                // Process Text Lines
+                let rawLines = lines.slice(textStart).map(l => l.trim()).filter(l => l);
+                
+                // If Forced CC, all lines are CC
+                if (isForcedCC) {
+                    if (rawLines.length > 0) {
+                        entries.push({
+                            startSeconds: startSec,
+                            endSeconds: endSec,
+                            timecode: newTimecode,
+                            speaker: '[CC]',
+                            text: rawLines.join('\n')
+                        });
+                    }
+                    return;
+                }
+
+                // Normal Mode: Split Mixed Lines
+                const finalSpeaker = speakerLabelOverride || extractedSpeaker;
                 
                 rawLines.forEach(line => {
-                    const trimmed = line.trim();
-                    if (!trimmed) return;
+                    // Regex for (text) or [text]
+                    // We need to support "Mixed" lines: "(Beep) Hello world" or "Hello (Laughs)"
+                    // But also simple "(Beep)"
                     
-                    // Simple regex for (text) or [text]
-                    if ((trimmed.startsWith('(') && trimmed.endsWith(')')) || 
-                        (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
-                        ccLines.push(trimmed);
-                    } else {
-                        dialogueLines.push(trimmed);
-                    }
+                    // Strategy: Split by parens capturing delimiter
+                    const parts = line.split(/(\([^\)]+\)|\[[^\]]+\])/g).filter(p => p.trim());
+                    
+                    parts.forEach(part => {
+                        const trimmed = part.trim();
+                        const isCC = (trimmed.startsWith('(') && trimmed.endsWith(')')) || 
+                                     (trimmed.startsWith('[') && trimmed.endsWith(']'));
+                                     
+                        if (isCC) {
+                            entries.push({
+                                startSeconds: startSec,
+                                endSeconds: endSec,
+                                timecode: newTimecode,
+                                speaker: '[CC]',
+                                text: trimmed
+                            });
+                        } else {
+                            entries.push({
+                                startSeconds: startSec,
+                                endSeconds: endSec,
+                                timecode: newTimecode,
+                                speaker: finalSpeaker,
+                                text: trimmed
+                            });
+                        }
+                    });
                 });
-                
-                // Create Entries
-                // 1. CC Entry
-                if (ccLines.length > 0) {
-                    entries.push({
-                        startSeconds: startSec,
-                        endSeconds: endSec,
-                        timecode: newTimecode,
-                        speaker: '[CC]',
-                        text: ccLines.join('\n')
-                    });
-                }
-                
-                // 2. Dialogue Entry
-                if (dialogueLines.length > 0) {
-                    entries.push({
-                        startSeconds: startSec,
-                        endSeconds: endSec,
-                        timecode: newTimecode,
-                        speaker: speakerLabelOverride || extractedSpeaker,
-                        text: dialogueLines.join('\n')
-                    });
-                }
             });
             return entries;
         }
@@ -1716,6 +1923,33 @@
             const showSpeakers = document.getElementById('toggleSpeakerNames').checked;
             const showCC = document.getElementById('toggleCC').checked;
             
+            // SRT COMPLIANCE FIX: Linearize (No Overlaps)
+            // Option A: Keep end times fixed, recalculate starts
+            // If Line B overlaps Line A, Line B starts when Line A ends.
+            // Ensure minimum display duration so entries don't get compressed to nothing.
+            const srtData = processedData.map(entry => ({ ...entry }));
+            const MIN_DISPLAY_DURATION = 0.5; // Minimum 0.5 seconds per subtitle
+            
+            let lastEnd = 0;
+            srtData.forEach((entry, index) => {
+                // Force Start to be at least the previous End
+                if (entry.startSeconds < lastEnd) {
+                    entry.startSeconds = lastEnd;
+                }
+                
+                // CRITICAL: Ensure entry has valid duration
+                // If pushing start forward created start >= end, fix it
+                if (entry.startSeconds >= entry.endSeconds) {
+                    // Extend end to provide minimum duration
+                    entry.endSeconds = entry.startSeconds + MIN_DISPLAY_DURATION;
+                } else if (entry.endSeconds - entry.startSeconds < MIN_DISPLAY_DURATION) {
+                    // Duration too short - extend it
+                    entry.endSeconds = entry.startSeconds + MIN_DISPLAY_DURATION;
+                }
+                
+                lastEnd = entry.endSeconds;
+            });
+
             let content = '';
             const formatSrtTime = (ms) => {
                 const h = Math.floor(ms / 3600000);
@@ -1726,7 +1960,7 @@
             };
             
             let counter = 1;
-            processedData.forEach((entry) => {
+            srtData.forEach((entry) => {
                 const isCC = entry.speaker === '[CC]' || entry.text.startsWith('(') && entry.text.endsWith(')');
                 if (isCC && !showCC) return;
                 

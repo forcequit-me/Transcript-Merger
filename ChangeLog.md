@@ -3,12 +3,11 @@
 ## [Unreleased]
 
 ### Added
--   **Subtitle Limits Toggle**: Added "Enable Limits" checkbox to optionally disable text splitting.
--   **Refined Overlap Logic**: Moved overlap resolution to occur *before* text splitting to correctly handle interrupting speakers on the input level.
--   **CC Separation**: Automatically extracts text in `()` or `[]` as separate `[CC]` entries.
--   **Visibility Toggles**: Checkboxes to toggle Speaker Names and Closed Captions on/off.
--   **UI Improvements**: Centered export buttons, increased preview height.
+-   **Smart Limits for Composite Cards**: The first line (CC Header) of a merged card is exempt from subtitle limits. It is detatched before processing and re-attached to the first resulting card.
+-   **Refined Flattening Engine**: Clean-before-slice logic.
+-   **Composite Card Formatting**: Baked-in speaker names for overlaps.
+-   **Time-Sliced Flattening**: Linear output generation.
+-   **Subtitle Limits Toggle**: Added "Enable Limits" checkbox.
 
 ### Changed
--   **Processing Pipeline**: Now strictly `Raw Input` -> `Overlap Resolution` -> `Subtitle Limits`.
--   **Subtitle Settings Mode**: Updated UI panel with the new toggle.
+-   **Processing Pipeline**: `Raw Input` -> `Clean Tracks` -> `Slice & Merge` -> `Smart Limits`.
