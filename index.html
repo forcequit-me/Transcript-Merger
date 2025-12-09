@@ -32,6 +32,250 @@
             border-color: #6366f1 !important; /* Indigo-500 */
             background-color: #1e293b !important; /* Slate-800 */
         }
+        
+        /* Dialogue Entry Editing Styles */
+        .dialogue-entry {
+            position: relative;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .dialogue-entry:hover:not(.selected) {
+            border-color: #475569 !important;
+        }
+        .dialogue-entry.selected {
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+        }
+        
+        /* Edit Action Buttons */
+        .edit-actions-top {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+        .edit-actions-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+        .edit-actions-left,
+        .edit-actions-center,
+        .edit-actions-right {
+            display: flex;
+            gap: 0.5rem;
+            flex: 1;
+        }
+        .edit-actions-left {
+            justify-content: flex-start;
+        }
+        .edit-actions-center {
+            justify-content: center;
+        }
+        .edit-actions-right {
+            justify-content: flex-end;
+        }
+        .dialogue-entry.selected .edit-actions-top,
+        .dialogue-entry.selected .edit-actions-bottom {
+            opacity: 1;
+            max-height: 50px;
+            padding-top: 0.5rem;
+        }
+        .dialogue-entry.selected .edit-actions-top {
+            padding-bottom: 0.5rem;
+        }
+        
+        .edit-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.15s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .edit-btn-add {
+            background: #334155;
+            color: #94a3b8;
+        }
+        .edit-btn-add:hover {
+            background: #475569;
+            color: #e2e8f0;
+        }
+        .edit-btn-save {
+            background: #166534;
+            color: #86efac;
+        }
+        .edit-btn-save:hover {
+            background: #15803d;
+            color: #bbf7d0;
+        }
+        .edit-btn-delete {
+            background: #7f1d1d;
+            color: #fca5a5;
+        }
+        .edit-btn-delete:hover {
+            background: #991b1b;
+            color: #fecaca;
+        }
+        .edit-btn-cc {
+            background: #1e3a5f;
+            color: #7dd3fc;
+            font-size: 10px;
+            width: auto;
+            padding: 0 8px;
+        }
+        .edit-btn-cc:hover {
+            background: #1e40af;
+            color: #93c5fd;
+        }
+        
+        /* Speaker Dropdown */
+        .speaker-name-container {
+            position: relative;
+            display: inline-block;
+        }
+        .speaker-name-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #818cf8;
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+        .speaker-name-btn:hover {
+            background: #334155;
+        }
+        .dialogue-entry.selected .speaker-name-btn {
+            background: #334155;
+        }
+        .dialogue-entry.selected .speaker-name-btn:hover {
+            background: #475569;
+        }
+        .speaker-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 180px;
+            background: #1e293b;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            z-index: 100;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .speaker-option {
+            padding: 10px 14px;
+            cursor: pointer;
+            color: #e2e8f0;
+            font-size: 0.875rem;
+            transition: background 0.1s ease;
+        }
+        .speaker-option:hover {
+            background: #334155;
+        }
+        .speaker-option.selected {
+            background: #4f46e5;
+            color: white;
+        }
+        .speaker-option.custom-option {
+            border-top: 1px solid #475569;
+            color: #a5b4fc;
+        }
+        .speaker-custom-input {
+            width: 100%;
+            padding: 10px 14px;
+            background: #0f172a;
+            border: none;
+            border-top: 1px solid #475569;
+            color: #e2e8f0;
+            font-size: 0.875rem;
+            outline: none;
+        }
+        .speaker-custom-input::placeholder {
+            color: #64748b;
+        }
+        
+        /* Editable Text Area */
+        .edit-text-input {
+            width: 100%;
+            min-height: 60px;
+            padding: 8px 10px;
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 0.875rem;
+            line-height: 1.4;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+        .edit-text-input:focus {
+            border-color: #6366f1;
+        }
+        
+        /* Editable Timing */
+        .timing-container {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .edit-timing-input {
+            width: 90px;
+            padding: 4px 6px;
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 4px;
+            color: #94a3b8;
+            font-size: 0.75rem;
+            font-family: monospace;
+            text-align: center;
+            outline: none;
+        }
+        .edit-timing-input:focus {
+            border-color: #6366f1;
+            color: #e2e8f0;
+        }
+        .timing-separator {
+            color: #64748b;
+            font-size: 0.75rem;
+        }
+        
+        /* Dialogue text display (non-edit mode) */
+        .dialogue-text-display {
+            color: #cbd5e1;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        
+        /* CC Entry Indicator */
+        .cc-indicator {
+            display: inline-block;
+            background: #1e3a5f;
+            color: #7dd3fc;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 6px;
+        }
     </style>
 </head>
 <body class="bg-slate-900 p-6 min-h-screen text-slate-200">
@@ -822,6 +1066,10 @@
             return entries;
         }
 
+        // EDITING STATE
+        let selectedEntryIndex = null;
+        let openDropdownIndex = null;
+
         function displayPreview() {
             document.getElementById('entryCount').textContent = processedData.length;
             document.getElementById('statEntries').textContent = processedData.length;
@@ -832,22 +1080,398 @@
             const previewList = document.getElementById('previewList');
             previewList.innerHTML = '';
 
-            processedData.forEach((entry) => {
+            processedData.forEach((entry, index) => {
                 const div = document.createElement('div');
-                div.className = 'bg-slate-800 p-3 rounded border border-slate-700';
+                div.className = 'dialogue-entry bg-slate-800 p-3 rounded border border-slate-700';
+                div.dataset.index = index;
+                
+                const isCC = entry.speaker === '[CC]' || entry.text.startsWith('(') && entry.text.endsWith(')');
+                
                 div.innerHTML = `
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="font-semibold text-sm text-indigo-400">${entry.speaker}</span>
-                        <span class="text-xs text-slate-500">${entry.timecode}</span>
+                    <!-- Top Action Buttons -->
+                    <div class="edit-actions-top">
+                        <button class="edit-btn edit-btn-add btn-add-above" title="Add dialogue above">+</button>
+                        <button class="edit-btn edit-btn-cc btn-cc-above" title="Add CC above">CC</button>
                     </div>
-                    <p class="text-sm text-slate-300">${entry.text}</p>
+                    
+                    <!-- Entry Content -->
+                    <div class="entry-content">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="speaker-name-container">
+                                <button class="speaker-name-btn">${entry.speaker}</button>
+                                ${isCC ? '<span class="cc-indicator">CC</span>' : ''}
+                            </div>
+                            <div class="timing-container timing-display">
+                                <span class="text-xs text-slate-500">${entry.timecode}</span>
+                            </div>
+                        </div>
+                        <div class="dialogue-text-container">
+                            <p class="dialogue-text-display">${escapeHtml(entry.text)}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Bottom Action Buttons -->
+                    <div class="edit-actions-bottom">
+                        <div class="edit-actions-left"></div>
+                        <div class="edit-actions-center">
+                            <button class="edit-btn edit-btn-add btn-add-below" title="Add dialogue below">+</button>
+                            <button class="edit-btn edit-btn-cc btn-cc-below" title="Add CC below">CC</button>
+                        </div>
+                        <div class="edit-actions-right">
+                            <button class="edit-btn edit-btn-save btn-save" title="Save changes">✓</button>
+                            <button class="edit-btn edit-btn-delete btn-delete" title="Delete entry">✕</button>
+                        </div>
+                    </div>
                 `;
+                
+                // Click handler for selection
+                div.addEventListener('click', (e) => {
+                    // Don't select if clicking on buttons or inputs
+                    if (e.target.closest('.edit-btn') || e.target.closest('.speaker-dropdown') || 
+                        e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') {
+                        return;
+                    }
+                    selectEntry(index);
+                });
+                
+                // Speaker dropdown handler
+                const speakerBtn = div.querySelector('.speaker-name-btn');
+                speakerBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (selectedEntryIndex === index) {
+                        toggleSpeakerDropdown(index, speakerBtn);
+                    }
+                });
+                
+                // Add Above button
+                div.querySelector('.btn-add-above').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    addEntryAbove(index, false);
+                });
+                
+                // Add CC Above button
+                div.querySelector('.btn-cc-above').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    addEntryAbove(index, true);
+                });
+                
+                // Add Below button
+                div.querySelector('.btn-add-below').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    addEntryBelow(index, false);
+                });
+                
+                // Add CC Below button
+                div.querySelector('.btn-cc-below').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    addEntryBelow(index, true);
+                });
+                
+                // Save button
+                div.querySelector('.btn-save').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    saveEntryChanges(index);
+                });
+                
+                // Delete button
+                div.querySelector('.btn-delete').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteEntry(index);
+                });
+                
                 previewList.appendChild(div);
             });
 
             document.getElementById('previewSection').classList.remove('hidden');
             // Scroll to preview
             document.getElementById('previewSection').scrollIntoView({ behavior: 'smooth' });
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', closeAllDropdowns);
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function selectEntry(index) {
+            // Save previous entry if one was selected
+            if (selectedEntryIndex !== null && selectedEntryIndex !== index) {
+                saveEntryChanges(selectedEntryIndex, true);
+                deselectEntry(selectedEntryIndex);
+            }
+            
+            // Toggle if clicking same entry
+            if (selectedEntryIndex === index) {
+                saveEntryChanges(index, true);
+                deselectEntry(index);
+                return;
+            }
+            
+            selectedEntryIndex = index;
+            const entryEl = document.querySelector(`[data-index="${index}"]`);
+            if (!entryEl) return;
+            
+            entryEl.classList.add('selected');
+            enableEditing(entryEl, index);
+        }
+        
+        function deselectEntry(index) {
+            const entryEl = document.querySelector(`[data-index="${index}"]`);
+            if (!entryEl) return;
+            
+            entryEl.classList.remove('selected');
+            disableEditing(entryEl, index);
+            selectedEntryIndex = null;
+            closeAllDropdowns();
+        }
+        
+        function enableEditing(entryEl, index) {
+            const entry = processedData[index];
+            
+            // Replace text display with textarea
+            const textContainer = entryEl.querySelector('.dialogue-text-container');
+            textContainer.innerHTML = `<textarea class="edit-text-input">${entry.text}</textarea>`;
+            
+            // Replace timing display with editable inputs
+            const timingContainer = entryEl.querySelector('.timing-display');
+            timingContainer.innerHTML = `
+                <input type="text" class="edit-timing-input edit-timing-start" value="${formatEditableTimecode(entry.startSeconds)}" />
+                <span class="timing-separator">-</span>
+                <input type="text" class="edit-timing-input edit-timing-end" value="${formatEditableTimecode(entry.endSeconds)}" />
+            `;
+        }
+        
+        function disableEditing(entryEl, index) {
+            const entry = processedData[index];
+            
+            // Restore text display
+            const textContainer = entryEl.querySelector('.dialogue-text-container');
+            textContainer.innerHTML = `<p class="dialogue-text-display">${escapeHtml(entry.text)}</p>`;
+            
+            // Restore timing display
+            const timingContainer = entryEl.querySelector('.timing-display');
+            timingContainer.innerHTML = `<span class="text-xs text-slate-500">${entry.timecode}</span>`;
+        }
+        
+        function formatEditableTimecode(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+            const ff = Math.floor((seconds % 1) * 30);
+            return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}:${String(ff).padStart(2,'0')}`;
+        }
+        
+        function parseEditableTimecode(timecodeStr) {
+            const parts = timecodeStr.split(':').map(Number);
+            if (parts.length === 4) {
+                return parts[0] * 3600 + parts[1] * 60 + parts[2] + parts[3] / 30;
+            }
+            return 0;
+        }
+        
+        function toggleSpeakerDropdown(index, speakerBtn) {
+            const container = speakerBtn.closest('.speaker-name-container');
+            const existingDropdown = container.querySelector('.speaker-dropdown');
+            
+            if (existingDropdown) {
+                existingDropdown.remove();
+                openDropdownIndex = null;
+                return;
+            }
+            
+            closeAllDropdowns();
+            
+            // Get unique speakers
+            const speakers = [...new Set(processedData.map(e => e.speaker))];
+            const currentSpeaker = processedData[index].speaker;
+            
+            const dropdown = document.createElement('div');
+            dropdown.className = 'speaker-dropdown';
+            dropdown.innerHTML = `
+                ${speakers.map(s => `
+                    <div class="speaker-option ${s === currentSpeaker ? 'selected' : ''}" data-speaker="${escapeHtml(s)}">${escapeHtml(s)}</div>
+                `).join('')}
+                <div class="speaker-option custom-option" data-custom="true">+ Custom Speaker...</div>
+            `;
+            
+            // Add click handlers for speaker options
+            dropdown.querySelectorAll('.speaker-option:not(.custom-option)').forEach(opt => {
+                opt.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    setSpeaker(index, opt.dataset.speaker);
+                    closeAllDropdowns();
+                });
+            });
+            
+            // Custom speaker option
+            dropdown.querySelector('.custom-option').addEventListener('click', (e) => {
+                e.stopPropagation();
+                showCustomSpeakerInput(dropdown, index);
+            });
+            
+            container.appendChild(dropdown);
+            openDropdownIndex = index;
+        }
+        
+        function showCustomSpeakerInput(dropdown, index) {
+            const customOption = dropdown.querySelector('.custom-option');
+            customOption.remove();
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'speaker-custom-input';
+            input.placeholder = 'Enter speaker name...';
+            dropdown.appendChild(input);
+            input.focus();
+            
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && input.value.trim()) {
+                    setSpeaker(index, input.value.trim());
+                    closeAllDropdowns();
+                }
+                if (e.key === 'Escape') {
+                    closeAllDropdowns();
+                }
+            });
+            
+            input.addEventListener('click', (e) => e.stopPropagation());
+        }
+        
+        function setSpeaker(index, speaker) {
+            processedData[index].speaker = speaker;
+            const entryEl = document.querySelector(`[data-index="${index}"]`);
+            if (entryEl) {
+                const speakerBtn = entryEl.querySelector('.speaker-name-btn');
+                speakerBtn.textContent = speaker;
+                
+                // Update CC indicator
+                const isCC = speaker === '[CC]';
+                const existingIndicator = entryEl.querySelector('.cc-indicator');
+                if (isCC && !existingIndicator) {
+                    speakerBtn.insertAdjacentHTML('afterend', '<span class="cc-indicator">CC</span>');
+                } else if (!isCC && existingIndicator) {
+                    existingIndicator.remove();
+                }
+            }
+            
+            // Update stats
+            document.getElementById('statSpeakers').textContent = new Set(processedData.map(e => e.speaker)).size;
+        }
+        
+        function closeAllDropdowns() {
+            document.querySelectorAll('.speaker-dropdown').forEach(d => d.remove());
+            openDropdownIndex = null;
+        }
+        
+        function addEntryAbove(index, isCC = false) {
+            const refEntry = processedData[index];
+            
+            // Calculate timing - slightly before reference entry
+            const duration = 2; // 2 second default duration
+            let endTime = refEntry.startSeconds;
+            let startTime = Math.max(0, endTime - duration);
+            
+            // If there's a previous entry, start after it ends
+            if (index > 0) {
+                const prevEntry = processedData[index - 1];
+                startTime = Math.max(startTime, prevEntry.endSeconds);
+            }
+            
+            const newEntry = {
+                startSeconds: startTime,
+                endSeconds: endTime,
+                timecode: `[${formatTimecode(startTime)} - ${formatTimecode(endTime)}]`,
+                speaker: isCC ? '[CC]' : refEntry.speaker,
+                text: isCC ? '(Enter description)' : 'New dialogue'
+            };
+            
+            processedData.splice(index, 0, newEntry);
+            selectedEntryIndex = null;
+            displayPreview();
+            
+            // Select the new entry for immediate editing
+            setTimeout(() => selectEntry(index), 50);
+        }
+        
+        function addEntryBelow(index, isCC = false) {
+            const refEntry = processedData[index];
+            
+            // Calculate timing - slightly after reference entry
+            const duration = 2; // 2 second default duration
+            let startTime = refEntry.endSeconds;
+            let endTime = startTime + duration;
+            
+            // If there's a next entry, end before it starts
+            if (index < processedData.length - 1) {
+                const nextEntry = processedData[index + 1];
+                endTime = Math.min(endTime, nextEntry.startSeconds);
+            }
+            
+            const newEntry = {
+                startSeconds: startTime,
+                endSeconds: endTime,
+                timecode: `[${formatTimecode(startTime)} - ${formatTimecode(endTime)}]`,
+                speaker: isCC ? '[CC]' : refEntry.speaker,
+                text: isCC ? '(Enter description)' : 'New dialogue'
+            };
+            
+            processedData.splice(index + 1, 0, newEntry);
+            selectedEntryIndex = null;
+            displayPreview();
+            
+            // Select the new entry for immediate editing
+            setTimeout(() => selectEntry(index + 1), 50);
+        }
+        
+        function deleteEntry(index) {
+            if (processedData.length <= 1) {
+                alert("Cannot delete the last entry.");
+                return;
+            }
+            
+            // Remove the entry
+            processedData.splice(index, 1);
+            selectedEntryIndex = null;
+            
+            // Re-render the preview
+            displayPreview();
+            
+            // Update entry count display
+            document.getElementById('entryCount').textContent = processedData.length;
+        }
+        
+        function saveEntryChanges(index, silent = false) {
+            const entryEl = document.querySelector(`[data-index="${index}"]`);
+            if (!entryEl) return;
+            
+            const entry = processedData[index];
+            
+            // Get edited text
+            const textInput = entryEl.querySelector('.edit-text-input');
+            if (textInput) {
+                entry.text = textInput.value;
+            }
+            
+            // Get edited timing
+            const startInput = entryEl.querySelector('.edit-timing-start');
+            const endInput = entryEl.querySelector('.edit-timing-end');
+            if (startInput && endInput) {
+                entry.startSeconds = parseEditableTimecode(startInput.value);
+                entry.endSeconds = parseEditableTimecode(endInput.value);
+                entry.timecode = `[${formatTimecode(entry.startSeconds)} - ${formatTimecode(entry.endSeconds)}]`;
+            }
+            
+            // Update stats
+            document.getElementById('statEntries').textContent = processedData.length;
+            const lastEntry = processedData[processedData.length - 1];
+            document.getElementById('statDuration').textContent = lastEntry ? Math.floor(lastEntry.endSeconds / 60) + 'm' : '0m';
+            
+            if (!silent) {
+                deselectEntry(index);
+            }
         }
 
         // EXPORTS
