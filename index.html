@@ -1065,30 +1065,26 @@
                     let partIndex = 1;
                     for (const fileObj of sequenceFiles) {
                         const content = await fileObj.file.text();
-                        // For sequence mode, we might want to keep original speakers or override? 
-                        // Usually sequence implies same video split, so speakers are embedded.
-                        // But our parser expects speaker label override? 
-                        // Let's assume we keep "Speaker" from file if we can, but our parser is rigid.
-                        // Let's just use a generic "Speaker" or try to extract from text?
-                        // The current parser uses the `speakerLabel` arg to override. 
-                        // Let's pass "Unknown" or maybe we should parse the speaker line from the file?
-                        // Actually, the parser logic: `if (lines[i].startsWith('Speaker'))` skips that line.
-                        // It doesn't extract the speaker name from the file, it uses the passed label.
-                        // This is a limitation for Sequence mode if the file has multiple speakers.
-                        // FIX: Let's modify parseTranscript to extract speaker if label is null?
-                        // For now, let's just use "Speaker" as label for sequence mode, or maybe we need to improve parser.
-                        // The user said "upload multiple completed transcripts that have already been merged".
-                        // So they likely have "Speaker 1", "Speaker 2" inside them.
-                        // My parser currently IGNORES the speaker line in the file and uses the input label.
-                        // I should probably fix the parser to read the speaker from the file if possible.
                         
-                // Let's do a quick fix: pass null as label, and have parser extract it.
-                        const entries = await parseTranscript(content, null, currentOffset);
-                        // Add part number to each entry for sequence mode visualization
-                        entries.forEach(entry => {
-                            entry.partNumber = partIndex;
-                        });
-                        allEntries = allEntries.concat(entries);
+                        // Parse entries WITHOUT offset first to detect base timecode
+                        const rawEntries = await parseTranscript(content, null, 0);
+                        
+                        if (rawEntries.length > 0) {
+                            // Detect the base timecode offset from the first entry
+                            // DaVinci Resolve often uses record timecode starting at 01:00:00:00
+                            // We need to normalize this to relative time (starting at 0)
+                            const baseOffset = rawEntries[0].startSeconds;
+                            
+                            // Apply normalization: subtract base offset, then add cumulative sequence offset
+                            rawEntries.forEach(entry => {
+                                entry.startSeconds = entry.startSeconds - baseOffset + currentOffset;
+                                entry.endSeconds = entry.endSeconds - baseOffset + currentOffset;
+                                entry.timecode = `[${formatTimecode(entry.startSeconds)} - ${formatTimecode(entry.endSeconds)}]`;
+                                entry.partNumber = partIndex;
+                            });
+                            
+                            allEntries = allEntries.concat(rawEntries);
+                        }
                         
                         currentOffset += parseDuration(fileObj.duration);
                         partIndex++;
