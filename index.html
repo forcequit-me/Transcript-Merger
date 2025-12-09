@@ -154,7 +154,8 @@
             font-weight: 600;
             font-size: 0.875rem;
             color: #818cf8;
-            padding: 2px 8px 2px 0;
+            padding: 4px 10px 4px 0;
+            margin-left: -2px;
             border-radius: 4px;
             transition: all 0.15s ease;
         }
@@ -277,6 +278,42 @@
             font-weight: 600;
             margin-left: 6px;
         }
+        
+        /* Custom Checkbox Styling - Muted colors to match project style */
+        input[type="checkbox"] {
+            accent-color: #6366f1;
+        }
+        input[type="checkbox"]:checked {
+            accent-color: #6366f1;
+        }
+        
+        /* Part Separator Styling for Sequencer Mode */
+        .part-separator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1.5rem 0;
+            margin: 1rem 0;
+        }
+        .part-separator::before,
+        .part-separator::after {
+            content: '';
+            flex: 1;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #6366f1, transparent);
+        }
+        .part-separator-label {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            font-weight: 700;
+            font-size: 0.875rem;
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+        }
     </style>
 </head>
 <body class="bg-slate-900 p-6 min-h-screen text-slate-200">
@@ -287,7 +324,7 @@
             <p class="text-slate-400 mb-6">Merge or Sequence DaVinci Resolve transcripts</p>
             
             <!-- Tabs -->
-            <div class="flex justify-center gap-4 mb-6">
+            <div class="flex justify-center gap-4">
                 <button id="tabMerge" class="px-6 py-2 rounded-full font-semibold bg-indigo-600 text-white shadow-md transition hover:bg-indigo-500">
                     Merge Speakers
                 </button>
@@ -295,7 +332,41 @@
                     Sequence Transcripts
                 </button>
             </div>
+            
+            <!-- Instructions (positioned below tabs) -->
+            <div id="instructionsMerge" class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 text-left mt-6">
+                <ol class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-300">
+                    <li class="flex items-center gap-3">
+                        <span class="text-2xl font-bold text-indigo-500 flex-shrink-0 leading-none">1</span>
+                        <span class="leading-tight">In Resolve put each speaker on a separate audio track (Create Stems)</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <span class="text-2xl font-bold text-indigo-500 flex-shrink-0 leading-none">2</span>
+                        <span class="leading-tight">Transcribe each stem individually: <strong>with speaker detection DISABLED!</strong></span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <span class="text-2xl font-bold text-indigo-500 flex-shrink-0 leading-none">3</span>
+                        <span class="leading-tight">Export each stem transcript, then upload and merge.</span>
+                    </li>
+                </ol>
+            </div>
 
+            <div id="instructionsSequence" class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 text-left mt-6 hidden">
+                <ol class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-300">
+                    <li class="flex items-center gap-3">
+                        <span class="text-2xl font-bold text-emerald-500 flex-shrink-0 leading-none">1</span>
+                        <span class="leading-tight">Upload transcript parts in order. Use arrows to reorder if needed.</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <span class="text-2xl font-bold text-emerald-500 flex-shrink-0 leading-none">2</span>
+                        <span class="leading-tight">Enter video clip duration (HH:MM:SS format).</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <span class="text-2xl font-bold text-emerald-500 flex-shrink-0 leading-none">3</span>
+                        <span class="leading-tight">Timestamps auto-adjust when sequenced.</span>
+                    </li>
+                </ol>
+            </div>
 
         </div>
 
@@ -326,10 +397,10 @@
                 </button>
             </div>
 
-            <!-- SUBTITLE LIMITS SETTINGS -->
-            <div class="mb-6 bg-slate-900/50 p-4 rounded-lg border border-slate-700">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Subtitle Limits</h3>
+            <!-- SUBTITLE LIMITS SETTINGS (Merge mode only) -->
+            <div id="subtitleLimitsSection" class="mb-6 bg-slate-900/50 p-4 rounded-lg border border-slate-700">
+                <div class="flex flex-col items-center gap-3 mb-4">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider text-center">Subtitle Limits</h3>
                     
                     <!-- Limits Toggle -->
                     <label class="flex items-center gap-2 cursor-pointer bg-slate-800 px-3 py-1 rounded-lg border border-slate-600 hover:bg-slate-700 transition">
@@ -338,7 +409,8 @@
                     </label>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Collapsible Settings Grid -->
+                <div id="limitsSettings" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-300 mb-1" title="Max characters per line (approximate)">Max Characters Per Line</label>
                         <input type="number" id="settingCpl" value="42" min="1" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-slate-500" />
@@ -355,6 +427,27 @@
                         <p class="text-xs text-slate-500 mt-1">0 = off. Extends short subtitles.</p>
                     </div>
                 </div>
+
+                <!-- Visibility Toggles (Centered) -->
+                <div class="flex flex-col items-center gap-2 pt-3 border-t border-slate-700">
+                    <span class="text-xs text-slate-500 uppercase tracking-wider">Output Options</span>
+                    <div class="flex items-center gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="toggleSpeakerNames" checked class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 bg-slate-800 border-slate-600">
+                            <span class="text-sm text-slate-300">Show Speakers</span>
+                        </label>
+                        <div class="w-px h-4 bg-slate-700"></div>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="toggleCC" checked class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 bg-slate-800 border-slate-600">
+                            <span class="text-sm text-slate-300">Show CC</span>
+                        </label>
+                        <div class="w-px h-4 bg-slate-700"></div>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="toggleStripSilence" checked class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 bg-slate-800 border-slate-600">
+                            <span class="text-sm text-slate-300">Strip Silence</span>
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <!-- Action Buttons -->
@@ -368,84 +461,19 @@
             </div>
         </div>
 
-
-        <!-- Instructions (Dynamic based on tab) -->
-        <!-- Instructions (Dynamic based on tab) -->
-        <div id="instructionsMerge" class="bg-slate-800 border border-slate-700 rounded-lg p-6 text-left mb-6">
-            <h3 class="text-xl font-bold text-slate-200 mb-6 text-center">How to Merge Speaker Transcripts:</h3>
-            <ol class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-slate-300">
-                <li class="flex items-center gap-4">
-                    <span class="text-4xl font-bold text-indigo-500 flex-shrink-0 leading-none">1</span>
-                    <span class="leading-tight">In Resolve put each speaker on a separate audio track (Create Stems)</span>
-                </li>
-                <li class="flex items-center gap-4">
-                    <span class="text-4xl font-bold text-indigo-500 flex-shrink-0 leading-none">2</span>
-                    <span class="leading-tight">Transcribe each stem individually: <strong> with speaker detection DISABLED!</strong> </span>
-                </li>
-                <li class="flex items-center gap-4">
-                    <span class="text-4xl font-bold text-indigo-500 flex-shrink-0 leading-none">3</span>
-                    <span class="leading-tight">Export each stem transcript (Freddie.txt), then upload and merge.</span>
-                </li>
-            </ol>
-        </div>
-
-        <div id="instructionsSequence" class="bg-slate-800 border border-slate-700 rounded-lg p-6 text-left mb-6 hidden">
-            <h3 class="text-xl font-bold text-slate-200 mb-6 text-center">How to Sequence Transcripts:</h3>
-            <ol class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-slate-300">
-                <li class="flex items-center gap-4">
-                    <span class="text-4xl font-bold text-emerald-500 flex-shrink-0 leading-none">1</span>
-                    <span class="leading-tight">Upload transcript parts in order. Use arrows to reorder if needed.</span>
-                </li>
-                <li class="flex items-center gap-4">
-                    <span class="text-4xl font-bold text-emerald-500 flex-shrink-0 leading-none">2</span>
-                    <span class="leading-tight">Enter total video clip duration (Part Length Only) in HH:MM:SS format.</span>
-                </li>
-                <li class="flex items-center gap-4">
-                    <span class="text-4xl font-bold text-emerald-500 flex-shrink-0 leading-none">3</span>
-                    <span class="leading-tight">Sequenced transcripts will auto adjust timestamps and merge files</span>
-                </li>
-            </ol>
-        </div>
-
         <!-- Preview Section -->
         <div id="previewSection" class="bg-slate-800 rounded-lg shadow-lg p-8 hidden border border-slate-700">
-            <div class="flex flex-wrap items-center justify-between mb-4 gap-4">
-                <h2 class="text-xl font-semibold text-slate-100">
-                    Preview (<span id="entryCount">0</span> entries)
-                </h2>
-                
-                <!-- Visibility Toggles -->
-                <div class="flex items-center gap-4 bg-slate-900/50 px-3 py-1.5 rounded-lg border border-slate-700">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" id="toggleSpeakerNames" checked class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 bg-slate-800 border-slate-600">
-                        <span class="text-sm text-slate-300">Show Speakers</span>
-                    </label>
-                    <div class="w-px h-4 bg-slate-700"></div>
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" id="toggleCC" checked class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 bg-slate-800 border-slate-600">
-                        <span class="text-sm text-slate-300">Show CC</span>
-                    </label>
-                    <div class="w-px h-4 bg-slate-700"></div>
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" id="toggleStripSilence" checked class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 bg-slate-800 border-slate-600">
-                        <span class="text-sm text-slate-300">Strip Silence</span>
-                    </label>
-                </div>
-            </div>
+            <h2 class="text-2xl font-bold text-slate-100 text-center mb-6">
+                Preview
+            </h2>
+            <!-- Hidden entry count for JS reference -->
+            <span id="entryCount" class="hidden">0</span>
 
             <!-- Export Buttons (Centered) -->
             <div class="flex flex-wrap justify-center gap-2 mb-6">
                 <button id="copyBtn" class="flex items-center gap-2 px-4 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition font-medium focus:outline-none focus:ring-2 focus:ring-slate-500">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
                     Copy
-                </button>
-                <button id="downloadCsvBtn" class="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition font-medium focus:outline-none focus:ring-2 focus:ring-yellow-500">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    CSV
-                </button>
-                <button id="downloadJsonBtn" class="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                    JSON
                 </button>
                 <button id="downloadTxtBtn" class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium focus:outline-none focus:ring-2 focus:ring-green-500">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -459,15 +487,15 @@
 
             <!-- Stats -->
             <div class="grid grid-cols-3 gap-4 mb-6 p-4 bg-slate-900 rounded-lg border border-slate-700">
-                <div>
+                <div class="text-center">
                     <p class="text-sm text-slate-400">Total Entries</p>
                     <p class="text-2xl font-bold text-slate-100" id="statEntries">0</p>
                 </div>
-                <div>
+                <div class="text-center">
                     <p class="text-sm text-slate-400">Duration</p>
                     <p class="text-2xl font-bold text-slate-100" id="statDuration">0m</p>
                 </div>
-                <div>
+                <div class="text-center">
                     <p class="text-sm text-slate-400">Speakers</p>
                     <p class="text-2xl font-bold text-slate-100" id="statSpeakers">0</p>
                 </div>
@@ -503,6 +531,8 @@
         // TABS LOGIC
         function switchTab(mode) {
             currentMode = mode;
+            const subtitleLimitsSection = document.getElementById('subtitleLimitsSection');
+            
             if (mode === 'merge') {
                 tabMerge.className = "px-6 py-2 rounded-full font-semibold bg-indigo-600 text-white shadow-md transition hover:bg-indigo-500";
                 tabSequence.className = "px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 shadow-sm transition";
@@ -510,6 +540,7 @@
                 viewSequence.classList.add('hidden');
                 instructionsMerge.classList.remove('hidden');
                 instructionsSequence.classList.add('hidden');
+                subtitleLimitsSection.classList.remove('hidden');
                 processBtn.textContent = "Merge Transcripts";
                 processBtn.className = processBtn.className.replace('bg-emerald-600', 'bg-indigo-600').replace('hover:bg-emerald-500', 'hover:bg-indigo-500');
             } else {
@@ -519,6 +550,7 @@
                 viewSequence.classList.remove('hidden');
                 instructionsMerge.classList.add('hidden');
                 instructionsSequence.classList.remove('hidden');
+                subtitleLimitsSection.classList.add('hidden');
                 processBtn.textContent = "Sequence Transcripts";
                 processBtn.className = processBtn.className.replace('bg-indigo-600', 'bg-emerald-600').replace('hover:bg-indigo-500', 'hover:bg-emerald-500');
             }
@@ -891,6 +923,13 @@
                 e.preventDefault();
             });
             
+            // Auto-reprocess when duration changes (if preview already exists)
+            durationInput.addEventListener('change', () => {
+                if (previewMode === 'sequence' && processedData !== null) {
+                    processTranscripts();
+                }
+            });
+            
             // Reordering Logic
             fileItem.querySelector('.move-up').addEventListener('click', () => moveFile(id, -1));
             fileItem.querySelector('.move-down').addEventListener('click', () => moveFile(id, 1));
@@ -1023,6 +1062,7 @@
                     allEntries.sort((a, b) => a.startSeconds - b.startSeconds);
                 } else {
                     let currentOffset = 0;
+                    let partIndex = 1;
                     for (const fileObj of sequenceFiles) {
                         const content = await fileObj.file.text();
                         // For sequence mode, we might want to keep original speakers or override? 
@@ -1044,9 +1084,14 @@
                         
                 // Let's do a quick fix: pass null as label, and have parser extract it.
                         const entries = await parseTranscript(content, null, currentOffset);
+                        // Add part number to each entry for sequence mode visualization
+                        entries.forEach(entry => {
+                            entry.partNumber = partIndex;
+                        });
                         allEntries = allEntries.concat(entries);
                         
                         currentOffset += parseDuration(fileObj.duration);
+                        partIndex++;
                     }
                 }
 
@@ -1054,12 +1099,13 @@
                 // Creates a linear, non-overlapping stream with composite Text
                 let flattenedEntries = flattenTracks(allEntries);
 
-                // 2. APPLY SUBTITLE LIMITS (Optional)
+                // 2. APPLY SUBTITLE LIMITS (Merge mode only)
                 const cpl = parseInt(document.getElementById('settingCpl').value) || 11;
                 const maxLines = parseInt(document.getElementById('settingMaxLines').value) || 2;
                 const enableLimits = document.getElementById('toggleLimits').checked;
                 
-                if (enableLimits) {
+                // Only apply limits in merge mode
+                if (currentMode === 'merge' && enableLimits) {
                     processedData = applyLimits(flattenedEntries, cpl, maxLines);
                 } else {
                     processedData = flattenedEntries;
@@ -1363,7 +1409,8 @@
                     endSeconds: pageEnd,
                     timecode: `[${formatTimecode(currentStart)} - ${formatTimecode(pageEnd)}]`,
                     speaker: originalEntry.speaker,
-                    text: pageText
+                    text: pageText,
+                    partNumber: originalEntry.partNumber // Preserve part number for sequencer mode
                 });
                 
                 currentStart = pageEnd;
@@ -1485,10 +1532,14 @@
         let selectedEntryIndex = null;
         let openDropdownIndex = null;
 
-        function displayPreview() {
+        function displayPreview(skipScroll = false) {
             // Filter based on toggles
             const showSpeakers = document.getElementById('toggleSpeakerNames').checked;
             const showCC = document.getElementById('toggleCC').checked;
+            const stripSilence = document.getElementById('toggleStripSilence').checked;
+            
+            // Helper to check if entry is a silence marker
+            const isSilence = (entry) => /^\(\s*silence\s*\)$/i.test(entry.text.trim());
             
             document.getElementById('entryCount').textContent = processedData.length;
             document.getElementById('statEntries').textContent = processedData.length;
@@ -1499,11 +1550,34 @@
             const previewList = document.getElementById('previewList');
             previewList.innerHTML = '';
 
+            // Track last part number for separator insertion in sequence mode
+            let lastPartNumber = 0;
+
             processedData.forEach((entry, index) => {
                 const isCC = entry.speaker === '[CC]' || entry.text.startsWith('(') && entry.text.endsWith(')');
                 
                 // VISIBILITY CHECK
                 if (isCC && !showCC) return; // Skip if CC hidden
+                if (stripSilence && isSilence(entry)) return; // Skip silence entries if Strip Silence enabled
+                
+                // ADD PART SEPARATOR for Sequencer mode when entering a new part
+                if (previewMode === 'sequence' && entry.partNumber && entry.partNumber !== lastPartNumber) {
+                    // Only show separator if not the first part (visual separator between parts)
+                    if (lastPartNumber > 0 || index > 0) {
+                        const separator = document.createElement('div');
+                        separator.className = 'part-separator';
+                        separator.innerHTML = `<span class="part-separator-label">Part ${entry.partNumber}</span>`;
+                        previewList.appendChild(separator);
+                    } else if (entry.partNumber === 1) {
+                        // For the very first entry, just show a subtle part label
+                        const separator = document.createElement('div');
+                        separator.className = 'part-separator';
+                        separator.style.paddingTop = '0.5rem';
+                        separator.innerHTML = `<span class="part-separator-label">Part 1</span>`;
+                        previewList.appendChild(separator);
+                    }
+                    lastPartNumber = entry.partNumber;
+                }
                 
                 const div = document.createElement('div');
                 div.className = 'dialogue-entry bg-slate-800 p-3 rounded border border-slate-700';
@@ -1608,8 +1682,10 @@
             });
 
             document.getElementById('previewSection').classList.remove('hidden');
-            // Scroll to preview
-            document.getElementById('previewSection').scrollIntoView({ behavior: 'smooth' });
+            // Only scroll to preview on initial display, not on toggle updates
+            if (!skipScroll) {
+                document.getElementById('previewSection').scrollIntoView({ behavior: 'smooth' });
+            }
             
             // Close dropdowns when clicking outside
             document.addEventListener('click', closeAllDropdowns);
@@ -2002,42 +2078,6 @@
             download(content, 'merged_transcript.srt', 'text/plain');
         });
 
-        document.getElementById('downloadCsvBtn').addEventListener('click', () => {
-            if (!processedData) return;
-            const showSpeakers = document.getElementById('toggleSpeakerNames').checked;
-            const showCC = document.getElementById('toggleCC').checked;
-            
-            let content = 'Timecode,Speaker,Text\n';
-            processedData.forEach(entry => {
-                const isCC = entry.speaker === '[CC]' || entry.text.startsWith('(') && entry.text.endsWith(')');
-                if (isCC && !showCC) return;
-                
-                const safeText = `"${entry.text.replace(/"/g, '""')}"`;
-                const speaker = showSpeakers ? `"${entry.speaker}"` : '""';
-                content += `${entry.timecode},${speaker},${safeText}\n`;
-            });
-            download(content, 'merged_transcript.csv', 'text/csv');
-        });
-
-        document.getElementById('downloadJsonBtn').addEventListener('click', () => {
-            if (!processedData) return;
-            const showSpeakers = document.getElementById('toggleSpeakerNames').checked;
-            const showCC = document.getElementById('toggleCC').checked;
-            
-            const filteredData = processedData.filter(entry => {
-                const isCC = entry.speaker === '[CC]' || entry.text.startsWith('(') && entry.text.endsWith(')');
-                return !(isCC && !showCC);
-            }).map(entry => {
-                if (!showSpeakers) {
-                    const { speaker, ...rest } = entry;
-                    return rest;
-                }
-                return entry;
-            });
-            
-            download(JSON.stringify(filteredData, null, 2), 'merged_transcript.json', 'application/json');
-        });
-
         document.getElementById('copyBtn').addEventListener('click', () => {
             if (!processedData) return;
             const showSpeakers = document.getElementById('toggleSpeakerNames').checked;
@@ -2092,9 +2132,10 @@
         document.getElementById('addPartBtn').addEventListener('click', addSequenceFile);
         processBtn.addEventListener('click', processTranscripts);
 
-        // Toggle Listeners
-        document.getElementById('toggleSpeakerNames').addEventListener('change', displayPreview);
-        document.getElementById('toggleCC').addEventListener('change', displayPreview);
+        // Toggle Listeners - skipScroll=true to prevent viewport jumping when adjusting settings
+        document.getElementById('toggleSpeakerNames').addEventListener('change', () => displayPreview(true));
+        document.getElementById('toggleCC').addEventListener('change', () => displayPreview(true));
+        document.getElementById('toggleStripSilence').addEventListener('change', () => displayPreview(true));
         document.getElementById('toggleLimits').addEventListener('change', () => processBtn.click());
 
         // Init
