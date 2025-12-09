@@ -144,7 +144,8 @@
         /* Speaker Dropdown */
         .speaker-name-container {
             position: relative;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
         }
         .speaker-name-btn {
             background: none;
@@ -153,7 +154,7 @@
             font-weight: 600;
             font-size: 0.875rem;
             color: #818cf8;
-            padding: 2px 8px;
+            padding: 2px 8px 2px 0;
             border-radius: 4px;
             transition: all 0.15s ease;
         }
@@ -332,21 +333,26 @@
                     
                     <!-- Limits Toggle -->
                     <label class="flex items-center gap-2 cursor-pointer bg-slate-800 px-3 py-1 rounded-lg border border-slate-600 hover:bg-slate-700 transition">
-                        <input type="checkbox" id="toggleLimits" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 bg-slate-900 border-slate-500">
+                        <input type="checkbox" id="toggleLimits" checked class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 bg-slate-900 border-slate-500">
                         <span class="text-xs text-slate-300 font-medium">Enable Limits</span>
                     </label>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-300 mb-1" title="Max characters per line (approximate)">Max Characters Per Line</label>
                         <input type="number" id="settingCpl" value="42" min="1" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-slate-500" />
-                        <p class="text-xs text-slate-500 mt-1">Words are never split. Lines may exceed limit to fit long words.</p>
+                        <p class="text-xs text-slate-500 mt-1">Lines may exceed to fit long words.</p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-300 mb-1" title="Max lines per subtitle card">Max Lines Per Subtitle</label>
                         <input type="number" id="settingMaxLines" value="2" min="1" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-slate-500" />
-                        <p class="text-xs text-slate-500 mt-1">Card splits if text exceeds line limit.</p>
+                        <p class="text-xs text-slate-500 mt-1">Card splits if text exceeds.</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1" title="Minimum display time per subtitle (seconds)">Minimum Duration (s)</label>
+                        <input type="number" id="settingMinDuration" value="0" min="0" step="0.5" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-slate-500" />
+                        <p class="text-xs text-slate-500 mt-1">0 = off. Extends short subtitles.</p>
                     </div>
                 </div>
             </div>
@@ -1927,24 +1933,34 @@
             // Option A: Keep end times fixed, recalculate starts
             // If Line B overlaps Line A, Line B starts when Line A ends.
             // Ensure minimum display duration so entries don't get compressed to nothing.
-            const srtData = processedData.map(entry => ({ ...entry }));
-            const MIN_DISPLAY_DURATION = 0.5; // Minimum 0.5 seconds per subtitle
+            // Filter out CC entries first if CC is toggled off
+            // This prevents hidden CC from affecting dialogue timing
+            const isCC = (entry) => entry.speaker === '[CC]' || (entry.text.startsWith('(') && entry.text.endsWith(')'));
+            const filteredData = showCC ? processedData : processedData.filter(e => !isCC(e));
+            
+            const srtData = filteredData.map(entry => ({ ...entry }));
+            
+            // User-configurable minimum duration (0 = off, only fix overlaps)
+            const minDuration = parseFloat(document.getElementById('settingMinDuration').value) || 0;
             
             let lastEnd = 0;
             srtData.forEach((entry, index) => {
-                // Force Start to be at least the previous End
+                // Force Start to be at least the previous End (fix overlaps)
                 if (entry.startSeconds < lastEnd) {
                     entry.startSeconds = lastEnd;
                 }
                 
-                // CRITICAL: Ensure entry has valid duration
-                // If pushing start forward created start >= end, fix it
-                if (entry.startSeconds >= entry.endSeconds) {
-                    // Extend end to provide minimum duration
-                    entry.endSeconds = entry.startSeconds + MIN_DISPLAY_DURATION;
-                } else if (entry.endSeconds - entry.startSeconds < MIN_DISPLAY_DURATION) {
-                    // Duration too short - extend it
-                    entry.endSeconds = entry.startSeconds + MIN_DISPLAY_DURATION;
+                // Apply minimum duration if enabled
+                if (minDuration > 0) {
+                    const currentDuration = entry.endSeconds - entry.startSeconds;
+                    if (currentDuration < minDuration) {
+                        entry.endSeconds = entry.startSeconds + minDuration;
+                    }
+                } else {
+                    // Even with minDuration off, ensure valid timing (start < end)
+                    if (entry.startSeconds >= entry.endSeconds) {
+                        entry.endSeconds = entry.startSeconds + 0.1; // Tiny buffer
+                    }
                 }
                 
                 lastEnd = entry.endSeconds;
@@ -1961,14 +1977,14 @@
             
             let counter = 1;
             srtData.forEach((entry) => {
-                const isCC = entry.speaker === '[CC]' || entry.text.startsWith('(') && entry.text.endsWith(')');
-                if (isCC && !showCC) return;
+                // Note: CC entries already filtered above if showCC is false
+                const entryIsCC = entry.speaker === '[CC]' || (entry.text.startsWith('(') && entry.text.endsWith(')'));
                 
                 const startMs = entry.startSeconds * 1000;
                 const endMs = entry.endSeconds * 1000;
                 content += `${counter++}\n${formatSrtTime(startMs)} --> ${formatSrtTime(endMs)}\n`;
                 
-                if (showSpeakers && !isCC) { // Usually don't show speaker name for CC lines in SRT
+                if (showSpeakers && !entryIsCC) { // Don't show speaker name for CC lines in SRT
                      content += `${entry.speaker}: `;
                 }
                 content += `${entry.text}\n\n`;
