@@ -334,7 +334,7 @@
             </div>
             
             <!-- Instructions (positioned below tabs) -->
-            <div id="instructionsMerge" class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 text-left mt-6">
+            <div id="instructionsMerge" class="bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-5 text-left mt-6">
                 <ol class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-300">
                     <li class="flex items-center gap-3">
                         <span class="text-2xl font-bold text-indigo-500 flex-shrink-0 leading-none">1</span>
@@ -351,7 +351,7 @@
                 </ol>
             </div>
 
-            <div id="instructionsSequence" class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 text-left mt-6 hidden">
+            <div id="instructionsSequence" class="bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-5 text-left mt-6 hidden">
                 <ol class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-300">
                     <li class="flex items-center gap-3">
                         <span class="text-2xl font-bold text-emerald-500 flex-shrink-0 leading-none">1</span>
@@ -1990,12 +1990,44 @@
             if (!processedData) return;
             const showSpeakers = document.getElementById('toggleSpeakerNames').checked;
             const showCC = document.getElementById('toggleCC').checked;
+            const stripSilence = document.getElementById('toggleStripSilence').checked;
+            
+            // STEP 1: Strip (Silence) entries if enabled
+            const isSilence = (entry) => /^\(\s*silence\s*\)$/i.test(entry.text.trim());
+            const noSilenceData = stripSilence ? processedData.filter(e => !isSilence(e)) : processedData;
+            
+            // STEP 2: Filter out CC entries if CC toggle is off
+            const isCC = (entry) => entry.speaker === '[CC]' || (entry.text.startsWith('(') && entry.text.endsWith(')'));
+            const filteredData = showCC ? noSilenceData : noSilenceData.filter(e => !isCC(e));
+            
+            // STEP 3: Clone and apply timing corrections (linearization + min duration)
+            const txtData = filteredData.map(entry => ({ ...entry }));
+            const minDuration = parseFloat(document.getElementById('settingMinDuration').value) || 0;
+            
+            let lastEnd = 0;
+            txtData.forEach((entry) => {
+                // Fix overlaps
+                if (entry.startSeconds < lastEnd) {
+                    entry.startSeconds = lastEnd;
+                }
+                // Apply minimum duration
+                if (minDuration > 0) {
+                    const currentDuration = entry.endSeconds - entry.startSeconds;
+                    if (currentDuration < minDuration) {
+                        entry.endSeconds = entry.startSeconds + minDuration;
+                    }
+                } else {
+                    if (entry.startSeconds >= entry.endSeconds) {
+                        entry.endSeconds = entry.startSeconds + 0.1;
+                    }
+                }
+                // Update timecode string
+                entry.timecode = `[${formatTimecode(entry.startSeconds)} - ${formatTimecode(entry.endSeconds)}]`;
+                lastEnd = entry.endSeconds;
+            });
             
             let content = '';
-            processedData.forEach(entry => {
-                const isCC = entry.speaker === '[CC]' || entry.text.startsWith('(') && entry.text.endsWith(')');
-                if (isCC && !showCC) return;
-                
+            txtData.forEach(entry => {
                 content += `${entry.timecode}\n`;
                 if (showSpeakers) {
                     content += `${entry.speaker}\n`;
@@ -2082,12 +2114,44 @@
             if (!processedData) return;
             const showSpeakers = document.getElementById('toggleSpeakerNames').checked;
             const showCC = document.getElementById('toggleCC').checked;
+            const stripSilence = document.getElementById('toggleStripSilence').checked;
+            
+            // STEP 1: Strip (Silence) entries if enabled
+            const isSilence = (entry) => /^\(\s*silence\s*\)$/i.test(entry.text.trim());
+            const noSilenceData = stripSilence ? processedData.filter(e => !isSilence(e)) : processedData;
+            
+            // STEP 2: Filter out CC entries if CC toggle is off
+            const isCC = (entry) => entry.speaker === '[CC]' || (entry.text.startsWith('(') && entry.text.endsWith(')'));
+            const filteredData = showCC ? noSilenceData : noSilenceData.filter(e => !isCC(e));
+            
+            // STEP 3: Clone and apply timing corrections (linearization + min duration)
+            const copyData = filteredData.map(entry => ({ ...entry }));
+            const minDuration = parseFloat(document.getElementById('settingMinDuration').value) || 0;
+            
+            let lastEnd = 0;
+            copyData.forEach((entry) => {
+                // Fix overlaps
+                if (entry.startSeconds < lastEnd) {
+                    entry.startSeconds = lastEnd;
+                }
+                // Apply minimum duration
+                if (minDuration > 0) {
+                    const currentDuration = entry.endSeconds - entry.startSeconds;
+                    if (currentDuration < minDuration) {
+                        entry.endSeconds = entry.startSeconds + minDuration;
+                    }
+                } else {
+                    if (entry.startSeconds >= entry.endSeconds) {
+                        entry.endSeconds = entry.startSeconds + 0.1;
+                    }
+                }
+                // Update timecode string
+                entry.timecode = `[${formatTimecode(entry.startSeconds)} - ${formatTimecode(entry.endSeconds)}]`;
+                lastEnd = entry.endSeconds;
+            });
             
             let content = '';
-            processedData.forEach(entry => {
-                const isCC = entry.speaker === '[CC]' || entry.text.startsWith('(') && entry.text.endsWith(')');
-                if (isCC && !showCC) return;
-                
+            copyData.forEach(entry => {
                 content += `${entry.timecode}\n`;
                 if (showSpeakers) {
                     content += `${entry.speaker}\n`;
