@@ -325,6 +325,23 @@
                 </button>
             </div>
 
+            <!-- SUBTITLE LIMITS SETTINGS -->
+            <div class="mb-6 bg-slate-900/50 p-4 rounded-lg border border-slate-700">
+                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Subtitle Limits</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1" title="Max characters per line (approximate)">Max Characters Per Line</label>
+                        <input type="number" id="settingCpl" value="11" min="1" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-slate-500" />
+                        <p class="text-xs text-slate-500 mt-1">Words are never split. Lines may exceed limit to fit long words.</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1" title="Max lines per subtitle card">Max Lines Per Subtitle</label>
+                        <input type="number" id="settingMaxLines" value="2" min="1" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-slate-500" />
+                        <p class="text-xs text-slate-500 mt-1">Card splits if text exceeds line limit.</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Action Buttons -->
             <div class="flex gap-3">
                 <button id="processBtn" class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-500 transition disabled:bg-slate-600 disabled:text-slate-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-800">
@@ -380,6 +397,20 @@
                 <h2 class="text-xl font-semibold text-slate-100">
                     Preview (<span id="entryCount">0</span> entries)
                 </h2>
+                
+                <!-- Visibility Toggles -->
+                <div class="flex items-center gap-4 bg-slate-900/50 px-3 py-1.5 rounded-lg border border-slate-700">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="toggleSpeakerNames" checked class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 bg-slate-800 border-slate-600">
+                        <span class="text-sm text-slate-300">Show Speakers</span>
+                    </label>
+                    <div class="w-px h-4 bg-slate-700"></div>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="toggleCC" checked class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 bg-slate-800 border-slate-600">
+                        <span class="text-sm text-slate-300">Show CC</span>
+                    </label>
+                </div>
+
                 <div class="flex flex-wrap gap-2">
                     <button id="copyBtn" class="flex items-center gap-2 px-4 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition font-medium focus:outline-none focus:ring-2 focus:ring-slate-500">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
@@ -420,8 +451,8 @@
                 </div>
             </div>
 
-            <!-- Preview List -->
-            <div id="previewList" class="max-h-96 overflow-y-auto space-y-4 border border-slate-700 rounded-lg p-4 bg-slate-900"></div>
+            <!-- Preview List (Increased Height) -->
+            <div id="previewList" class="max-h-[800px] overflow-y-auto space-y-4 border border-slate-700 rounded-lg p-4 bg-slate-900"></div>
         </div>
     </div>
 
@@ -989,7 +1020,7 @@
                         // My parser currently IGNORES the speaker line in the file and uses the input label.
                         // I should probably fix the parser to read the speaker from the file if possible.
                         
-                        // Let's do a quick fix: pass null as label, and have parser extract it.
+                // Let's do a quick fix: pass null as label, and have parser extract it.
                         const entries = await parseTranscript(content, null, currentOffset);
                         allEntries = allEntries.concat(entries);
                         
@@ -997,7 +1028,15 @@
                     }
                 }
 
-                processedData = allEntries;
+                // APPLY SUBTITLE LIMITS
+                const cpl = parseInt(document.getElementById('settingCpl').value) || 11;
+                const maxLines = parseInt(document.getElementById('settingMaxLines').value) || 2;
+                
+                let limitEntries = applyLimits(allEntries, cpl, maxLines);
+
+                // RESOLVE OVERLAPS (Generic for all speakers/CC)
+                processedData = resolveOverlaps(limitEntries);
+                
                 previewMode = currentMode; // Store which mode generated this preview
                 displayPreview();
             } catch (error) {
@@ -1006,7 +1045,121 @@
             }
         }
         
-        // OVERRIDE PARSER FOR SPEAKER EXTRACTION
+        function resolveOverlaps(entries) {
+            // Sort by start time just to be safe
+            entries.sort((a, b) => a.startSeconds - b.startSeconds);
+            
+            const resolved = [];
+            for (let i = 0; i < entries.length; i++) {
+                let current = { ...entries[i] }; // Clone to avoid mutation issues
+                
+                // If not last entry, check overlap with next
+                if (i < entries.length - 1) {
+                    const next = entries[i + 1];
+                    
+                    // If current ends AFTER next starts, trim current
+                    if (current.endSeconds > next.startSeconds) {
+                        current.endSeconds = next.startSeconds;
+                        current.timecode = `[${formatTimecode(current.startSeconds)} - ${formatTimecode(current.endSeconds)}]`;
+                    }
+                }
+                
+                // Filter out invalid/zero duration entries
+                if (current.endSeconds > current.startSeconds) {
+                    resolved.push(current);
+                }
+            }
+            return resolved;
+        }
+        
+        // LIMIT LOGIC
+        function applyLimits(entries, cplLimit, maxLinesLimit) {
+            let newEntries = [];
+            
+            entries.forEach(entry => {
+                const splitEntries = createLimitEntries(entry, cplLimit, maxLinesLimit);
+                newEntries = newEntries.concat(splitEntries);
+            });
+            
+            return newEntries;
+        }
+        
+        function createLimitEntries(originalEntry, cpl, maxLines) {
+            // 1. Wrap logic (Greedy Overflow)
+            const words = originalEntry.text.split(/\s+/);
+            const lines = [];
+            let currentLine = [];
+            let currentLen = 0;
+            
+            words.forEach(word => {
+                const wordLen = word.length;
+                // Add 1 for space if line not empty
+                const spaceLen = currentLine.length > 0 ? 1 : 0;
+                
+                // Add word to current line tentatively
+                currentLine.push(word);
+                currentLen += spaceLen + wordLen;
+                
+                // Check if we exceeded the limit
+                if (currentLen > cpl) {
+                    // Line is full. Commit.
+                    lines.push(currentLine.join(' '));
+                    currentLine = [];
+                    currentLen = 0;
+                }
+            });
+            
+            // Push remaining
+            if (currentLine.length > 0) {
+                lines.push(currentLine.join(' '));
+            }
+            
+            // 2. Pagination logic
+            const pages = [];
+            for (let i = 0; i < lines.length; i += maxLines) {
+                pages.push(lines.slice(i, i + maxLines).join('\n'));
+            }
+            
+            if (pages.length === 1) {
+                return [{
+                    ...originalEntry,
+                    text: pages[0]
+                }];
+            }
+            
+            // 3. Timestamp Interpolation
+            const totalDuration = originalEntry.endSeconds - originalEntry.startSeconds;
+            const totalChars = pages.reduce((acc, page) => acc + page.length, 0); 
+            
+            let currentStart = originalEntry.startSeconds;
+            const resultEntries = [];
+            
+            pages.forEach((pageText, idx) => {
+                const charCount = pageText.length;
+                const fraction = totalChars > 0 ? (charCount / totalChars) : (1 / pages.length);
+                let duration = totalDuration * fraction;
+                
+                let pageEnd = currentStart + duration;
+                
+                if (idx === pages.length - 1) {
+                    pageEnd = originalEntry.endSeconds;
+                }
+                
+                resultEntries.push({
+                    startSeconds: currentStart,
+                    endSeconds: pageEnd,
+                    timecode: `[${formatTimecode(currentStart)} - ${formatTimecode(pageEnd)}]`,
+                    speaker: originalEntry.speaker,
+                    text: pageText
+                });
+                
+                currentStart = pageEnd;
+            });
+            
+            return resultEntries;
+        }
+
+        // OVERRIDE PARSER FOR SPEAKER EXTRACTION & CC SEPARATION
         async function parseTranscript(content, speakerLabelOverride, timeOffset = 0) {
             const entries = [];
             const blocks = content.split(/\n(?=\[)/);
@@ -1034,32 +1187,59 @@
                 for (let i = 1; i < lines.length; i++) {
                     if (lines[i].startsWith('Speaker')) {
                         extractedSpeaker = lines[i].replace('Speaker', '').replace(':', '').trim() || "Speaker";
-                        if (extractedSpeaker === "Speaker") extractedSpeaker = lines[i].trim(); // Keep full line if just "Speaker 1"
+                        if (extractedSpeaker === "Speaker") extractedSpeaker = lines[i].trim(); 
                         textStart = i + 1;
                         foundSpeakerPrefix = true;
                         break;
                     }
                 }
 
-                // Fallback: If no "Speaker" prefix found, and we are in Sequence mode (no override),
-                // check if the first line looks like a speaker (short line).
                 if (!foundSpeakerPrefix && !speakerLabelOverride && lines.length > 1) {
                     const potentialSpeaker = lines[1].trim();
-                    // Heuristic: If line is short (< 50 chars) and not empty, assume it's the speaker
                     if (potentialSpeaker.length > 0 && potentialSpeaker.length < 50) {
                         extractedSpeaker = potentialSpeaker;
                         textStart = 2;
                     }
                 }
 
-                const text = lines.slice(textStart).join('\n').trim();
-                if (text || extractedSpeaker !== "Unknown") { // Allow empty text if speaker is found? Or just ensure we have something.
+                // Process Text Lines for CC
+                const rawLines = lines.slice(textStart);
+                const ccLines = [];
+                const dialogueLines = [];
+                
+                rawLines.forEach(line => {
+                    const trimmed = line.trim();
+                    if (!trimmed) return;
+                    
+                    // Simple regex for (text) or [text]
+                    if ((trimmed.startsWith('(') && trimmed.endsWith(')')) || 
+                        (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+                        ccLines.push(trimmed);
+                    } else {
+                        dialogueLines.push(trimmed);
+                    }
+                });
+                
+                // Create Entries
+                // 1. CC Entry
+                if (ccLines.length > 0) {
+                    entries.push({
+                        startSeconds: startSec,
+                        endSeconds: endSec,
+                        timecode: newTimecode,
+                        speaker: '[CC]',
+                        text: ccLines.join('\n')
+                    });
+                }
+                
+                // 2. Dialogue Entry
+                if (dialogueLines.length > 0) {
                     entries.push({
                         startSeconds: startSec,
                         endSeconds: endSec,
                         timecode: newTimecode,
                         speaker: speakerLabelOverride || extractedSpeaker,
-                        text
+                        text: dialogueLines.join('\n')
                     });
                 }
             });
@@ -1071,6 +1251,10 @@
         let openDropdownIndex = null;
 
         function displayPreview() {
+            // Filter based on toggles
+            const showSpeakers = document.getElementById('toggleSpeakerNames').checked;
+            const showCC = document.getElementById('toggleCC').checked;
+            
             document.getElementById('entryCount').textContent = processedData.length;
             document.getElementById('statEntries').textContent = processedData.length;
             const lastEntry = processedData[processedData.length - 1];
@@ -1081,11 +1265,17 @@
             previewList.innerHTML = '';
 
             processedData.forEach((entry, index) => {
+                const isCC = entry.speaker === '[CC]' || entry.text.startsWith('(') && entry.text.endsWith(')');
+                
+                // VISIBILITY CHECK
+                if (isCC && !showCC) return; // Skip if CC hidden
+                
                 const div = document.createElement('div');
                 div.className = 'dialogue-entry bg-slate-800 p-3 rounded border border-slate-700';
                 div.dataset.index = index;
                 
-                const isCC = entry.speaker === '[CC]' || entry.text.startsWith('(') && entry.text.endsWith(')');
+                // Toggle Speaker Visibility
+                const speakerStyle = showSpeakers ? '' : 'display: none;';
                 
                 div.innerHTML = `
                     <!-- Top Action Buttons -->
@@ -1097,7 +1287,7 @@
                     <!-- Entry Content -->
                     <div class="entry-content">
                         <div class="flex items-center justify-between mb-2">
-                            <div class="speaker-name-container">
+                            <div class="speaker-name-container" style="${speakerStyle}">
                                 <button class="speaker-name-btn">${entry.speaker}</button>
                                 ${isCC ? '<span class="cc-indicator">CC</span>' : ''}
                             </div>
@@ -1487,15 +1677,28 @@
 
         document.getElementById('downloadTxtBtn').addEventListener('click', () => {
             if (!processedData) return;
+            const showSpeakers = document.getElementById('toggleSpeakerNames').checked;
+            const showCC = document.getElementById('toggleCC').checked;
+            
             let content = '';
             processedData.forEach(entry => {
-                content += `${entry.timecode}\n${entry.speaker}\n${entry.text}\n\n`;
+                const isCC = entry.speaker === '[CC]' || entry.text.startsWith('(') && entry.text.endsWith(')');
+                if (isCC && !showCC) return;
+                
+                content += `${entry.timecode}\n`;
+                if (showSpeakers) {
+                    content += `${entry.speaker}\n`;
+                }
+                content += `${entry.text}\n\n`;
             });
             download(content, 'merged_transcript.txt', 'text/plain');
         });
 
         document.getElementById('downloadSrtBtn').addEventListener('click', () => {
             if (!processedData) return;
+            const showSpeakers = document.getElementById('toggleSpeakerNames').checked;
+            const showCC = document.getElementById('toggleCC').checked;
+            
             let content = '';
             const formatSrtTime = (ms) => {
                 const h = Math.floor(ms / 3600000);
@@ -1504,35 +1707,75 @@
                 const mil = Math.floor(ms % 1000);
                 return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')},${String(mil).padStart(3,'0')}`;
             };
-
-            processedData.forEach((entry, idx) => {
+            
+            let counter = 1;
+            processedData.forEach((entry) => {
+                const isCC = entry.speaker === '[CC]' || entry.text.startsWith('(') && entry.text.endsWith(')');
+                if (isCC && !showCC) return;
+                
                 const startMs = entry.startSeconds * 1000;
                 const endMs = entry.endSeconds * 1000;
-                content += `${idx + 1}\n${formatSrtTime(startMs)} --> ${formatSrtTime(endMs)}\n${entry.speaker}\n${entry.text}\n\n`;
+                content += `${counter++}\n${formatSrtTime(startMs)} --> ${formatSrtTime(endMs)}\n`;
+                
+                if (showSpeakers && !isCC) { // Usually don't show speaker name for CC lines in SRT
+                     content += `${entry.speaker}: `;
+                }
+                content += `${entry.text}\n\n`;
             });
             download(content, 'merged_transcript.srt', 'text/plain');
         });
 
         document.getElementById('downloadCsvBtn').addEventListener('click', () => {
             if (!processedData) return;
+            const showSpeakers = document.getElementById('toggleSpeakerNames').checked;
+            const showCC = document.getElementById('toggleCC').checked;
+            
             let content = 'Timecode,Speaker,Text\n';
             processedData.forEach(entry => {
+                const isCC = entry.speaker === '[CC]' || entry.text.startsWith('(') && entry.text.endsWith(')');
+                if (isCC && !showCC) return;
+                
                 const safeText = `"${entry.text.replace(/"/g, '""')}"`;
-                content += `${entry.timecode},"${entry.speaker}",${safeText}\n`;
+                const speaker = showSpeakers ? `"${entry.speaker}"` : '""';
+                content += `${entry.timecode},${speaker},${safeText}\n`;
             });
             download(content, 'merged_transcript.csv', 'text/csv');
         });
 
         document.getElementById('downloadJsonBtn').addEventListener('click', () => {
             if (!processedData) return;
-            download(JSON.stringify(processedData, null, 2), 'merged_transcript.json', 'application/json');
+            const showSpeakers = document.getElementById('toggleSpeakerNames').checked;
+            const showCC = document.getElementById('toggleCC').checked;
+            
+            const filteredData = processedData.filter(entry => {
+                const isCC = entry.speaker === '[CC]' || entry.text.startsWith('(') && entry.text.endsWith(')');
+                return !(isCC && !showCC);
+            }).map(entry => {
+                if (!showSpeakers) {
+                    const { speaker, ...rest } = entry;
+                    return rest;
+                }
+                return entry;
+            });
+            
+            download(JSON.stringify(filteredData, null, 2), 'merged_transcript.json', 'application/json');
         });
 
         document.getElementById('copyBtn').addEventListener('click', () => {
             if (!processedData) return;
+            const showSpeakers = document.getElementById('toggleSpeakerNames').checked;
+            const showCC = document.getElementById('toggleCC').checked;
+            
             let content = '';
             processedData.forEach(entry => {
-                content += `${entry.timecode}\n${entry.speaker}\n${entry.text}\n\n`;
+                const isCC = entry.speaker === '[CC]' || entry.text.startsWith('(') && entry.text.endsWith(')');
+                if (isCC && !showCC) return;
+                
+                content += `${entry.timecode}\n`;
+                if (showSpeakers) {
+                    content += `${entry.speaker}\n`;
+                }
+                content += `${entry.text}\n\n`;
             });
             navigator.clipboard.writeText(content).then(() => {
                 const originalText = document.getElementById('copyBtn').innerHTML;
@@ -1571,6 +1814,10 @@
         document.getElementById('addTrackBtn').addEventListener('click', addMergeFile);
         document.getElementById('addPartBtn').addEventListener('click', addSequenceFile);
         processBtn.addEventListener('click', processTranscripts);
+
+        // Toggle Listeners
+        document.getElementById('toggleSpeakerNames').addEventListener('change', displayPreview);
+        document.getElementById('toggleCC').addEventListener('change', displayPreview);
 
         // Init
         addMergeFile();

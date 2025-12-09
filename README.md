@@ -40,6 +40,14 @@ Export your processed transcripts in the format you need:
    - Upload the transcript files.
    - Assign speaker names to each file.
    - Click **Merge Components**.
+   - **(Optional) Configure Subtitle Limits**:
+     - **Max Characters Per Line**: Set strict character limits (default: 11). Words that exceed the limit will not be split but will overflow the line.
+     - **Max Lines Per Subtitle**: Automatically splits long entries.
+   - **Automatic Processing**:
+     - **CC Separation**: Text in `()` or `[]` is automatically separated into distinct entries.
+     - **Overlap Fix**: Entries overlapping with subsequent dialogue are automatically trimmed.
+   - **Visibility Controls**: Use the checkboxes in the preview section to hide/show Speakers or CCs in both the preview and final export.
+
 
 ### How to Sequence Transcripts
 1. **Upload**: Drag and drop your transcript parts into the **Sequence Transcripts** tab.
