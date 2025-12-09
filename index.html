@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcript Merger</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/latest/umd/lucide.min.js"></script>
+    <style>
+        [data-icon] {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+            stroke: currentColor;
+        }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+        .drag-active {
+            border-color: #6366f1 !important; /* Indigo-500 */
+            background-color: #1e293b !important; /* Slate-800 */
+        }
+    </style>
+</head>
+<body class="bg-slate-900 p-6 min-h-screen text-slate-200">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8 text-center">
+            <h1 class="text-4xl font-bold text-white mb-2">Transcript Merger</h1>
+            <p class="text-slate-400 mb-6">Merge or Sequence DaVinci Resolve transcripts</p>
+            
+            <!-- Tabs -->
+            <div class="flex justify-center gap-4 mb-6">
+                <button id="tabMerge" class="px-6 py-2 rounded-full font-semibold bg-indigo-600 text-white shadow-md transition hover:bg-indigo-500">
+                    Merge Speakers
+                </button>
+                <button id="tabSequence" class="px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 shadow-sm transition">
+                    Sequence Transcripts
+                </button>
+            </div>
+
+
+        </div>
+
+        <!-- Main Card -->
+        <div class="bg-slate-800 rounded-lg shadow-lg p-6 mb-6 border border-slate-700">
+            
+            <!-- MERGE VIEW -->
+            <div id="viewMerge">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-100 text-center">Upload Speaker Transcriptions</h2>
+                </div>
+                <div id="filesContainerMerge" class="space-y-3 mb-6"></div>
+                <button id="addTrackBtn" class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-slate-700 text-indigo-400 rounded-lg hover:bg-slate-600 transition font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-6">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Add Another Transcription
+                </button>
+            </div>
+
+            <!-- SEQUENCE VIEW -->
+            <div id="viewSequence" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-100 text-center">Upload Transcripts and Sequence Them</h2>
+                </div>
+                <div id="filesContainerSequence" class="space-y-3 mb-6"></div>
+                <button id="addPartBtn" class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-slate-700 text-emerald-400 rounded-lg hover:bg-slate-600 transition font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 mb-6">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Add Another Transcript
+                </button>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-3">
+                <button id="processBtn" class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-500 transition disabled:bg-slate-600 disabled:text-slate-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-800">
+                    Merge Transcripts
+                </button>
+                <button id="clearBtn" class="px-4 py-3 bg-red-900/30 text-red-400 rounded-lg font-semibold border border-red-900/50 shadow-sm transition-all duration-200 ease-in-out hover:bg-red-700 hover:text-white hover:border-red-600 hover:shadow-red-900/50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-slate-800">
+                    Clear All
+                </button>
+            </div>
+        </div>
+
+        <!-- Instructions (Dynamic based on tab) -->
+        <!-- Instructions (Dynamic based on tab) -->
+        <div id="instructionsMerge" class="bg-slate-800 border border-slate-700 rounded-lg p-6 text-left mb-6">
+            <h3 class="text-xl font-bold text-slate-200 mb-6 text-center">How to Merge Speaker Transcripts:</h3>
+            <ol class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-slate-300">
+                <li class="flex items-center gap-4">
+                    <span class="text-4xl font-bold text-indigo-500 flex-shrink-0 leading-none">1</span>
+                    <span class="leading-tight">In Resolve put each speaker on a separate audio track (Create Stems)</span>
+                </li>
+                <li class="flex items-center gap-4">
+                    <span class="text-4xl font-bold text-indigo-500 flex-shrink-0 leading-none">2</span>
+                    <span class="leading-tight">Transcribe each stem individually: <strong> with speaker detection DISABLED!</strong> </span>
+                </li>
+                <li class="flex items-center gap-4">
+                    <span class="text-4xl font-bold text-indigo-500 flex-shrink-0 leading-none">3</span>
+                    <span class="leading-tight">Export each stem transcript (Freddie.txt), then upload and merge.</span>
+                </li>
+            </ol>
+        </div>
+
+        <div id="instructionsSequence" class="bg-slate-800 border border-slate-700 rounded-lg p-6 text-left mb-6 hidden">
+            <h3 class="text-xl font-bold text-slate-200 mb-6 text-center">How to Sequence Transcripts:</h3>
+            <ol class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-slate-300">
+                <li class="flex items-center gap-4">
+                    <span class="text-4xl font-bold text-emerald-500 flex-shrink-0 leading-none">1</span>
+                    <span class="leading-tight">Upload transcript parts in order. Use arrows to reorder if needed.</span>
+                </li>
+                <li class="flex items-center gap-4">
+                    <span class="text-4xl font-bold text-emerald-500 flex-shrink-0 leading-none">2</span>
+                    <span class="leading-tight">Enter total video clip duration (Part Length Only) in HH:MM:SS format.</span>
+                </li>
+                <li class="flex items-center gap-4">
+                    <span class="text-4xl font-bold text-emerald-500 flex-shrink-0 leading-none">3</span>
+                    <span class="leading-tight">Sequenced transcripts will auto adjust timestamps and merge files</span>
+                </li>
+            </ol>
+        </div>
+
+        <!-- Preview Section -->
+        <div id="previewSection" class="bg-slate-800 rounded-lg shadow-lg p-8 hidden border border-slate-700">
+            <div class="flex flex-wrap items-center justify-between mb-6 gap-4">
+                <h2 class="text-xl font-semibold text-slate-100">
+                    Preview (<span id="entryCount">0</span> entries)
+                </h2>
+                <div class="flex flex-wrap gap-2">
+                    <button id="copyBtn" class="flex items-center gap-2 px-4 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition font-medium focus:outline-none focus:ring-2 focus:ring-slate-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                        Copy
+                    </button>
+                    <button id="downloadCsvBtn" class="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition font-medium focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        CSV
+                    </button>
+                    <button id="downloadJsonBtn" class="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                        JSON
+                    </button>
+                    <button id="downloadTxtBtn" class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        TXT
+                    </button>
+                    <button id="downloadSrtBtn" class="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-medium focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"></path></svg>
+                        SRT
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-3 gap-4 mb-6 p-4 bg-slate-900 rounded-lg border border-slate-700">
+                <div>
+                    <p class="text-sm text-slate-400">Total Entries</p>
+                    <p class="text-2xl font-bold text-slate-100" id="statEntries">0</p>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-400">Duration</p>
+                    <p class="text-2xl font-bold text-slate-100" id="statDuration">0m</p>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-400">Speakers</p>
+                    <p class="text-2xl font-bold text-slate-100" id="statSpeakers">0</p>
+                </div>
+            </div>
+
+            <!-- Preview List -->
+            <div id="previewList" class="max-h-96 overflow-y-auto space-y-4 border border-slate-700 rounded-lg p-4 bg-slate-900"></div>
+        </div>
+    </div>
+
+    <script>
+        // STATE
+        let currentMode = 'merge'; // 'merge' or 'sequence'
+        let mergeFiles = [];
+        let sequenceFiles = [];
+        let fileIdCounter = 0;
+        let processedData = null;
+        let previewMode = null; // Track which mode generated the current preview
+
+        // DOM ELEMENTS
+        const tabMerge = document.getElementById('tabMerge');
+        const tabSequence = document.getElementById('tabSequence');
+        const viewMerge = document.getElementById('viewMerge');
+        const viewSequence = document.getElementById('viewSequence');
+        const instructionsMerge = document.getElementById('instructionsMerge');
+        const instructionsSequence = document.getElementById('instructionsSequence');
+        
+        const filesContainerMerge = document.getElementById('filesContainerMerge');
+        const filesContainerSequence = document.getElementById('filesContainerSequence');
+        
+        const processBtn = document.getElementById('processBtn');
+        
+        // TABS LOGIC
+        function switchTab(mode) {
+            currentMode = mode;
+            if (mode === 'merge') {
+                tabMerge.className = "px-6 py-2 rounded-full font-semibold bg-indigo-600 text-white shadow-md transition hover:bg-indigo-500";
+                tabSequence.className = "px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 shadow-sm transition";
+                viewMerge.classList.remove('hidden');
+                viewSequence.classList.add('hidden');
+                instructionsMerge.classList.remove('hidden');
+                instructionsSequence.classList.add('hidden');
+                processBtn.textContent = "Merge Transcripts";
+                processBtn.className = processBtn.className.replace('bg-emerald-600', 'bg-indigo-600').replace('hover:bg-emerald-500', 'hover:bg-indigo-500');
+            } else {
+                tabMerge.className = "px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 shadow-sm transition";
+                tabSequence.className = "px-6 py-2 rounded-full font-semibold bg-emerald-600 text-white shadow-md transition hover:bg-emerald-500";
+                viewMerge.classList.add('hidden');
+                viewSequence.classList.remove('hidden');
+                instructionsMerge.classList.add('hidden');
+                instructionsSequence.classList.remove('hidden');
+                processBtn.textContent = "Sequence Transcripts";
+                processBtn.className = processBtn.className.replace('bg-indigo-600', 'bg-emerald-600').replace('hover:bg-indigo-500', 'hover:bg-emerald-500');
+            }
+            
+            // Show/hide preview based on which mode generated it
+            if (previewMode !== null && previewMode !== mode) {
+                document.getElementById('previewSection').classList.add('hidden');
+            } else if (previewMode === mode && processedData !== null) {
+                document.getElementById('previewSection').classList.remove('hidden');
+            }
+            
+            updateProcessButtonState();
+        }
+
+        tabMerge.addEventListener('click', () => switchTab('merge'));
+        tabSequence.addEventListener('click', () => switchTab('sequence'));
+
+        // FILE HANDLING
+        function createUploadZone(fileObj, onFileSelect) {
+            const zone = document.createElement('label');
+            zone.className = "flex items-center justify-center w-full px-4 py-2 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer hover:border-indigo-500 transition focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 bg-slate-900/50";
+            zone.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    <span class="text-sm text-slate-400 file-name">${fileObj.file ? fileObj.file.name : 'Click or Drag file'}</span>
+                </div>
+                <input type="file" accept=".txt" class="sr-only file-input" />
+            `;
+
+            const input = zone.querySelector('input');
+            
+            // Drag & Drop
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                zone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                zone.addEventListener(eventName, () => zone.classList.add('drag-active'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                zone.addEventListener(eventName, () => zone.classList.remove('drag-active'), false);
+            });
+
+            zone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files[0]) handleFile(files[0]);
+            });
+
+            input.addEventListener('change', (e) => {
+                if (e.target.files[0]) handleFile(e.target.files[0]);
+            });
+
+            function handleFile(file) {
+                fileObj.file = file;
+                zone.querySelector('.file-name').textContent = file.name;
+                onFileSelect();
+            }
+
+            return zone;
+        }
+
+        function addMergeFile() {
+            const id = fileIdCounter++;
+            const fileItem = document.createElement('div');
+            fileItem.className = 'flex gap-3 items-end bg-slate-900/50 p-3 rounded-lg border border-slate-700';
+            fileItem.id = `file-merge-${id}`;
+            
+            const fileObj = { id, element: fileItem, file: null, label: `Speaker ${mergeFiles.length + 1}` };
+            mergeFiles.push(fileObj);
+
+            fileItem.innerHTML = `
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Speaker Label</label>
+                    <input type="text" value="${fileObj.label}" class="speaker-label w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-slate-500" placeholder="e.g., John" />
+                </div>
+                <div class="flex-1 file-zone-container">
+                    <label class="block text-sm font-medium text-slate-300 mb-1">File</label>
+                </div>
+                <button class="remove-btn px-3 py-2 text-red-400 bg-transparent rounded-lg transition-colors duration-200 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+            `;
+
+            const zone = createUploadZone(fileObj, () => {
+                if (fileObj.file) {
+                    const name = fileObj.file.name.replace(/\.[^/.]+$/, "");
+                    fileObj.label = name;
+                    fileItem.querySelector('.speaker-label').value = name;
+                }
+                updateProcessButtonState();
+            });
+            fileItem.querySelector('.file-zone-container').appendChild(zone);
+
+            fileItem.querySelector('.speaker-label').addEventListener('change', (e) => fileObj.label = e.target.value);
+            fileItem.querySelector('.remove-btn').addEventListener('click', () => {
+                mergeFiles = mergeFiles.filter(f => f.id !== id);
+                fileItem.remove();
+                updateProcessButtonState();
+            });
+
+            filesContainerMerge.appendChild(fileItem);
+            updateProcessButtonState();
+        }
+
+        function addSequenceFile() {
+            const id = fileIdCounter++;
+            const fileItem = document.createElement('div');
+            fileItem.className = 'flex gap-3 items-end bg-slate-900/50 p-3 rounded-lg border border-slate-700';
+            fileItem.id = `file-seq-${id}`;
+            
+            const fileObj = { id, element: fileItem, file: null, duration: "00:00:00" };
+            sequenceFiles.push(fileObj);
+
+            fileItem.innerHTML = `
+                <div class="flex flex-col items-center gap-1">
+                    <button class="move-up text-slate-500 hover:text-slate-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg></button>
+                    <span class="text-xs font-bold text-slate-500 index-badge">#${sequenceFiles.length}</span>
+                    <button class="move-down text-slate-500 hover:text-slate-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                </div>
+                <div class="flex-1 file-zone-container">
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Transcript Part</label>
+                </div>
+                <div class="w-32">
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Duration</label>
+                    <input type="text" value="00:00:00" class="duration-input w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-center font-mono text-white" placeholder="HH:MM:SS" />
+                </div>
+                <button class="remove-btn px-3 py-2 text-red-400 bg-transparent rounded-lg transition-colors duration-200 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+            `;
+
+            const zone = createUploadZone(fileObj, updateProcessButtonState);
+            fileItem.querySelector('.file-zone-container').appendChild(zone);
+
+            const durationInput = fileItem.querySelector('.duration-input');
+            
+            // Helper to get current field (0=hours, 1=minutes, 2=seconds) based on cursor position
+            function getCurrentField(input) {
+                const pos = input.selectionStart;
+                if (pos <= 2) return 0; // Hours
+                if (pos <= 5) return 1; // Minutes
+                return 2; // Seconds
+            }
+            
+            // Helper to select a specific field
+            function selectField(input, fieldIndex) {
+                const ranges = [
+                    [0, 2],   // Hours
+                    [3, 5],   // Minutes
+                    [6, 8]    // Seconds
+                ];
+                const [start, end] = ranges[fieldIndex];
+                input.setSelectionRange(start, end);
+            }
+            
+            // Parse current value into array [hours, minutes, seconds]
+            function parseValue(value) {
+                const parts = value.split(':');
+                return [
+                    parts[0] || '00',
+                    parts[1] || '00',
+                    parts[2] || '00'
+                ];
+            }
+            
+            // Format array back to HH:MM:SS
+            function formatValue(parts) {
+                return `${parts[0]}:${parts[1]}:${parts[2]}`;
+            }
+            
+            durationInput.addEventListener('keydown', (e) => {
+                // Allow tab to move to next input
+                if (e.key === 'Tab') {
+                    return;
+                }
+                
+                // Allow Ctrl/Cmd shortcuts
+                if (e.ctrlKey || e.metaKey) {
+                    return;
+                }
+                
+                const currentField = getCurrentField(e.target);
+                
+                // Arrow left - move to previous field
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    if (currentField > 0) {
+                        selectField(e.target, currentField - 1);
+                    }
+                    return;
+                }
+                
+                // Arrow right - move to next field
+                if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    if (currentField < 2) {
+                        selectField(e.target, currentField + 1);
+                    }
+                    return;
+                }
+                
+                // Home - select hours
+                if (e.key === 'Home') {
+                    e.preventDefault();
+                    selectField(e.target, 0);
+                    return;
+                }
+                
+                // End - select seconds
+                if (e.key === 'End') {
+                    e.preventDefault();
+                    selectField(e.target, 2);
+                    return;
+                }
+                
+                const parts = parseValue(e.target.value);
+                
+                // Backspace - delete one digit at a time
+                if (e.key === 'Backspace' || e.key === 'Delete') {
+                    e.preventDefault();
+                    
+                    // Check if already "00" before attempting deletion
+                    const wasAlreadyZero = parts[currentField] === '00';
+                    
+                    if (wasAlreadyZero && currentField > 0) {
+                        // Already at "00", move to previous field
+                        setTimeout(() => {
+                            selectField(e.target, currentField - 1);
+                        }, 0);
+                    } else if (!wasAlreadyZero) {
+                        // Delete rightmost digit
+                        const currentValue = parts[currentField];
+                        
+                        if (currentValue[1] === '0') {
+                            // Right digit is already "0", so clear the left digit
+                            // e.g., "20" → "00" or "50" → "00"
+                            parts[currentField] = '00';
+                        } else {
+                            // Clear the right digit, keep left digit
+                            // e.g., "24" → "20" or "56" → "50"
+                            parts[currentField] = currentValue[0] + '0';
+                        }
+                        
+                        e.target.value = formatValue(parts);
+                        fileObj.duration = e.target.value;
+                        
+                        // Check if we just made it "00"
+                        if (parts[currentField] === '00' && currentField > 0) {
+                            // Just cleared to "00", move to previous field
+                            setTimeout(() => {
+                                selectField(e.target, currentField - 1);
+                            }, 0);
+                        } else {
+                            // Stay on current field
+                            selectField(e.target, currentField);
+                        }
+                    } else {
+                        // Already "00" but on first field (hours), just stay
+                        selectField(e.target, currentField);
+                    }
+                    return;
+                }
+                
+                // Handle digit input
+                if (/[0-9]/.test(e.key)) {
+                    e.preventDefault();
+                    
+                    // Get current field value
+                    let fieldValue = parts[currentField];
+                    
+                    // Check if field is fully selected (both digits)
+                    const selStart = e.target.selectionStart;
+                    const selEnd = e.target.selectionEnd;
+                    const isFullySelected = (selEnd - selStart === 2);
+                    
+                    let shouldAdvance = false;
+                    
+                    if (isFullySelected) {
+                        // Full field selected, start fresh with first digit
+                        fieldValue = '0' + e.key;
+                        // Don't advance yet - wait for second digit or validation
+                    } else {
+                        // Shift left and add new digit (this is the second digit)
+                        fieldValue = (fieldValue.substring(1) + e.key).slice(-2);
+                        // After entering second digit, we should advance
+                        shouldAdvance = true;
+                    }
+                    
+                    // Validate based on field
+                    let val = parseInt(fieldValue);
+                    if (currentField > 0 && val > 59) {
+                        fieldValue = '59';
+                        // If we hit the limit, auto-advance
+                        shouldAdvance = true;
+                    }
+                    
+                    // Check if first digit is already maxed for minutes/seconds
+                    // e.g., if user types "6" in minutes/seconds, we can only have "60" max (which becomes 59)
+                    // so auto-advance after first digit if it's 6 or higher
+                    if (currentField > 0 && isFullySelected) {
+                        const firstDigit = parseInt(e.key);
+                        if (firstDigit >= 6) {
+                            // First digit is 6 or more, so the field will be capped at 59
+                            fieldValue = '59';
+                            shouldAdvance = true;
+                        }
+                    }
+                    
+                    parts[currentField] = fieldValue;
+                    e.target.value = formatValue(parts);
+                    fileObj.duration = e.target.value;
+                    
+                    // Auto-advance to next field if appropriate
+                    if (shouldAdvance && currentField < 2) {
+                        setTimeout(() => {
+                            selectField(e.target, currentField + 1);
+                        }, 0);
+                    } else if (!isFullySelected) {
+                        // If we just entered the second digit but shouldn't advance (last field),
+                        // select the current field
+                        setTimeout(() => {
+                            selectField(e.target, currentField);
+                        }, 0);
+                    } else {
+                        // After first digit, position cursor at the end instead of selecting
+                        // This allows the next digit to be added as the second digit
+                        setTimeout(() => {
+                            const ranges = [
+                                [0, 2],   // Hours
+                                [3, 5],   // Minutes
+                                [6, 8]    // Seconds
+                            ];
+                            const [start, end] = ranges[currentField];
+                            e.target.setSelectionRange(end, end); // Position at end of field
+                        }, 0);
+                    }
+                    return;
+                }
+                
+                // Block all other keys
+                e.preventDefault();
+            });
+            
+            // Click to select the field that was clicked
+            durationInput.addEventListener('click', (e) => {
+                setTimeout(() => {
+                    const field = getCurrentField(e.target);
+                    selectField(e.target, field);
+                }, 0);
+            });
+            
+            // Focus to select hours by default
+            durationInput.addEventListener('focus', (e) => {
+                setTimeout(() => {
+                    selectField(e.target, 0);
+                }, 0);
+            });
+            
+            // Prevent pasting
+            durationInput.addEventListener('paste', (e) => {
+                e.preventDefault();
+            });
+            
+            // Reordering Logic
+            fileItem.querySelector('.move-up').addEventListener('click', () => moveFile(id, -1));
+            fileItem.querySelector('.move-down').addEventListener('click', () => moveFile(id, 1));
+
+            fileItem.querySelector('.remove-btn').addEventListener('click', () => {
+                sequenceFiles = sequenceFiles.filter(f => f.id !== id);
+                fileItem.remove();
+                updateSequenceIndices();
+                updateProcessButtonState();
+            });
+
+            filesContainerSequence.appendChild(fileItem);
+            updateSequenceIndices();
+            updateProcessButtonState();
+        }
+
+        function moveFile(id, direction) {
+            const index = sequenceFiles.findIndex(f => f.id === id);
+            if (index < 0) return;
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= sequenceFiles.length) return;
+
+            // Swap in array
+            [sequenceFiles[index], sequenceFiles[newIndex]] = [sequenceFiles[newIndex], sequenceFiles[index]];
+            
+            // Swap in DOM
+            const container = filesContainerSequence;
+            const items = Array.from(container.children);
+            if (direction === -1) {
+                container.insertBefore(items[index], items[newIndex]);
+            } else {
+                container.insertBefore(items[newIndex], items[index]);
+            }
+            
+            updateSequenceIndices();
+        }
+
+        function updateSequenceIndices() {
+            sequenceFiles.forEach((f, idx) => {
+                f.element.querySelector('.index-badge').textContent = `#${idx + 1}`;
+            });
+        }
+
+        function updateProcessButtonState() {
+            const files = currentMode === 'merge' ? mergeFiles : sequenceFiles;
+            const hasFiles = files.length > 0 && files.every(f => f.file);
+            processBtn.disabled = !hasFiles;
+        }
+
+        // PARSING & PROCESSING
+        function parseTimecode(timecodeStr) {
+            const match = timecodeStr.match(/\[(\d+):(\d+):(\d+):(\d+)\s*-/);
+            if (match) {
+                const [, h, m, s, ff] = match.map(Number);
+                return h * 3600 + m * 60 + s + ff / 30;
+            }
+            return 0;
+        }
+
+        function parseDuration(durationStr) {
+            const parts = durationStr.split(':').map(Number);
+            if (parts.length === 3) {
+                return parts[0] * 3600 + parts[1] * 60 + parts[2];
+            }
+            return 0;
+        }
+
+        function formatTimecode(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+            const ff = Math.floor((seconds % 1) * 30);
+            return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}:${String(ff).padStart(2,'0')}`;
+        }
+
+        async function parseTranscript(content, speakerLabel, timeOffset = 0) {
+            const entries = [];
+            const blocks = content.split(/\n(?=\[)/);
+
+            blocks.forEach(block => {
+                const lines = block.trim().split('\n');
+                if (!lines[0].startsWith('[')) return;
+
+                const timecodeMatch = lines[0].match(/\[(\d+):(\d+):(\d+):(\d+)\s*-\s*(\d+):(\d+):(\d+):(\d+)\]/);
+                if (!timecodeMatch) return;
+
+                // Parse Start
+                let startSec = parseInt(timecodeMatch[1])*3600 + parseInt(timecodeMatch[2])*60 + parseInt(timecodeMatch[3]) + parseInt(timecodeMatch[4])/30;
+                // Parse End
+                let endSec = parseInt(timecodeMatch[5])*3600 + parseInt(timecodeMatch[6])*60 + parseInt(timecodeMatch[7]) + parseInt(timecodeMatch[8])/30;
+
+                // Apply Offset
+                startSec += timeOffset;
+                endSec += timeOffset;
+
+                const newTimecode = `[${formatTimecode(startSec)} - ${formatTimecode(endSec)}]`;
+
+                let textStart = 1;
+                for (let i = 1; i < lines.length; i++) {
+                    if (lines[i].startsWith('Speaker')) {
+                        textStart = i + 1;
+                        break;
+                    }
+                }
+
+                const text = lines.slice(textStart).join('\n').trim();
+                if (text) {
+                    entries.push({
+                        startSeconds: startSec,
+                        endSeconds: endSec,
+                        timecode: newTimecode,
+                        speaker: speakerLabel,
+                        text
+                    });
+                }
+            });
+            return entries;
+        }
+
+        async function processTranscripts() {
+            try {
+                let allEntries = [];
+
+                if (currentMode === 'merge') {
+                    for (const fileObj of mergeFiles) {
+                        const content = await fileObj.file.text();
+                        const entries = await parseTranscript(content, fileObj.label, 0);
+                        allEntries = allEntries.concat(entries);
+                    }
+                    allEntries.sort((a, b) => a.startSeconds - b.startSeconds);
+                } else {
+                    let currentOffset = 0;
+                    for (const fileObj of sequenceFiles) {
+                        const content = await fileObj.file.text();
+                        // For sequence mode, we might want to keep original speakers or override? 
+                        // Usually sequence implies same video split, so speakers are embedded.
+                        // But our parser expects speaker label override? 
+                        // Let's assume we keep "Speaker" from file if we can, but our parser is rigid.
+                        // Let's just use a generic "Speaker" or try to extract from text?
+                        // The current parser uses the `speakerLabel` arg to override. 
+                        // Let's pass "Unknown" or maybe we should parse the speaker line from the file?
+                        // Actually, the parser logic: `if (lines[i].startsWith('Speaker'))` skips that line.
+                        // It doesn't extract the speaker name from the file, it uses the passed label.
+                        // This is a limitation for Sequence mode if the file has multiple speakers.
+                        // FIX: Let's modify parseTranscript to extract speaker if label is null?
+                        // For now, let's just use "Speaker" as label for sequence mode, or maybe we need to improve parser.
+                        // The user said "upload multiple completed transcripts that have already been merged".
+                        // So they likely have "Speaker 1", "Speaker 2" inside them.
+                        // My parser currently IGNORES the speaker line in the file and uses the input label.
+                        // I should probably fix the parser to read the speaker from the file if possible.
+                        
+                        // Let's do a quick fix: pass null as label, and have parser extract it.
+                        const entries = await parseTranscript(content, null, currentOffset);
+                        allEntries = allEntries.concat(entries);
+                        
+                        currentOffset += parseDuration(fileObj.duration);
+                    }
+                }
+
+                processedData = allEntries;
+                previewMode = currentMode; // Store which mode generated this preview
+                displayPreview();
+            } catch (error) {
+                alert('Error processing files: ' + error.message);
+                console.error(error);
+            }
+        }
+        
+        // OVERRIDE PARSER FOR SPEAKER EXTRACTION
+        async function parseTranscript(content, speakerLabelOverride, timeOffset = 0) {
+            const entries = [];
+            const blocks = content.split(/\n(?=\[)/);
+
+            blocks.forEach(block => {
+                const lines = block.trim().split('\n');
+                if (!lines[0].startsWith('[')) return;
+
+                const timecodeMatch = lines[0].match(/\[(\d+):(\d+):(\d+):(\d+)\s*-\s*(\d+):(\d+):(\d+):(\d+)\]/);
+                if (!timecodeMatch) return;
+
+                let startSec = parseInt(timecodeMatch[1])*3600 + parseInt(timecodeMatch[2])*60 + parseInt(timecodeMatch[3]) + parseInt(timecodeMatch[4])/30;
+                let endSec = parseInt(timecodeMatch[5])*3600 + parseInt(timecodeMatch[6])*60 + parseInt(timecodeMatch[7]) + parseInt(timecodeMatch[8])/30;
+
+                startSec += timeOffset;
+                endSec += timeOffset;
+
+                const newTimecode = `[${formatTimecode(startSec)} - ${formatTimecode(endSec)}]`;
+
+                let textStart = 1;
+                let extractedSpeaker = "Unknown";
+                
+                // Try to find line starting with "Speaker"
+                let foundSpeakerPrefix = false;
+                for (let i = 1; i < lines.length; i++) {
+                    if (lines[i].startsWith('Speaker')) {
+                        extractedSpeaker = lines[i].replace('Speaker', '').replace(':', '').trim() || "Speaker";
+                        if (extractedSpeaker === "Speaker") extractedSpeaker = lines[i].trim(); // Keep full line if just "Speaker 1"
+                        textStart = i + 1;
+                        foundSpeakerPrefix = true;
+                        break;
+                    }
+                }
+
+                // Fallback: If no "Speaker" prefix found, and we are in Sequence mode (no override),
+                // check if the first line looks like a speaker (short line).
+                if (!foundSpeakerPrefix && !speakerLabelOverride && lines.length > 1) {
+                    const potentialSpeaker = lines[1].trim();
+                    // Heuristic: If line is short (< 50 chars) and not empty, assume it's the speaker
+                    if (potentialSpeaker.length > 0 && potentialSpeaker.length < 50) {
+                        extractedSpeaker = potentialSpeaker;
+                        textStart = 2;
+                    }
+                }
+
+                const text = lines.slice(textStart).join('\n').trim();
+                if (text || extractedSpeaker !== "Unknown") { // Allow empty text if speaker is found? Or just ensure we have something.
+                    entries.push({
+                        startSeconds: startSec,
+                        endSeconds: endSec,
+                        timecode: newTimecode,
+                        speaker: speakerLabelOverride || extractedSpeaker,
+                        text
+                    });
+                }
+            });
+            return entries;
+        }
+
+        function displayPreview() {
+            document.getElementById('entryCount').textContent = processedData.length;
+            document.getElementById('statEntries').textContent = processedData.length;
+            const lastEntry = processedData[processedData.length - 1];
+            document.getElementById('statDuration').textContent = lastEntry ? Math.floor(lastEntry.endSeconds / 60) + 'm' : '0m';
+            document.getElementById('statSpeakers').textContent = new Set(processedData.map(e => e.speaker)).size;
+
+            const previewList = document.getElementById('previewList');
+            previewList.innerHTML = '';
+
+            processedData.forEach((entry) => {
+                const div = document.createElement('div');
+                div.className = 'bg-slate-800 p-3 rounded border border-slate-700';
+                div.innerHTML = `
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="font-semibold text-sm text-indigo-400">${entry.speaker}</span>
+                        <span class="text-xs text-slate-500">${entry.timecode}</span>
+                    </div>
+                    <p class="text-sm text-slate-300">${entry.text}</p>
+                `;
+                previewList.appendChild(div);
+            });
+
+            document.getElementById('previewSection').classList.remove('hidden');
+            // Scroll to preview
+            document.getElementById('previewSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // EXPORTS
+        function download(content, filename, type) {
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        document.getElementById('downloadTxtBtn').addEventListener('click', () => {
+            if (!processedData) return;
+            let content = '';
+            processedData.forEach(entry => {
+                content += `${entry.timecode}\n${entry.speaker}\n${entry.text}\n\n`;
+            });
+            download(content, 'merged_transcript.txt', 'text/plain');
+        });
+
+        document.getElementById('downloadSrtBtn').addEventListener('click', () => {
+            if (!processedData) return;
+            let content = '';
+            const formatSrtTime = (ms) => {
+                const h = Math.floor(ms / 3600000);
+                const m = Math.floor((ms % 3600000) / 60000);
+                const s = Math.floor((ms % 60000) / 1000);
+                const mil = Math.floor(ms % 1000);
+                return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')},${String(mil).padStart(3,'0')}`;
+            };
+
+            processedData.forEach((entry, idx) => {
+                const startMs = entry.startSeconds * 1000;
+                const endMs = entry.endSeconds * 1000;
+                content += `${idx + 1}\n${formatSrtTime(startMs)} --> ${formatSrtTime(endMs)}\n${entry.speaker}\n${entry.text}\n\n`;
+            });
+            download(content, 'merged_transcript.srt', 'text/plain');
+        });
+
+        document.getElementById('downloadCsvBtn').addEventListener('click', () => {
+            if (!processedData) return;
+            let content = 'Timecode,Speaker,Text\n';
+            processedData.forEach(entry => {
+                const safeText = `"${entry.text.replace(/"/g, '""')}"`;
+                content += `${entry.timecode},"${entry.speaker}",${safeText}\n`;
+            });
+            download(content, 'merged_transcript.csv', 'text/csv');
+        });
+
+        document.getElementById('downloadJsonBtn').addEventListener('click', () => {
+            if (!processedData) return;
+            download(JSON.stringify(processedData, null, 2), 'merged_transcript.json', 'application/json');
+        });
+
+        document.getElementById('copyBtn').addEventListener('click', () => {
+            if (!processedData) return;
+            let content = '';
+            processedData.forEach(entry => {
+                content += `${entry.timecode}\n${entry.speaker}\n${entry.text}\n\n`;
+            });
+            navigator.clipboard.writeText(content).then(() => {
+                const originalText = document.getElementById('copyBtn').innerHTML;
+                document.getElementById('copyBtn').innerHTML = `<span class="text-green-600 font-bold">Copied!</span>`;
+                setTimeout(() => {
+                    document.getElementById('copyBtn').innerHTML = originalText;
+                }, 2000);
+            });
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            mergeFiles = [];
+            sequenceFiles = [];
+            fileIdCounter = 0;
+            processedData = null;
+            previewMode = null; // Reset preview mode
+            filesContainerMerge.innerHTML = '';
+            filesContainerSequence.innerHTML = '';
+            document.getElementById('previewSection').classList.add('hidden');
+            document.getElementById('previewList').innerHTML = '';
+            document.getElementById('statEntries').textContent = '0';
+            document.getElementById('statDuration').textContent = '0m';
+            document.getElementById('statSpeakers').textContent = '0';
+            
+            // Reset to default state (2 inputs each)
+            addMergeFile();
+            addMergeFile();
+            addSequenceFile();
+            addSequenceFile();
+
+            // Maintain current mode and blur button
+            switchTab(currentMode);
+            document.getElementById('clearBtn').blur();
+        });
+
+        document.getElementById('addTrackBtn').addEventListener('click', addMergeFile);
+        document.getElementById('addPartBtn').addEventListener('click', addSequenceFile);
+        processBtn.addEventListener('click', processTranscripts);
+
+        // Init
+        addMergeFile();
+        addMergeFile();
+        addSequenceFile();
+        addSequenceFile();
+    </script>
+</body>
+</html>
