@@ -41,11 +41,12 @@ Export your processed transcripts in the format you need:
    - Assign speaker names to each file.
    - Click **Merge Components**.
    - **(Optional) Configure Subtitle Limits**:
+     - **Enable Limits**: Toggle checkbox to enable or disable CPL and Line limiting.
      - **Max Characters Per Line**: Set strict character limits (default: 11). Words that exceed the limit will not be split but will overflow the line.
      - **Max Lines Per Subtitle**: Automatically splits long entries.
    - **Automatic Processing**:
      - **CC Separation**: Text in `()` or `[]` is automatically separated into distinct entries.
-     - **Overlap Fix**: Entries overlapping with subsequent dialogue are automatically trimmed.
+     - **Overlap Fix**: Entries overlapping with subsequent dialogue are automatically trimmed (performed on inputs before splitting).
    - **Visibility Controls**: Use the checkboxes in the preview section to hide/show Speakers or CCs in both the preview and final export.
 
 
