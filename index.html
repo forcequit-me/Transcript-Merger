@@ -284,17 +284,16 @@
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
-            width: 1rem;
-            height: 1rem;
+            width: 16px;
+            height: 16px;
+            min-width: 16px;
+            min-height: 16px;
             border: 2px solid #64748b;
             border-radius: 4px;
             background-color: #1e293b;
             cursor: pointer;
-            position: relative;
             transition: all 0.15s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            vertical-align: middle;
         }
         input[type="checkbox"]:hover {
             border-color: #818cf8;
@@ -306,18 +305,10 @@
         input[type="checkbox"]:checked {
             background-color: #6366f1;
             border-color: #6366f1;
-        }
-        input[type="checkbox"]:checked::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            margin: auto;
-            width: 4px;
-            height: 8px;
-            border: solid white;
-            border-width: 0 2px 2px 0;
-            transform: rotate(45deg);
-            margin-top: 0px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' d='M4 8l3 3 5-6'/%3E%3C/svg%3E");
+            background-size: 12px 12px;
+            background-position: center;
+            background-repeat: no-repeat;
         }
         
         /* Part Separator Styling for Sequencer Mode */
