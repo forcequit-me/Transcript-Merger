@@ -321,15 +321,15 @@
         <!-- Header -->
         <div class="mb-8 text-center">
             <h1 class="text-4xl font-bold text-white mb-2">Transcript Merger</h1>
-            <p class="text-slate-400 mb-6">Merge or Sequence DaVinci Resolve transcripts</p>
+            <p class="text-slate-400 mb-6">Merge, Edit, or Sequence DaVinci Resolve transcripts</p>
             
             <!-- Tabs -->
-            <div class="flex justify-center gap-4">
-                <button id="tabEdit" class="px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 shadow-sm transition">
-                    Edit
-                </button>
+            <div class="flex justify-center gap-2">
                 <button id="tabMerge" class="px-6 py-2 rounded-full font-semibold bg-indigo-600 text-white shadow-md transition hover:bg-indigo-500">
                     Merge Speakers
+                </button>
+                <button id="tabEdit" class="px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 shadow-sm transition">
+                    Edit Transcripts
                 </button>
                 <button id="tabSequence" class="px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 shadow-sm transition">
                     Sequence Transcripts
@@ -789,7 +789,7 @@
             fileItem.className = 'flex gap-3 items-end bg-slate-900/50 p-3 rounded-lg border border-slate-700';
             fileItem.id = `file-seq-${id}`;
             
-            const fileObj = { id, element: fileItem, file: null, duration: "00:00:00" };
+            const fileObj = { id, element: fileItem, file: null, duration: "0000:00:00", label: `Part ${sequenceFiles.length + 1}` };
             sequenceFiles.push(fileObj);
 
             fileItem.innerHTML = `
@@ -798,67 +798,94 @@
                     <span class="text-xs font-bold text-slate-500 index-badge">#${sequenceFiles.length}</span>
                     <button class="move-down text-slate-500 hover:text-slate-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
                 </div>
-                <div class="flex-1 file-zone-container">
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Transcript Part</label>
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Part Label</label>
+                    <input type="text" value="${fileObj.label}" class="part-label w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-white placeholder-slate-500" placeholder="e.g., Intro" />
                 </div>
-                <div class="w-32">
+                <div class="flex-1 file-zone-container">
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Transcript File</label>
+                </div>
+                <div class="w-36">
                     <label class="block text-sm font-medium text-slate-300 mb-1">Duration</label>
-                    <input type="text" value="00:00:00" class="duration-input w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-center font-mono text-white" placeholder="HH:MM:SS" />
+                    <input type="text" value="0000:00:00" class="duration-input w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-center font-mono text-white" placeholder="HHHH:MM:SS" />
                 </div>
                 <button class="remove-btn px-3 py-2 text-red-400 bg-transparent rounded-lg transition-colors duration-200 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                 </button>
             `;
 
-            const zone = createUploadZone(fileObj, updateProcessButtonState);
+            const zone = createUploadZone(fileObj, () => {
+                // Auto-populate label from filename when file is uploaded
+                if (fileObj.file) {
+                    const name = fileObj.file.name.replace(/\.[^/.]+$/, "");
+                    fileObj.label = name;
+                    fileItem.querySelector('.part-label').value = name;
+                }
+                updateProcessButtonState();
+            });
             fileItem.querySelector('.file-zone-container').appendChild(zone);
+
+            // Part label input handler
+            fileItem.querySelector('.part-label').addEventListener('input', (e) => fileObj.label = e.target.value);
 
             const durationInput = fileItem.querySelector('.duration-input');
             
-            // STATE: Track which field is being edited and whether waiting for second digit
+            // STATE: Track which field is being edited and digit position within field
             let activeFieldIndex = 0;  // 0=hours, 1=minutes, 2=seconds
-            let waitingForSecondDigit = false;
-            let firstDigitValue = '';  // The value after first digit (e.g., "05")
+            let digitPosition = 0;     // Current digit position within the field (0-3 for hours, 0-1 for min/sec)
+            let pendingDigits = '';    // Accumulated digits for current field
             
             // Helper to select a specific field
             function selectField(input, fieldIndex) {
                 const ranges = [
-                    [0, 2],   // Hours
-                    [3, 5],   // Minutes
-                    [6, 8]    // Seconds
+                    [0, 4],   // Hours (4 digits)
+                    [5, 7],   // Minutes
+                    [8, 10]   // Seconds
                 ];
                 const [start, end] = ranges[fieldIndex];
                 input.setSelectionRange(start, end);
                 activeFieldIndex = fieldIndex;
-                waitingForSecondDigit = false;  // Reset when field is selected
+                digitPosition = 0;  // Reset digit position when field is selected
+                pendingDigits = ''; // Clear pending digits
             }
             
             // Get field index from cursor position (for clicks)
             function getFieldFromPosition(pos) {
-                if (pos <= 2) return 0; // Hours
-                if (pos <= 5) return 1; // Minutes
-                return 2; // Seconds
+                if (pos <= 4) return 0; // Hours (0-4)
+                if (pos <= 7) return 1; // Minutes (5-7)
+                return 2; // Seconds (8-10)
             }
             
             // Parse current value into array [hours, minutes, seconds]
             function parseValue(value) {
                 const parts = value.split(':');
                 return [
-                    parts[0] || '00',
-                    parts[1] || '00',
-                    parts[2] || '00'
+                    (parts[0] || '0000').padStart(4, '0'),
+                    (parts[1] || '00').padStart(2, '0'),
+                    (parts[2] || '00').padStart(2, '0')
                 ];
             }
             
-            // Format array back to HH:MM:SS
+            // Format array back to HHHH:MM:SS
             function formatValue(parts) {
-                return `${parts[0]}:${parts[1]}:${parts[2]}`;
+                return `${parts[0].padStart(4, '0')}:${parts[1].padStart(2, '0')}:${parts[2].padStart(2, '0')}`;
+            }
+            
+            // Get the number of digits for a field
+            function getFieldDigits(fieldIndex) {
+                return fieldIndex === 0 ? 4 : 2; // Hours = 4 digits, Min/Sec = 2 digits
+            }
+            
+            // Get zero value for a field
+            function getZeroValue(fieldIndex) {
+                return fieldIndex === 0 ? '0000' : '00';
             }
             
             durationInput.addEventListener('keydown', (e) => {
                 // Allow tab to move to next input
                 if (e.key === 'Tab') {
-                    waitingForSecondDigit = false;
+                    digitPosition = 0;
+                    pendingDigits = '';
                     return;
                 }
                 
@@ -905,43 +932,42 @@
                 if (e.key === 'Backspace' || e.key === 'Delete') {
                     e.preventDefault();
                     
-                    // If we were waiting for second digit, just clear and stay on this field
-                    if (waitingForSecondDigit) {
-                        parts[activeFieldIndex] = '00';
+                    const zeroVal = getZeroValue(activeFieldIndex);
+                    
+                    // If we were in the middle of entering digits, just clear and stay on this field
+                    if (digitPosition > 0) {
+                        parts[activeFieldIndex] = zeroVal;
                         e.target.value = formatValue(parts);
                         fileObj.duration = e.target.value;
-                        waitingForSecondDigit = false;
+                        digitPosition = 0;
+                        pendingDigits = '';
                         selectField(e.target, activeFieldIndex);  // Stay on current field
                         return;
                     }
                     
-                    // Check if already "00" before attempting deletion
-                    const wasAlreadyZero = parts[activeFieldIndex] === '00';
+                    // Check if already zero before attempting deletion
+                    const wasAlreadyZero = parts[activeFieldIndex] === zeroVal;
                     
                     if (wasAlreadyZero && activeFieldIndex > 0) {
-                        // Already at "00", move to previous field
+                        // Already at zero, move to previous field
                         selectField(e.target, activeFieldIndex - 1);
                     } else if (!wasAlreadyZero) {
-                        // Delete rightmost digit
+                        // Shift digits right (remove rightmost, pad left with 0)
                         const currentValue = parts[activeFieldIndex];
-                        
-                        if (currentValue[1] === '0') {
-                            parts[activeFieldIndex] = '00';
-                        } else {
-                            parts[activeFieldIndex] = currentValue[0] + '0';
-                        }
+                        const shifted = '0' + currentValue.slice(0, -1);
+                        parts[activeFieldIndex] = shifted;
                         
                         e.target.value = formatValue(parts);
                         fileObj.duration = e.target.value;
                         
-                        // Check if we just made it "00" - move to previous field
-                        if (parts[activeFieldIndex] === '00' && activeFieldIndex > 0) {
+                        // Check if we just made it zero - move to previous field
+                        if (parts[activeFieldIndex] === zeroVal && activeFieldIndex > 0) {
                             selectField(e.target, activeFieldIndex - 1);
                         } else {
                             selectField(e.target, activeFieldIndex);
                         }
                     } else {
-                        // Already "00" but on first field (hours), just stay
+                        // Already zero but on first field (hours), just stay
                         selectField(e.target, activeFieldIndex);
                     }
                     return;
@@ -951,27 +977,30 @@
                 if (/[0-9]/.test(e.key)) {
                     e.preventDefault();
                     
+                    const maxDigits = getFieldDigits(activeFieldIndex);
                     let fieldValue;
                     let shouldAdvance = false;
                     
-                    if (!waitingForSecondDigit) {
-                        // FIRST DIGIT: Start fresh
-                        fieldValue = '0' + e.key;
-                        firstDigitValue = fieldValue;
-                        waitingForSecondDigit = true;
+                    // Add digit to pending
+                    pendingDigits += e.key;
+                    digitPosition++;
+                    
+                    if (digitPosition < maxDigits) {
+                        // Still building the field value
+                        fieldValue = pendingDigits.padStart(maxDigits, '0');
                     } else {
-                        // SECOND DIGIT: Combine with first digit
-                        const potentialValue = firstDigitValue.substring(1) + e.key;
-                        const val = parseInt(potentialValue);
+                        // Field is complete
+                        fieldValue = pendingDigits.slice(-maxDigits); // Take last N digits
+                        const val = parseInt(fieldValue);
                         
                         // Block invalid values for minutes/seconds (must be <= 59)
                         if (activeFieldIndex > 0 && val > 59) {
-                            // Invalid input - just ignore this keystroke
+                            // Invalid input - revert to previous digits minus last
+                            pendingDigits = pendingDigits.slice(0, -1);
+                            digitPosition--;
                             return;
                         }
                         
-                        fieldValue = potentialValue;
-                        waitingForSecondDigit = false;
                         shouldAdvance = true;
                     }
                     
@@ -983,18 +1012,19 @@
                     if (shouldAdvance && activeFieldIndex < 2) {
                         selectField(e.target, activeFieldIndex + 1);
                     } else if (shouldAdvance) {
-                        // On last field after second digit, re-select it
+                        // On last field after completing digits, re-select it
                         selectField(e.target, activeFieldIndex);
                     } else {
-                        // After first digit, just position cursor (don't fully select)
-                        // but keep our state tracking active
+                        // Still entering digits, position cursor BEFORE the next digit slot
                         const ranges = [
-                            [0, 2],   // Hours
-                            [3, 5],   // Minutes
-                            [6, 8]    // Seconds
+                            [0, 4],   // Hours (4 digits)
+                            [5, 7],   // Minutes
+                            [8, 10]   // Seconds
                         ];
                         const [start, end] = ranges[activeFieldIndex];
-                        e.target.setSelectionRange(end, end);
+                        // Position cursor at the next digit to be entered
+                        const cursorPos = start + digitPosition;
+                        e.target.setSelectionRange(cursorPos, cursorPos);
                     }
                     return;
                 }
@@ -1104,7 +1134,7 @@
             const m = Math.floor((seconds % 3600) / 60);
             const s = Math.floor(seconds % 60);
             const ff = Math.floor((seconds % 1) * 30);
-            return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}:${String(ff).padStart(2,'0')}`;
+            return `${String(h).padStart(4,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}:${String(ff).padStart(2,'0')}`;
         }
 
         async function parseTranscript(content, speakerLabel, timeOffset = 0) {
@@ -1189,6 +1219,7 @@
                                 entry.endSeconds = entry.endSeconds - baseOffset + currentOffset;
                                 entry.timecode = `[${formatTimecode(entry.startSeconds)} - ${formatTimecode(entry.endSeconds)}]`;
                                 entry.partNumber = partIndex;
+                                entry.partLabel = fileObj.label; // Store the custom part label
                             });
                             
                             allEntries = allEntries.concat(rawEntries);
@@ -1666,18 +1697,21 @@
                 
                 // ADD PART SEPARATOR for Sequencer mode when entering a new part
                 if (previewMode === 'sequence' && entry.partNumber && entry.partNumber !== lastPartNumber) {
+                    // Use custom label if available, otherwise fall back to generic "Part N"
+                    const labelText = entry.partLabel || `Part ${entry.partNumber}`;
+                    
                     // Only show separator if not the first part (visual separator between parts)
                     if (lastPartNumber > 0 || index > 0) {
                         const separator = document.createElement('div');
                         separator.className = 'part-separator';
-                        separator.innerHTML = `<span class="part-separator-label">Part ${entry.partNumber}</span>`;
+                        separator.innerHTML = `<span class="part-separator-label">${escapeHtml(labelText)}</span>`;
                         previewList.appendChild(separator);
                     } else if (entry.partNumber === 1) {
                         // For the very first entry, just show a subtle part label
                         const separator = document.createElement('div');
                         separator.className = 'part-separator';
                         separator.style.paddingTop = '0.5rem';
-                        separator.innerHTML = `<span class="part-separator-label">Part 1</span>`;
+                        separator.innerHTML = `<span class="part-separator-label">${escapeHtml(labelText)}</span>`;
                         previewList.appendChild(separator);
                     }
                     lastPartNumber = entry.partNumber;
