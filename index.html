@@ -292,6 +292,9 @@
             cursor: pointer;
             position: relative;
             transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         input[type="checkbox"]:hover {
             border-color: #818cf8;
@@ -307,13 +310,14 @@
         input[type="checkbox"]:checked::before {
             content: '';
             position: absolute;
-            top: 1px;
-            left: 4px;
+            inset: 0;
+            margin: auto;
             width: 4px;
             height: 8px;
             border: solid white;
             border-width: 0 2px 2px 0;
             transform: rotate(45deg);
+            margin-top: 0px;
         }
         
         /* Part Separator Styling for Sequencer Mode */
