@@ -325,6 +325,9 @@
             
             <!-- Tabs -->
             <div class="flex justify-center gap-4">
+                <button id="tabEdit" class="px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 shadow-sm transition">
+                    Edit
+                </button>
                 <button id="tabMerge" class="px-6 py-2 rounded-full font-semibold bg-indigo-600 text-white shadow-md transition hover:bg-indigo-500">
                     Merge Speakers
                 </button>
@@ -334,6 +337,23 @@
             </div>
             
             <!-- Instructions (positioned below tabs) -->
+            <div id="instructionsEdit" class="bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-5 text-left mt-6 hidden">
+                <ol class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-300">
+                    <li class="flex items-center gap-3">
+                        <span class="text-2xl font-bold text-amber-500 flex-shrink-0 leading-none">1</span>
+                        <span class="leading-tight">Upload a single transcript file (with or without speaker detection).</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <span class="text-2xl font-bold text-amber-500 flex-shrink-0 leading-none">2</span>
+                        <span class="leading-tight">Detected speakers are automatically preserved.</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <span class="text-2xl font-bold text-amber-500 flex-shrink-0 leading-none">3</span>
+                        <span class="leading-tight">Edit entries, then export as TXT or SRT.</span>
+                    </li>
+                </ol>
+            </div>
+
             <div id="instructionsMerge" class="bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-5 text-left mt-6">
                 <ol class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-300">
                     <li class="flex items-center gap-3">
@@ -373,6 +393,14 @@
         <!-- Main Card -->
         <div class="bg-slate-800 rounded-lg shadow-lg p-6 mb-6 border border-slate-700">
             
+            <!-- EDIT VIEW -->
+            <div id="viewEdit" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-100 text-center">Edit Transcript</h2>
+                </div>
+                <div id="filesContainerEdit" class="space-y-3 mb-6"></div>
+            </div>
+
             <!-- MERGE VIEW -->
             <div id="viewMerge">
                 <div class="mb-6">
@@ -508,7 +536,8 @@
 
     <script>
         // STATE
-        let currentMode = 'merge'; // 'merge' or 'sequence'
+        let currentMode = 'merge'; // 'edit', 'merge', or 'sequence'
+        let editFile = null; // Single file for edit mode
         let mergeFiles = [];
         let sequenceFiles = [];
         let fileIdCounter = 0;
@@ -516,43 +545,69 @@
         let previewMode = null; // Track which mode generated the current preview
 
         // DOM ELEMENTS
+        const tabEdit = document.getElementById('tabEdit');
         const tabMerge = document.getElementById('tabMerge');
         const tabSequence = document.getElementById('tabSequence');
+        const viewEdit = document.getElementById('viewEdit');
         const viewMerge = document.getElementById('viewMerge');
         const viewSequence = document.getElementById('viewSequence');
+        const instructionsEdit = document.getElementById('instructionsEdit');
         const instructionsMerge = document.getElementById('instructionsMerge');
         const instructionsSequence = document.getElementById('instructionsSequence');
         
+        const filesContainerEdit = document.getElementById('filesContainerEdit');
         const filesContainerMerge = document.getElementById('filesContainerMerge');
         const filesContainerSequence = document.getElementById('filesContainerSequence');
         
         const processBtn = document.getElementById('processBtn');
         
         // TABS LOGIC
+        const inactiveTabClass = "px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 shadow-sm transition";
+        
         function switchTab(mode) {
             currentMode = mode;
             const subtitleLimitsSection = document.getElementById('subtitleLimitsSection');
             
-            if (mode === 'merge') {
+            // Reset all tabs to inactive
+            tabEdit.className = inactiveTabClass;
+            tabMerge.className = inactiveTabClass;
+            tabSequence.className = inactiveTabClass;
+            
+            // Hide all views and instructions
+            viewEdit.classList.add('hidden');
+            viewMerge.classList.add('hidden');
+            viewSequence.classList.add('hidden');
+            instructionsEdit.classList.add('hidden');
+            instructionsMerge.classList.add('hidden');
+            instructionsSequence.classList.add('hidden');
+            
+            if (mode === 'edit') {
+                tabEdit.className = "px-6 py-2 rounded-full font-semibold bg-amber-600 text-white shadow-md transition hover:bg-amber-500";
+                viewEdit.classList.remove('hidden');
+                instructionsEdit.classList.remove('hidden');
+                subtitleLimitsSection.classList.remove('hidden');
+                processBtn.textContent = "Edit Transcript";
+                processBtn.className = processBtn.className
+                    .replace(/bg-(indigo|emerald)-600/g, 'bg-amber-600')
+                    .replace(/hover:bg-(indigo|emerald)-500/g, 'hover:bg-amber-500');
+            } else if (mode === 'merge') {
                 tabMerge.className = "px-6 py-2 rounded-full font-semibold bg-indigo-600 text-white shadow-md transition hover:bg-indigo-500";
-                tabSequence.className = "px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 shadow-sm transition";
                 viewMerge.classList.remove('hidden');
-                viewSequence.classList.add('hidden');
                 instructionsMerge.classList.remove('hidden');
-                instructionsSequence.classList.add('hidden');
                 subtitleLimitsSection.classList.remove('hidden');
                 processBtn.textContent = "Merge Transcripts";
-                processBtn.className = processBtn.className.replace('bg-emerald-600', 'bg-indigo-600').replace('hover:bg-emerald-500', 'hover:bg-indigo-500');
+                processBtn.className = processBtn.className
+                    .replace(/bg-(amber|emerald)-600/g, 'bg-indigo-600')
+                    .replace(/hover:bg-(amber|emerald)-500/g, 'hover:bg-indigo-500');
             } else {
-                tabMerge.className = "px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 shadow-sm transition";
                 tabSequence.className = "px-6 py-2 rounded-full font-semibold bg-emerald-600 text-white shadow-md transition hover:bg-emerald-500";
-                viewMerge.classList.add('hidden');
                 viewSequence.classList.remove('hidden');
-                instructionsMerge.classList.add('hidden');
                 instructionsSequence.classList.remove('hidden');
-                subtitleLimitsSection.classList.add('hidden');
+                subtitleLimitsSection.classList.remove('hidden');
                 processBtn.textContent = "Sequence Transcripts";
-                processBtn.className = processBtn.className.replace('bg-indigo-600', 'bg-emerald-600').replace('hover:bg-indigo-500', 'hover:bg-emerald-500');
+                processBtn.className = processBtn.className
+                    .replace(/bg-(amber|indigo)-600/g, 'bg-emerald-600')
+                    .replace(/hover:bg-(amber|indigo)-500/g, 'hover:bg-emerald-500');
             }
             
             // Show/hide preview based on which mode generated it
@@ -565,6 +620,7 @@
             updateProcessButtonState();
         }
 
+        tabEdit.addEventListener('click', () => switchTab('edit'));
         tabMerge.addEventListener('click', () => switchTab('merge'));
         tabSequence.addEventListener('click', () => switchTab('sequence'));
 
@@ -621,6 +677,69 @@
             return zone;
         }
 
+        function initEditFile() {
+            // Create single file upload for edit mode
+            const fileItem = document.createElement('div');
+            fileItem.className = 'bg-slate-900/50 p-3 rounded-lg border border-slate-700';
+            fileItem.id = 'file-edit';
+            
+            fileItem.innerHTML = `
+                <div class="file-zone-container">
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Transcript File</label>
+                </div>
+            `;
+
+            const fileObj = { file: null };
+            const zone = document.createElement('label');
+            zone.className = "flex items-center justify-center w-full px-4 py-3 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer hover:border-amber-500 transition focus-within:ring-2 focus-within:ring-amber-500 focus-within:border-amber-500 bg-slate-900/50";
+            zone.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    <span class="text-sm text-slate-400 file-name">Click or Drag transcript file</span>
+                </div>
+                <input type="file" accept=".txt" class="sr-only file-input" />
+            `;
+
+            const input = zone.querySelector('input');
+            
+            // Drag & Drop
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                zone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }, false);
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                zone.addEventListener(eventName, () => zone.classList.add('drag-active'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                zone.addEventListener(eventName, () => zone.classList.remove('drag-active'), false);
+            });
+
+            zone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files[0]) handleFile(files[0]);
+            });
+
+            input.addEventListener('change', (e) => {
+                if (e.target.files[0]) handleFile(e.target.files[0]);
+            });
+
+            function handleFile(file) {
+                editFile = file;
+                zone.querySelector('.file-name').textContent = file.name;
+                updateProcessButtonState();
+            }
+
+            fileItem.querySelector('.file-zone-container').appendChild(zone);
+            filesContainerEdit.appendChild(fileItem);
+        }
+
         function addMergeFile() {
             const id = fileIdCounter++;
             const fileItem = document.createElement('div');
@@ -653,7 +772,7 @@
             });
             fileItem.querySelector('.file-zone-container').appendChild(zone);
 
-            fileItem.querySelector('.speaker-label').addEventListener('change', (e) => fileObj.label = e.target.value);
+            fileItem.querySelector('.speaker-label').addEventListener('input', (e) => fileObj.label = e.target.value);
             fileItem.querySelector('.remove-btn').addEventListener('click', () => {
                 mergeFiles = mergeFiles.filter(f => f.id !== id);
                 fileItem.remove();
@@ -951,8 +1070,14 @@
         }
 
         function updateProcessButtonState() {
-            const files = currentMode === 'merge' ? mergeFiles : sequenceFiles;
-            const hasFiles = files.length > 0 && files.every(f => f.file);
+            let hasFiles = false;
+            if (currentMode === 'edit') {
+                hasFiles = editFile !== null;
+            } else if (currentMode === 'merge') {
+                hasFiles = mergeFiles.length > 0 && mergeFiles.every(f => f.file);
+            } else {
+                hasFiles = sequenceFiles.length > 0 && sequenceFiles.every(f => f.file);
+            }
             processBtn.disabled = !hasFiles;
         }
 
@@ -1030,7 +1155,13 @@
             try {
                 let allEntries = [];
 
-                if (currentMode === 'merge') {
+                if (currentMode === 'edit') {
+                    // Edit mode: single file with auto speaker detection
+                    const content = await editFile.text();
+                    const entries = await parseTranscript(content, null, 0); // null = use detected speakers
+                    allEntries = entries;
+                    allEntries.sort((a, b) => a.startSeconds - b.startSeconds);
+                } else if (currentMode === 'merge') {
                     for (const fileObj of mergeFiles) {
                         const content = await fileObj.file.text();
                         const entries = await parseTranscript(content, fileObj.label, 0);
@@ -1072,13 +1203,13 @@
                 // Creates a linear, non-overlapping stream with composite Text
                 let flattenedEntries = flattenTracks(allEntries);
 
-                // 2. APPLY SUBTITLE LIMITS (Merge mode only)
+                // 2. APPLY SUBTITLE LIMITS (All modes when enabled)
                 const cpl = parseInt(document.getElementById('settingCpl').value) || 11;
                 const maxLines = parseInt(document.getElementById('settingMaxLines').value) || 2;
                 const enableLimits = document.getElementById('toggleLimits').checked;
                 
-                // Only apply limits in merge mode
-                if (currentMode === 'merge' && enableLimits) {
+                // Apply limits in all modes when enabled
+                if (enableLimits) {
                     processedData = applyLimits(flattenedEntries, cpl, maxLines);
                 } else {
                     processedData = flattenedEntries;
@@ -2273,11 +2404,13 @@
         });
 
         document.getElementById('clearBtn').addEventListener('click', () => {
+            editFile = null;
             mergeFiles = [];
             sequenceFiles = [];
             fileIdCounter = 0;
             processedData = null;
             previewMode = null; // Reset preview mode
+            filesContainerEdit.innerHTML = '';
             filesContainerMerge.innerHTML = '';
             filesContainerSequence.innerHTML = '';
             document.getElementById('previewSection').classList.add('hidden');
@@ -2286,7 +2419,8 @@
             document.getElementById('statDuration').textContent = '0m';
             document.getElementById('statSpeakers').textContent = '0';
             
-            // Reset to default state (2 inputs each)
+            // Reset to default state
+            initEditFile();
             addMergeFile();
             addMergeFile();
             addSequenceFile();
@@ -2305,9 +2439,23 @@
         document.getElementById('toggleSpeakerNames').addEventListener('change', () => displayPreview(true));
         document.getElementById('toggleCC').addEventListener('change', () => displayPreview(true));
         document.getElementById('toggleStripSilence').addEventListener('change', () => displayPreview(true));
-        document.getElementById('toggleLimits').addEventListener('change', () => processBtn.click());
+        document.getElementById('toggleLimits').addEventListener('change', () => {
+            if (processedData !== null) processTranscripts();
+        });
+        
+        // Numeric input listeners - reprocess on change for live updates
+        document.getElementById('settingCpl').addEventListener('input', () => {
+            if (processedData !== null) processTranscripts();
+        });
+        document.getElementById('settingMaxLines').addEventListener('input', () => {
+            if (processedData !== null) processTranscripts();
+        });
+        document.getElementById('settingMinDuration').addEventListener('input', () => {
+            if (processedData !== null) displayPreview(true); // Min duration affects export, not processedData
+        });
 
         // Init
+        initEditFile();
         addMergeFile();
         addMergeFile();
         addSequenceFile();
