@@ -696,13 +696,10 @@
 
             const durationInput = fileItem.querySelector('.duration-input');
             
-            // Helper to get current field (0=hours, 1=minutes, 2=seconds) based on cursor position
-            function getCurrentField(input) {
-                const pos = input.selectionStart;
-                if (pos <= 2) return 0; // Hours
-                if (pos <= 5) return 1; // Minutes
-                return 2; // Seconds
-            }
+            // STATE: Track which field is being edited and whether waiting for second digit
+            let activeFieldIndex = 0;  // 0=hours, 1=minutes, 2=seconds
+            let waitingForSecondDigit = false;
+            let firstDigitValue = '';  // The value after first digit (e.g., "05")
             
             // Helper to select a specific field
             function selectField(input, fieldIndex) {
@@ -713,6 +710,15 @@
                 ];
                 const [start, end] = ranges[fieldIndex];
                 input.setSelectionRange(start, end);
+                activeFieldIndex = fieldIndex;
+                waitingForSecondDigit = false;  // Reset when field is selected
+            }
+            
+            // Get field index from cursor position (for clicks)
+            function getFieldFromPosition(pos) {
+                if (pos <= 2) return 0; // Hours
+                if (pos <= 5) return 1; // Minutes
+                return 2; // Seconds
             }
             
             // Parse current value into array [hours, minutes, seconds]
@@ -733,6 +739,7 @@
             durationInput.addEventListener('keydown', (e) => {
                 // Allow tab to move to next input
                 if (e.key === 'Tab') {
+                    waitingForSecondDigit = false;
                     return;
                 }
                 
@@ -741,13 +748,11 @@
                     return;
                 }
                 
-                const currentField = getCurrentField(e.target);
-                
                 // Arrow left - move to previous field
                 if (e.key === 'ArrowLeft') {
                     e.preventDefault();
-                    if (currentField > 0) {
-                        selectField(e.target, currentField - 1);
+                    if (activeFieldIndex > 0) {
+                        selectField(e.target, activeFieldIndex - 1);
                     }
                     return;
                 }
@@ -755,8 +760,8 @@
                 // Arrow right - move to next field
                 if (e.key === 'ArrowRight') {
                     e.preventDefault();
-                    if (currentField < 2) {
-                        selectField(e.target, currentField + 1);
+                    if (activeFieldIndex < 2) {
+                        selectField(e.target, activeFieldIndex + 1);
                     }
                     return;
                 }
@@ -781,44 +786,44 @@
                 if (e.key === 'Backspace' || e.key === 'Delete') {
                     e.preventDefault();
                     
-                    // Check if already "00" before attempting deletion
-                    const wasAlreadyZero = parts[currentField] === '00';
+                    // If we were waiting for second digit, just clear and stay on this field
+                    if (waitingForSecondDigit) {
+                        parts[activeFieldIndex] = '00';
+                        e.target.value = formatValue(parts);
+                        fileObj.duration = e.target.value;
+                        waitingForSecondDigit = false;
+                        selectField(e.target, activeFieldIndex);  // Stay on current field
+                        return;
+                    }
                     
-                    if (wasAlreadyZero && currentField > 0) {
+                    // Check if already "00" before attempting deletion
+                    const wasAlreadyZero = parts[activeFieldIndex] === '00';
+                    
+                    if (wasAlreadyZero && activeFieldIndex > 0) {
                         // Already at "00", move to previous field
-                        setTimeout(() => {
-                            selectField(e.target, currentField - 1);
-                        }, 0);
+                        selectField(e.target, activeFieldIndex - 1);
                     } else if (!wasAlreadyZero) {
                         // Delete rightmost digit
-                        const currentValue = parts[currentField];
+                        const currentValue = parts[activeFieldIndex];
                         
                         if (currentValue[1] === '0') {
-                            // Right digit is already "0", so clear the left digit
-                            // e.g., "20" → "00" or "50" → "00"
-                            parts[currentField] = '00';
+                            parts[activeFieldIndex] = '00';
                         } else {
-                            // Clear the right digit, keep left digit
-                            // e.g., "24" → "20" or "56" → "50"
-                            parts[currentField] = currentValue[0] + '0';
+                            parts[activeFieldIndex] = currentValue[0] + '0';
                         }
                         
                         e.target.value = formatValue(parts);
                         fileObj.duration = e.target.value;
                         
-                        // Check if we just made it "00"
-                        if (parts[currentField] === '00' && currentField > 0) {
-                            // Just cleared to "00", move to previous field
-                            setTimeout(() => {
-                                selectField(e.target, currentField - 1);
-                            }, 0);
+                        // Check if we just made it "00" - move to previous field
+                        if (parts[activeFieldIndex] === '00' && activeFieldIndex > 0) {
+                            selectField(e.target, activeFieldIndex - 1);
                         } else {
-                            // Stay on current field
-                            selectField(e.target, currentField);
+                            selectField(e.target, activeFieldIndex);
                         }
                     } else {
                         // Already "00" but on first field (hours), just stay
-                        selectField(e.target, currentField);
+                        selectField(e.target, activeFieldIndex);
                     }
                     return;
                 }
@@ -827,74 +832,50 @@
                 if (/[0-9]/.test(e.key)) {
                     e.preventDefault();
                     
-                    // Get current field value
-                    let fieldValue = parts[currentField];
-                    
-                    // Check if field is fully selected (both digits)
-                    const selStart = e.target.selectionStart;
-                    const selEnd = e.target.selectionEnd;
-                    const isFullySelected = (selEnd - selStart === 2);
-                    
+                    let fieldValue;
                     let shouldAdvance = false;
                     
-                    if (isFullySelected) {
-                        // Full field selected, start fresh with first digit
+                    if (!waitingForSecondDigit) {
+                        // FIRST DIGIT: Start fresh
                         fieldValue = '0' + e.key;
-                        // Don't advance yet - wait for second digit or validation
+                        firstDigitValue = fieldValue;
+                        waitingForSecondDigit = true;
                     } else {
-                        // Shift left and add new digit (this is the second digit)
-                        fieldValue = (fieldValue.substring(1) + e.key).slice(-2);
-                        // After entering second digit, we should advance
-                        shouldAdvance = true;
-                    }
-                    
-                    // Validate based on field
-                    let val = parseInt(fieldValue);
-                    if (currentField > 0 && val > 59) {
-                        fieldValue = '59';
-                        // If we hit the limit, auto-advance
-                        shouldAdvance = true;
-                    }
-                    
-                    // Check if first digit is already maxed for minutes/seconds
-                    // e.g., if user types "6" in minutes/seconds, we can only have "60" max (which becomes 59)
-                    // so auto-advance after first digit if it's 6 or higher
-                    if (currentField > 0 && isFullySelected) {
-                        const firstDigit = parseInt(e.key);
-                        if (firstDigit >= 6) {
-                            // First digit is 6 or more, so the field will be capped at 59
-                            fieldValue = '59';
-                            shouldAdvance = true;
+                        // SECOND DIGIT: Combine with first digit
+                        const potentialValue = firstDigitValue.substring(1) + e.key;
+                        const val = parseInt(potentialValue);
+                        
+                        // Block invalid values for minutes/seconds (must be <= 59)
+                        if (activeFieldIndex > 0 && val > 59) {
+                            // Invalid input - just ignore this keystroke
+                            return;
                         }
+                        
+                        fieldValue = potentialValue;
+                        waitingForSecondDigit = false;
+                        shouldAdvance = true;
                     }
                     
-                    parts[currentField] = fieldValue;
+                    parts[activeFieldIndex] = fieldValue;
                     e.target.value = formatValue(parts);
                     fileObj.duration = e.target.value;
                     
                     // Auto-advance to next field if appropriate
-                    if (shouldAdvance && currentField < 2) {
-                        setTimeout(() => {
-                            selectField(e.target, currentField + 1);
-                        }, 0);
-                    } else if (!isFullySelected) {
-                        // If we just entered the second digit but shouldn't advance (last field),
-                        // select the current field
-                        setTimeout(() => {
-                            selectField(e.target, currentField);
-                        }, 0);
+                    if (shouldAdvance && activeFieldIndex < 2) {
+                        selectField(e.target, activeFieldIndex + 1);
+                    } else if (shouldAdvance) {
+                        // On last field after second digit, re-select it
+                        selectField(e.target, activeFieldIndex);
                     } else {
-                        // After first digit, position cursor at the end instead of selecting
-                        // This allows the next digit to be added as the second digit
-                        setTimeout(() => {
-                            const ranges = [
-                                [0, 2],   // Hours
-                                [3, 5],   // Minutes
-                                [6, 8]    // Seconds
-                            ];
-                            const [start, end] = ranges[currentField];
-                            e.target.setSelectionRange(end, end); // Position at end of field
-                        }, 0);
+                        // After first digit, just position cursor (don't fully select)
+                        // but keep our state tracking active
+                        const ranges = [
+                            [0, 2],   // Hours
+                            [3, 5],   // Minutes
+                            [6, 8]    // Seconds
+                        ];
+                        const [start, end] = ranges[activeFieldIndex];
+                        e.target.setSelectionRange(end, end);
                     }
                     return;
                 }
@@ -905,17 +886,13 @@
             
             // Click to select the field that was clicked
             durationInput.addEventListener('click', (e) => {
-                setTimeout(() => {
-                    const field = getCurrentField(e.target);
-                    selectField(e.target, field);
-                }, 0);
+                const field = getFieldFromPosition(e.target.selectionStart);
+                selectField(e.target, field);
             });
             
-            // Focus to select hours by default
+            // Focus to select hours by default (for tab navigation)
             durationInput.addEventListener('focus', (e) => {
-                setTimeout(() => {
-                    selectField(e.target, 0);
-                }, 0);
+                selectField(e.target, 0);
             });
             
             // Prevent pasting
