@@ -1865,16 +1865,82 @@
         
         function addEntryAbove(index, isCC = false) {
             const refEntry = processedData[index];
+            const minDuration = parseFloat(document.getElementById('settingMinDuration').value) || 1.0;
+            const desiredDuration = Math.max(minDuration, 1.0); // At least 1 second for new entry
             
-            // Calculate timing - slightly before reference entry
-            const duration = 2; // 2 second default duration
-            let endTime = refEntry.startSeconds;
-            let startTime = Math.max(0, endTime - duration);
+            // Check available gap
+            let availableGap = refEntry.startSeconds; // Default: from start of timeline
+            let prevEntry = null;
             
-            // If there's a previous entry, start after it ends
             if (index > 0) {
-                const prevEntry = processedData[index - 1];
-                startTime = Math.max(startTime, prevEntry.endSeconds);
+                prevEntry = processedData[index - 1];
+                availableGap = refEntry.startSeconds - prevEntry.endSeconds;
+            }
+            
+            let startTime, endTime;
+            
+            if (availableGap >= desiredDuration) {
+                // Enough gap - place just before reference entry
+                endTime = refEntry.startSeconds;
+                startTime = endTime - Math.min(availableGap, desiredDuration);
+            } else {
+                // Not enough gap - need to nudge surrounding entries
+                const neededTime = desiredDuration - Math.max(0, availableGap);
+                
+                // Split the nudge equally between prev entry (shorten end) and ref entry (shift start forward)
+                let nudgePrev = 0;
+                let nudgeRef = 0;
+                
+                if (prevEntry && index > 0) {
+                    // Can we shorten the previous entry's end?
+                    const prevDuration = prevEntry.endSeconds - prevEntry.startSeconds;
+                    const prevCanGive = Math.max(0, prevDuration - minDuration);
+                    
+                    // Can we push the reference entry's start later?
+                    const refDuration = refEntry.endSeconds - refEntry.startSeconds;
+                    const refCanGive = Math.max(0, refDuration - minDuration);
+                    
+                    // Split needed time equally, but respect limits
+                    const halfNeeded = neededTime / 2;
+                    nudgePrev = Math.min(halfNeeded, prevCanGive);
+                    nudgeRef = Math.min(halfNeeded, refCanGive);
+                    
+                    // If one side can't give enough, try to take more from the other
+                    if (nudgePrev < halfNeeded && nudgeRef < refCanGive) {
+                        nudgeRef = Math.min(neededTime - nudgePrev, refCanGive);
+                    } else if (nudgeRef < halfNeeded && nudgePrev < prevCanGive) {
+                        nudgePrev = Math.min(neededTime - nudgeRef, prevCanGive);
+                    }
+                    
+                    // Apply nudges to surrounding entries
+                    if (nudgePrev > 0) {
+                        prevEntry.endSeconds -= nudgePrev;
+                        prevEntry.timecode = `[${formatTimecode(prevEntry.startSeconds)} - ${formatTimecode(prevEntry.endSeconds)}]`;
+                    }
+                    if (nudgeRef > 0) {
+                        refEntry.startSeconds += nudgeRef;
+                        refEntry.timecode = `[${formatTimecode(refEntry.startSeconds)} - ${formatTimecode(refEntry.endSeconds)}]`;
+                    }
+                } else {
+                    // No previous entry - only nudge the reference entry forward
+                    const refDuration = refEntry.endSeconds - refEntry.startSeconds;
+                    const refCanGive = Math.max(0, refDuration - minDuration);
+                    nudgeRef = Math.min(neededTime, refCanGive);
+                    
+                    if (nudgeRef > 0) {
+                        refEntry.startSeconds += nudgeRef;
+                        refEntry.timecode = `[${formatTimecode(refEntry.startSeconds)} - ${formatTimecode(refEntry.endSeconds)}]`;
+                    }
+                }
+                
+                // Calculate new entry timing after nudges
+                startTime = prevEntry ? prevEntry.endSeconds : Math.max(0, refEntry.startSeconds - desiredDuration);
+                endTime = refEntry.startSeconds;
+                
+                // Ensure we still have at least minimum duration
+                if (endTime - startTime < minDuration) {
+                    startTime = Math.max(0, endTime - minDuration);
+                }
             }
             
             const newEntry = {
@@ -1895,16 +1961,82 @@
         
         function addEntryBelow(index, isCC = false) {
             const refEntry = processedData[index];
+            const minDuration = parseFloat(document.getElementById('settingMinDuration').value) || 1.0;
+            const desiredDuration = Math.max(minDuration, 1.0); // At least 1 second for new entry
             
-            // Calculate timing - slightly after reference entry
-            const duration = 2; // 2 second default duration
-            let startTime = refEntry.endSeconds;
-            let endTime = startTime + duration;
+            // Check available gap
+            let availableGap = Infinity; // Default: no limit (end of timeline)
+            let nextEntry = null;
             
-            // If there's a next entry, end before it starts
             if (index < processedData.length - 1) {
-                const nextEntry = processedData[index + 1];
-                endTime = Math.min(endTime, nextEntry.startSeconds);
+                nextEntry = processedData[index + 1];
+                availableGap = nextEntry.startSeconds - refEntry.endSeconds;
+            }
+            
+            let startTime, endTime;
+            
+            if (availableGap >= desiredDuration) {
+                // Enough gap - place just after reference entry
+                startTime = refEntry.endSeconds;
+                endTime = startTime + Math.min(availableGap === Infinity ? desiredDuration : availableGap, desiredDuration);
+            } else {
+                // Not enough gap - need to nudge surrounding entries
+                const neededTime = desiredDuration - Math.max(0, availableGap);
+                
+                // Split the nudge equally between ref entry (shorten end) and next entry (shift start later)
+                let nudgeRef = 0;
+                let nudgeNext = 0;
+                
+                if (nextEntry) {
+                    // Can we shorten the reference entry's end?
+                    const refDuration = refEntry.endSeconds - refEntry.startSeconds;
+                    const refCanGive = Math.max(0, refDuration - minDuration);
+                    
+                    // Can we push the next entry's start later?
+                    const nextDuration = nextEntry.endSeconds - nextEntry.startSeconds;
+                    const nextCanGive = Math.max(0, nextDuration - minDuration);
+                    
+                    // Split needed time equally, but respect limits
+                    const halfNeeded = neededTime / 2;
+                    nudgeRef = Math.min(halfNeeded, refCanGive);
+                    nudgeNext = Math.min(halfNeeded, nextCanGive);
+                    
+                    // If one side can't give enough, try to take more from the other
+                    if (nudgeRef < halfNeeded && nudgeNext < nextCanGive) {
+                        nudgeNext = Math.min(neededTime - nudgeRef, nextCanGive);
+                    } else if (nudgeNext < halfNeeded && nudgeRef < refCanGive) {
+                        nudgeRef = Math.min(neededTime - nudgeNext, refCanGive);
+                    }
+                    
+                    // Apply nudges to surrounding entries
+                    if (nudgeRef > 0) {
+                        refEntry.endSeconds -= nudgeRef;
+                        refEntry.timecode = `[${formatTimecode(refEntry.startSeconds)} - ${formatTimecode(refEntry.endSeconds)}]`;
+                    }
+                    if (nudgeNext > 0) {
+                        nextEntry.startSeconds += nudgeNext;
+                        nextEntry.timecode = `[${formatTimecode(nextEntry.startSeconds)} - ${formatTimecode(nextEntry.endSeconds)}]`;
+                    }
+                } else {
+                    // No next entry - only nudge the reference entry's end back
+                    const refDuration = refEntry.endSeconds - refEntry.startSeconds;
+                    const refCanGive = Math.max(0, refDuration - minDuration);
+                    nudgeRef = Math.min(neededTime, refCanGive);
+                    
+                    if (nudgeRef > 0) {
+                        refEntry.endSeconds -= nudgeRef;
+                        refEntry.timecode = `[${formatTimecode(refEntry.startSeconds)} - ${formatTimecode(refEntry.endSeconds)}]`;
+                    }
+                }
+                
+                // Calculate new entry timing after nudges
+                startTime = refEntry.endSeconds;
+                endTime = nextEntry ? nextEntry.startSeconds : startTime + desiredDuration;
+                
+                // Ensure we still have at least minimum duration
+                if (endTime - startTime < minDuration) {
+                    endTime = startTime + minDuration;
+                }
             }
             
             const newEntry = {
