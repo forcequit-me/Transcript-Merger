@@ -369,6 +369,41 @@
             letter-spacing: 0.05em;
             box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
         }
+        
+        /* Framerate Warning Banner */
+        .framerate-warning {
+            background: linear-gradient(135deg, #422006 0%, #78350f 100%);
+            border: 1px solid #f59e0b;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideDown 0.3s ease-out;
+        }
+        .framerate-warning-icon {
+            color: #fbbf24;
+            flex-shrink: 0;
+        }
+        .framerate-warning-text {
+            color: #fef3c7;
+            font-size: 0.875rem;
+            flex: 1;
+        }
+        .framerate-warning-text strong {
+            color: #fbbf24;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Framerate Mismatch Highlight */
+        .framerate-mismatch .framerate-select {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3);
+        }
     </style>
 </head>
 <body class="bg-slate-900 p-6 min-h-screen text-slate-200">
@@ -759,7 +794,7 @@
             fileItem.id = 'file-edit';
             
             fileItem.innerHTML = `
-                <div class="flex gap-3 items-end">
+                <div class="flex gap-3 items-start">
                     <div class="flex-1 file-zone-container">
                         <label class="block text-sm font-medium text-slate-300 mb-1">Transcript File</label>
                     </div>
@@ -778,7 +813,7 @@
                             <option value="120">120</option>
                             <option value="custom">+ Custom...</option>
                         </select>
-                        <input type="number" class="framerate-custom hidden w-full mt-1 px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-white text-sm text-center" placeholder="fps" min="1" max="240" step="0.001" />
+                        <input type="number" class="framerate-custom hidden w-full mt-1 px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-white text-sm text-center" placeholder="fps" min="1" max="999.999" step="0.001" />
                     </div>
                 </div>
             `;
@@ -843,6 +878,12 @@
                     framerateCustom.classList.add('hidden');
                 }
             });
+            framerateCustom.addEventListener('input', (e) => {
+                let val = parseFloat(e.target.value);
+                if (val > 999.999) {
+                    e.target.value = "999.999";
+                }
+            });
             
             filesContainerEdit.appendChild(fileItem);
         }
@@ -850,7 +891,7 @@
         function addMergeFile() {
             const id = fileIdCounter++;
             const fileItem = document.createElement('div');
-            fileItem.className = 'flex gap-3 items-end bg-slate-900/50 p-3 rounded-lg border border-slate-700';
+            fileItem.className = 'flex gap-3 items-start bg-slate-900/50 p-3 rounded-lg border border-slate-700';
             fileItem.id = `file-merge-${id}`;
             
             const fileObj = { id, element: fileItem, file: null, label: `Speaker ${mergeFiles.length + 1}`, framerate: 'ignore' };
@@ -879,11 +920,14 @@
                         <option value="120">120</option>
                         <option value="custom">+ Custom...</option>
                     </select>
-                    <input type="number" class="framerate-custom hidden w-full mt-1 px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white text-sm text-center" placeholder="fps" min="1" max="240" step="0.001" />
+                    <input type="number" class="framerate-custom hidden w-full mt-1 px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white text-sm text-center" placeholder="fps" min="1" max="999.999" step="0.001" />
                 </div>
-                <button class="remove-btn px-3 py-2 text-red-400 bg-transparent rounded-lg transition-colors duration-200 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                </button>
+                <div class="flex flex-col">
+                    <span class="block text-sm font-medium text-transparent mb-1 select-none" aria-hidden="true">&nbsp;</span>
+                    <button class="remove-btn px-3 py-2 text-red-400 bg-transparent rounded-lg transition-colors duration-200 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </div>
             `;
 
             const zone = createUploadZone(fileObj, () => {
@@ -908,12 +952,18 @@
                 } else {
                     framerateCustom.classList.add('hidden');
                     fileObj.framerate = e.target.value;
+                    updateProcessButtonState();
                 }
             });
             framerateCustom.addEventListener('input', (e) => {
-                const val = parseFloat(e.target.value);
+                let val = parseFloat(e.target.value);
+                if (val > 999.999) {
+                    val = 999.999;
+                    e.target.value = "999.999";
+                }
                 if (val > 0) {
                     fileObj.framerate = String(val);
+                    updateProcessButtonState();
                 }
             });
             fileItem.querySelector('.remove-btn').addEventListener('click', () => {
@@ -929,7 +979,7 @@
         function addSequenceFile() {
             const id = fileIdCounter++;
             const fileItem = document.createElement('div');
-            fileItem.className = 'flex gap-3 items-end bg-slate-900/50 p-3 rounded-lg border border-slate-700';
+            fileItem.className = 'flex gap-3 items-start bg-slate-900/50 p-3 rounded-lg border border-slate-700';
             fileItem.id = `file-seq-${id}`;
             
             const fileObj = { id, element: fileItem, file: null, duration: "0000:00:00", label: `Part ${sequenceFiles.length + 1}`, framerate: 'ignore' };
@@ -967,11 +1017,14 @@
                         <option value="120">120</option>
                         <option value="custom">+ Custom...</option>
                     </select>
-                    <input type="number" class="framerate-custom hidden w-full mt-1 px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-white text-sm text-center" placeholder="fps" min="1" max="240" step="0.001" />
+                    <input type="number" class="framerate-custom hidden w-full mt-1 px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-white text-sm text-center" placeholder="fps" min="1" max="999.999" step="0.001" />
                 </div>
-                <button class="remove-btn px-3 py-2 text-red-400 bg-transparent rounded-lg transition-colors duration-200 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                </button>
+                <div class="flex flex-col">
+                    <span class="block text-sm font-medium text-transparent mb-1 select-none" aria-hidden="true">&nbsp;</span>
+                    <button class="remove-btn px-3 py-2 text-red-400 bg-transparent rounded-lg transition-colors duration-200 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </div>
             `;
 
             const zone = createUploadZone(fileObj, () => {
@@ -998,12 +1051,18 @@
                 } else {
                     framerateCustom.classList.add('hidden');
                     fileObj.framerate = e.target.value;
+                    updateProcessButtonState();
                 }
             });
             framerateCustom.addEventListener('input', (e) => {
-                const val = parseFloat(e.target.value);
+                let val = parseFloat(e.target.value);
+                if (val > 999.999) {
+                    val = 999.999;
+                    e.target.value = "999.999";
+                }
                 if (val > 0) {
                     fileObj.framerate = String(val);
+                    updateProcessButtonState();
                 }
             });
 
@@ -1285,14 +1344,88 @@
 
         function updateProcessButtonState() {
             let hasFiles = false;
+            let framerateMismatch = false;
+            
+            // Determine if we have files
             if (currentMode === 'edit') {
                 hasFiles = editFile !== null;
             } else if (currentMode === 'merge') {
                 hasFiles = mergeFiles.length > 0 && mergeFiles.every(f => f.file);
+                
+                // Check framerate consistency
+                if (hasFiles && mergeFiles.length > 1) {
+                    const framerates = mergeFiles.map(f => f.framerate || 'ignore');
+                    const uniqueFramerates = [...new Set(framerates)];
+                    framerateMismatch = uniqueFramerates.length > 1;
+                    
+                    // Update UI for mismatch highlighting
+                    updateFramerateMismatchUI(mergeFiles, framerateMismatch, filesContainerMerge);
+                }
             } else {
                 hasFiles = sequenceFiles.length > 0 && sequenceFiles.every(f => f.file);
+                
+                // Check framerate consistency
+                if (hasFiles && sequenceFiles.length > 1) {
+                    const framerates = sequenceFiles.map(f => f.framerate || 'ignore');
+                    const uniqueFramerates = [...new Set(framerates)];
+                    framerateMismatch = uniqueFramerates.length > 1;
+                    
+                    // Update UI for mismatch highlighting
+                    updateFramerateMismatchUI(sequenceFiles, framerateMismatch, filesContainerSequence);
+                }
             }
-            processBtn.disabled = !hasFiles;
+            
+            // Update button state and text
+            processBtn.disabled = !hasFiles || framerateMismatch;
+            if (framerateMismatch) {
+                processBtn.textContent = '⚠ Framerates Mismatch';
+                processBtn.title = 'All files must have the same framerate setting';
+            } else {
+                processBtn.textContent = 'Process Transcripts';
+                processBtn.title = '';
+            }
+        }
+        
+        function updateFramerateMismatchUI(files, hasMismatch, container) {
+            // Remove existing warning
+            const existingWarning = container.querySelector('.framerate-warning');
+            if (existingWarning) existingWarning.remove();
+            
+            // Find the most common framerate to highlight mismatches
+            const framerateCounts = {};
+            files.forEach(f => {
+                const fr = f.framerate || 'ignore';
+                framerateCounts[fr] = (framerateCounts[fr] || 0) + 1;
+            });
+            const mostCommon = Object.entries(framerateCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
+            
+            // Update each file's UI
+            files.forEach(f => {
+                const frContainer = f.element.querySelector('.framerate-container');
+                if (frContainer) {
+                    const fr = f.framerate || 'ignore';
+                    if (hasMismatch && fr !== mostCommon) {
+                        frContainer.classList.add('framerate-mismatch');
+                    } else {
+                        frContainer.classList.remove('framerate-mismatch');
+                    }
+                }
+            });
+            
+            // Add warning banner if mismatch
+            if (hasMismatch) {
+                const warning = document.createElement('div');
+                warning.className = 'framerate-warning';
+                warning.innerHTML = `
+                    <svg class="framerate-warning-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <span class="framerate-warning-text">
+                        <strong>Framerate mismatch:</strong> All files must use the same framerate. Adjust the highlighted dropdowns.
+                    </span>
+                `;
+                container.insertBefore(warning, container.firstChild);
+            }
         }
 
         // PARSING & PROCESSING

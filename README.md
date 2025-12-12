@@ -15,22 +15,31 @@ Combine multiple individual transcript files (e.g., from audio stems) into a sin
 Edit a single transcript file with full control over entries.
 - **Works with speaker detection**: Preserves detected speakers from DaVinci Resolve transcripts.
 - **Full editing support**: Modify speaker names, dialogue text, and timestamps inline.
+- **Rename speakers**: Rename a speaker to apply changes across all occurrences in the transcript.
 - **Add/Remove entries**: Insert new dialogue or CC entries, or delete existing ones.
 
 ### 3. Sequence Transcripts
 Stitch together transcripts from multiple video parts into one continuous file.
 - **Timestamp Correction**: Automatically shifts timestamps based on the duration of previous clips.
 - **Drag-and-Drop Reordering**: Easily arrange clip order.
+- **Part Labeling**: Label each transcript part (auto-populated from filename).
 - **Offset Calculation**: Simply input the duration of each part, and the tool calculates the new global timestamps.
 - **Inline Editing**: After processing, click any entry to edit text, timing, or add new entries.
 
-### 4. Multiple Export Formats
+### 4. Per-File Framerate Settings
+Handle DaVinci Resolve's timecode format (HH:MM:SS:FF) with per-file framerate controls.
+- **Framerate Dropdown**: Select from common framerates (23.976, 24, 25, 29.97, 30, 50, 59.94, 60, 120) or enter a custom value.
+- **Ignore Option**: Set to "Ignore" if your transcript uses standard HH:MM:SS format without frames.
+- **Automatic Format Detection**: The timing input fields adapt based on the selected framerate.
+
+### 5. Multiple Export Formats
 Export your processed transcripts in the format you need:
+- **Custom Filename**: Set a custom filename for exports.
 - **Copy to Clipboard**: Quick paste functionality.
 - **SRT**: Standard subtitle format.
 - **TXT**: Plain text transcript.
 
-### 5. Privacy & Security
+### 6. Privacy & Security
 - **Client-Side Only**: The entire process runs in your browser. No files are ever uploaded to a server.
 - **No Installation**: Single-file application (HTML).
 
@@ -45,9 +54,11 @@ Export your processed transcripts in the format you need:
    - Select the **Merge Speakers** tab.
    - Upload the transcript files.
    - Assign speaker names to each file.
+   - Set framerate per file if using timecode format (optional).
    - Click **Merge Transcripts**.
 5. **Edit (Optional)**: Click any entry in the preview to:
    - Change speaker name (dropdown or custom input)
+   - Rename a speaker (applies to all occurrences)
    - Edit dialogue text inline
    - Adjust timing
    - Add new entries above/below
@@ -64,21 +75,23 @@ Export your processed transcripts in the format you need:
 
 ### How to Edit Transcripts
 1. **Upload**: Upload a single transcript file in the **Edit Transcripts** tab.
-2. **Process**: Click **Edit Transcript** to load and preview.
-3. **Edit**: Click any entry to modify speaker, text, or timing.
-4. **Export**: Use the export buttons to download as TXT or SRT.
+2. **Set Framerate** (Optional): If your transcript uses timecode format (HH:MM:SS:FF), select the appropriate framerate.
+3. **Process**: Click **Edit Transcript** to load and preview.
+4. **Edit**: Click any entry to modify speaker, text, or timing. Use "Rename Speaker" to apply changes globally.
+5. **Export**: Use the export buttons to download as TXT or SRT.
 
 ### How to Sequence Transcripts
 1. **Upload**: Drag and drop your transcript parts into the **Sequence Transcripts** tab.
 2. **Order**: Use the arrow buttons to arrange them in the correct playback order.
-3. **Label Parts**: Optionally edit the part labels for each transcript.
-4. **Set Duration**: Enter the exact duration of each video clip (HHHH:MM:SS format).
+3. **Label Parts**: Edit the part labels for each transcript (auto-populated from filename).
+4. **Set Duration**: Enter the exact duration of each video clip (HHHH:MM:SS format, supports up to 9999 hours).
    - *Note: This is critical for calculating the correct time offsets for subsequent clips.*
-5. **Process**: Click **Sequence Transcripts** to generate the unified file.
-6. **Edit (Optional)**: Click any entry in the preview to edit text, timing, or add new entries.
+5. **Set Framerate** (Optional): If your transcripts use timecode format, select the appropriate framerate for each part.
+6. **Process**: Click **Sequence Transcripts** to generate the unified file.
+7. **Edit (Optional)**: Click any entry in the preview to edit text, timing, or add new entries.
 
 ## Requirements
-- A modern web browser (Chrome, Firefox, Edge, Safari).
+- A modern web browser (Chrome, Firefox, Edge, Safari, Opera).
 - Internet connection (required for loading TailwindCSS and Icon libraries via CDN).
 
 ## Installation
