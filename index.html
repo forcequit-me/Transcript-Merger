@@ -1115,6 +1115,11 @@
             }
             
             updateSequenceIndices();
+            
+            // Auto-reprocess when order changes (if preview already exists)
+            if (previewMode === 'sequence' && processedData !== null) {
+                processTranscripts();
+            }
         }
 
         function updateSequenceIndices() {
@@ -2286,6 +2291,7 @@
             if (!entryEl) return;
             
             const entry = processedData[index];
+            const originalStartSeconds = entry.startSeconds;
             
             // Get edited text
             const textInput = entryEl.querySelector('.edit-text-input');
@@ -2296,9 +2302,17 @@
             // Get edited timing
             const startInput = entryEl.querySelector('.edit-timing-start');
             const endInput = entryEl.querySelector('.edit-timing-end');
+            let timingChanged = false;
             if (startInput && endInput) {
-                entry.startSeconds = parseEditableTimecode(startInput.value);
-                entry.endSeconds = parseEditableTimecode(endInput.value);
+                const newStartSeconds = parseEditableTimecode(startInput.value);
+                const newEndSeconds = parseEditableTimecode(endInput.value);
+                
+                if (newStartSeconds !== entry.startSeconds || newEndSeconds !== entry.endSeconds) {
+                    timingChanged = true;
+                }
+                
+                entry.startSeconds = newStartSeconds;
+                entry.endSeconds = newEndSeconds;
                 entry.timecode = `[${formatTimecode(entry.startSeconds)} - ${formatTimecode(entry.endSeconds)}]`;
             }
             
@@ -2318,6 +2332,14 @@
                 durationMinutes = lastEntry ? Math.floor(lastEntry.endSeconds / 60) : 0;
             }
             document.getElementById('statDuration').textContent = durationMinutes + 'm';
+            
+            // If timing changed, re-sort entries by start time and refresh preview
+            if (timingChanged) {
+                selectedEntryIndex = null;
+                processedData.sort((a, b) => a.startSeconds - b.startSeconds);
+                displayPreview();
+                return; // displayPreview handles everything, no need to deselect
+            }
             
             if (!silent) {
                 deselectEntry(index);
