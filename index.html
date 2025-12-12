@@ -199,6 +199,14 @@
             border-top: 1px solid #475569;
             color: #a5b4fc;
         }
+        .speaker-option.rename-option {
+            border-top: 1px solid #475569;
+            color: #fbbf24;
+            font-style: italic;
+        }
+        .speaker-option.rename-option:hover {
+            background: #422006;
+        }
         .speaker-custom-input {
             width: 100%;
             padding: 10px 14px;
@@ -521,8 +529,10 @@
             <!-- Hidden entry count for JS reference -->
             <span id="entryCount" class="hidden">0</span>
 
-            <!-- Export Buttons (Centered) -->
-            <div class="flex flex-wrap justify-center gap-2 mb-6">
+            <!-- Export Row -->
+            <div class="flex items-center gap-3 mb-6 p-3 bg-slate-900 rounded-lg border border-slate-700">
+                <label class="text-sm font-medium text-slate-400 whitespace-nowrap">Rename Export:</label>
+                <input type="text" id="exportFileName" value="merged_transcript" class="flex-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-slate-500 text-sm" placeholder="merged_transcript" />
                 <button id="copyBtn" class="flex items-center gap-2 px-4 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition font-medium focus:outline-none focus:ring-2 focus:ring-slate-500">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
                     Copy
@@ -2005,10 +2015,11 @@
                     <div class="speaker-option ${s === currentSpeaker ? 'selected' : ''}" data-speaker="${escapeHtml(s)}">${escapeHtml(s)}</div>
                 `).join('')}
                 <div class="speaker-option custom-option" data-custom="true">+ Custom Speaker...</div>
+                <div class="speaker-option rename-option" data-rename="true">✏ Rename "${escapeHtml(currentSpeaker)}" (All)</div>
             `;
             
             // Add click handlers for speaker options
-            dropdown.querySelectorAll('.speaker-option:not(.custom-option)').forEach(opt => {
+            dropdown.querySelectorAll('.speaker-option:not(.custom-option):not(.rename-option)').forEach(opt => {
                 opt.addEventListener('click', (e) => {
                     e.stopPropagation();
                     setSpeaker(index, opt.dataset.speaker);
@@ -2020,6 +2031,12 @@
             dropdown.querySelector('.custom-option').addEventListener('click', (e) => {
                 e.stopPropagation();
                 showCustomSpeakerInput(dropdown, index);
+            });
+            
+            // Rename speaker option
+            dropdown.querySelector('.rename-option').addEventListener('click', (e) => {
+                e.stopPropagation();
+                showRenameSpeakerInput(dropdown, index, currentSpeaker);
             });
             
             container.appendChild(dropdown);
@@ -2048,6 +2065,81 @@
             });
             
             input.addEventListener('click', (e) => e.stopPropagation());
+        }
+        
+        function showRenameSpeakerInput(dropdown, index, oldSpeaker) {
+            // Remove the rename option and custom option, show input
+            const renameOption = dropdown.querySelector('.rename-option');
+            const customOption = dropdown.querySelector('.custom-option');
+            if (renameOption) renameOption.remove();
+            if (customOption) customOption.remove();
+            
+            const inputContainer = document.createElement('div');
+            inputContainer.style.cssText = 'padding: 8px 10px; border-top: 1px solid #475569;';
+            inputContainer.innerHTML = `
+                <div style="color: #fbbf24; font-size: 0.75rem; margin-bottom: 6px;">Rename all "${escapeHtml(oldSpeaker)}" to:</div>
+            `;
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'speaker-custom-input';
+            input.style.cssText = 'margin-top: 0; border-top: none;';
+            input.placeholder = 'Enter new name...';
+            input.value = oldSpeaker === '[CC]' ? '' : oldSpeaker; // Pre-fill with current name for easy editing
+            inputContainer.appendChild(input);
+            dropdown.appendChild(inputContainer);
+            input.focus();
+            input.select();
+            
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && input.value.trim()) {
+                    renameSpeaker(oldSpeaker, input.value.trim());
+                    closeAllDropdowns();
+                }
+                if (e.key === 'Escape') {
+                    closeAllDropdowns();
+                }
+            });
+            
+            input.addEventListener('click', (e) => e.stopPropagation());
+        }
+        
+        function renameSpeaker(oldSpeaker, newSpeaker) {
+            if (oldSpeaker === newSpeaker) return;
+            
+            let changedCount = 0;
+            
+            // Update all entries with the old speaker name
+            processedData.forEach((entry, idx) => {
+                if (entry.speaker === oldSpeaker) {
+                    entry.speaker = newSpeaker;
+                    changedCount++;
+                    
+                    // Update the DOM element if it exists
+                    const entryEl = document.querySelector(`[data-index="${idx}"]`);
+                    if (entryEl) {
+                        const speakerBtn = entryEl.querySelector('.speaker-name-btn');
+                        if (speakerBtn) {
+                            speakerBtn.textContent = newSpeaker;
+                        }
+                        
+                        // Update CC indicator
+                        const isCC = newSpeaker === '[CC]';
+                        const existingIndicator = entryEl.querySelector('.cc-indicator');
+                        if (isCC && !existingIndicator) {
+                            speakerBtn.insertAdjacentHTML('afterend', '<span class="cc-indicator">CC</span>');
+                        } else if (!isCC && existingIndicator) {
+                            existingIndicator.remove();
+                        }
+                    }
+                }
+            });
+            
+            // Update stats - exclude [CC] from speaker count
+            const speakerSet = new Set(processedData.filter(e => e.speaker !== '[CC]').map(e => e.speaker));
+            document.getElementById('statSpeakers').textContent = speakerSet.size;
+            
+            console.log(`Renamed "${oldSpeaker}" to "${newSpeaker}" in ${changedCount} entries.`);
         }
         
         function setSpeaker(index, speaker) {
@@ -2405,7 +2497,8 @@
                 }
                 content += `${entry.text}\n\n`;
             });
-            download(content, 'merged_transcript.txt', 'text/plain');
+            const fileName = document.getElementById('exportFileName').value.trim() || 'merged_transcript';
+            download(content, `${fileName}.txt`, 'text/plain');
         });
 
         document.getElementById('downloadSrtBtn').addEventListener('click', () => {
@@ -2478,7 +2571,8 @@
                 }
                 content += `${entry.text}\n\n`;
             });
-            download(content, 'merged_transcript.srt', 'text/plain');
+            const fileName = document.getElementById('exportFileName').value.trim() || 'merged_transcript';
+            download(content, `${fileName}.srt`, 'text/plain');
         });
 
         document.getElementById('copyBtn').addEventListener('click', () => {
