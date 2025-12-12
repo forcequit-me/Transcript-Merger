@@ -154,19 +154,24 @@
             font-weight: 600;
             font-size: 0.875rem;
             color: #818cf8;
-            padding: 4px 10px 4px 0;
-            margin-left: -2px;
+            padding: 4px 0;
             border-radius: 4px;
             transition: all 0.15s ease;
         }
-        .speaker-name-btn:hover {
-            background: #334155;
-        }
+        /* Only show hover/selected background when in edit mode */
         .dialogue-entry.selected .speaker-name-btn {
             background: #334155;
+            padding: 4px 10px;
         }
         .dialogue-entry.selected .speaker-name-btn:hover {
             background: #475569;
+        }
+        /* Fix alignment during edit mode - keep speaker aligned to top */
+        .dialogue-entry.selected .entry-content > div:first-child {
+            align-items: flex-start;
+        }
+        .dialogue-entry.selected .speaker-name-container {
+            margin-top: 0;
         }
         .speaker-dropdown {
             position: absolute;
