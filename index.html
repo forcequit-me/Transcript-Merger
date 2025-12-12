@@ -252,7 +252,7 @@
             gap: 4px;
         }
         .edit-timing-input {
-            width: 90px;
+            width: 100px;
             padding: 4px 6px;
             background: #0f172a;
             border: 1px solid #475569;
@@ -267,9 +267,27 @@
             border-color: #6366f1;
             color: #e2e8f0;
         }
+        .edit-timing-input.invalid {
+            border-color: #ef4444 !important;
+            color: #fca5a5;
+            background: #450a0a;
+        }
         .timing-separator {
             color: #64748b;
             font-size: 0.75rem;
+        }
+        .timing-input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .timing-format-label {
+            font-size: 0.6rem;
+            color: #64748b;
+            font-family: monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         /* Dialogue text display (non-edit mode) */
@@ -620,6 +638,9 @@
             instructionsMerge.classList.add('hidden');
             instructionsSequence.classList.add('hidden');
             
+            // Get export filename input for updating defaults
+            const exportFileNameInput = document.getElementById('exportFileName');
+            
             if (mode === 'edit') {
                 tabEdit.className = "px-6 py-2 rounded-full font-semibold bg-amber-600 text-white shadow-md transition hover:bg-amber-500";
                 viewEdit.classList.remove('hidden');
@@ -629,6 +650,11 @@
                 processBtn.className = processBtn.className
                     .replace(/bg-(indigo|emerald)-600/g, 'bg-amber-600')
                     .replace(/hover:bg-(indigo|emerald)-500/g, 'hover:bg-amber-500');
+                // Set default export filename for edit mode
+                if (exportFileNameInput && (exportFileNameInput.value === 'merged_transcript' || exportFileNameInput.value === 'sequenced_transcript')) {
+                    exportFileNameInput.value = 'edited_transcript';
+                    exportFileNameInput.placeholder = 'edited_transcript';
+                }
             } else if (mode === 'merge') {
                 tabMerge.className = "px-6 py-2 rounded-full font-semibold bg-indigo-600 text-white shadow-md transition hover:bg-indigo-500";
                 viewMerge.classList.remove('hidden');
@@ -638,6 +664,11 @@
                 processBtn.className = processBtn.className
                     .replace(/bg-(amber|emerald)-600/g, 'bg-indigo-600')
                     .replace(/hover:bg-(amber|emerald)-500/g, 'hover:bg-indigo-500');
+                // Set default export filename for merge mode
+                if (exportFileNameInput && (exportFileNameInput.value === 'edited_transcript' || exportFileNameInput.value === 'sequenced_transcript')) {
+                    exportFileNameInput.value = 'merged_transcript';
+                    exportFileNameInput.placeholder = 'merged_transcript';
+                }
             } else {
                 tabSequence.className = "px-6 py-2 rounded-full font-semibold bg-emerald-600 text-white shadow-md transition hover:bg-emerald-500";
                 viewSequence.classList.remove('hidden');
@@ -647,6 +678,11 @@
                 processBtn.className = processBtn.className
                     .replace(/bg-(amber|indigo)-600/g, 'bg-emerald-600')
                     .replace(/hover:bg-(amber|indigo)-500/g, 'hover:bg-emerald-500');
+                // Set default export filename for sequence mode
+                if (exportFileNameInput && (exportFileNameInput.value === 'merged_transcript' || exportFileNameInput.value === 'edited_transcript')) {
+                    exportFileNameInput.value = 'sequenced_transcript';
+                    exportFileNameInput.placeholder = 'sequenced_transcript';
+                }
             }
             
             // Show/hide preview based on which mode generated it
@@ -723,8 +759,27 @@
             fileItem.id = 'file-edit';
             
             fileItem.innerHTML = `
-                <div class="file-zone-container">
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Transcript File</label>
+                <div class="flex gap-3 items-end">
+                    <div class="flex-1 file-zone-container">
+                        <label class="block text-sm font-medium text-slate-300 mb-1">Transcript File</label>
+                    </div>
+                    <div class="w-28 framerate-container">
+                        <label class="block text-sm font-medium text-slate-300 mb-1">Framerate</label>
+                        <select class="framerate-select w-full px-2 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-white text-sm">
+                            <option value="ignore" selected>Ignore</option>
+                            <option value="23.976">23.976</option>
+                            <option value="24">24</option>
+                            <option value="25">25</option>
+                            <option value="29.97">29.97</option>
+                            <option value="30">30</option>
+                            <option value="50">50</option>
+                            <option value="59.94">59.94</option>
+                            <option value="60">60</option>
+                            <option value="120">120</option>
+                            <option value="custom">+ Custom...</option>
+                        </select>
+                        <input type="number" class="framerate-custom hidden w-full mt-1 px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-white text-sm text-center" placeholder="fps" min="1" max="240" step="0.001" />
+                    </div>
                 </div>
             `;
 
@@ -776,6 +831,19 @@
             }
 
             fileItem.querySelector('.file-zone-container').appendChild(zone);
+            
+            // Framerate select with custom option support
+            const framerateSelect = fileItem.querySelector('.framerate-select');
+            const framerateCustom = fileItem.querySelector('.framerate-custom');
+            framerateSelect.addEventListener('change', (e) => {
+                if (e.target.value === 'custom') {
+                    framerateCustom.classList.remove('hidden');
+                    framerateCustom.focus();
+                } else {
+                    framerateCustom.classList.add('hidden');
+                }
+            });
+            
             filesContainerEdit.appendChild(fileItem);
         }
 
@@ -785,7 +853,7 @@
             fileItem.className = 'flex gap-3 items-end bg-slate-900/50 p-3 rounded-lg border border-slate-700';
             fileItem.id = `file-merge-${id}`;
             
-            const fileObj = { id, element: fileItem, file: null, label: `Speaker ${mergeFiles.length + 1}` };
+            const fileObj = { id, element: fileItem, file: null, label: `Speaker ${mergeFiles.length + 1}`, framerate: 'ignore' };
             mergeFiles.push(fileObj);
 
             fileItem.innerHTML = `
@@ -795,6 +863,23 @@
                 </div>
                 <div class="flex-1 file-zone-container">
                     <label class="block text-sm font-medium text-slate-300 mb-1">File</label>
+                </div>
+                <div class="w-28 framerate-container">
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Framerate</label>
+                    <select class="framerate-select w-full px-2 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white text-sm">
+                        <option value="ignore" selected>Ignore</option>
+                        <option value="23.976">23.976</option>
+                        <option value="24">24</option>
+                        <option value="25">25</option>
+                        <option value="29.97">29.97</option>
+                        <option value="30">30</option>
+                        <option value="50">50</option>
+                        <option value="59.94">59.94</option>
+                        <option value="60">60</option>
+                        <option value="120">120</option>
+                        <option value="custom">+ Custom...</option>
+                    </select>
+                    <input type="number" class="framerate-custom hidden w-full mt-1 px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white text-sm text-center" placeholder="fps" min="1" max="240" step="0.001" />
                 </div>
                 <button class="remove-btn px-3 py-2 text-red-400 bg-transparent rounded-lg transition-colors duration-200 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
@@ -812,6 +897,25 @@
             fileItem.querySelector('.file-zone-container').appendChild(zone);
 
             fileItem.querySelector('.speaker-label').addEventListener('input', (e) => fileObj.label = e.target.value);
+            
+            // Framerate select with custom option support
+            const framerateSelect = fileItem.querySelector('.framerate-select');
+            const framerateCustom = fileItem.querySelector('.framerate-custom');
+            framerateSelect.addEventListener('change', (e) => {
+                if (e.target.value === 'custom') {
+                    framerateCustom.classList.remove('hidden');
+                    framerateCustom.focus();
+                } else {
+                    framerateCustom.classList.add('hidden');
+                    fileObj.framerate = e.target.value;
+                }
+            });
+            framerateCustom.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                if (val > 0) {
+                    fileObj.framerate = String(val);
+                }
+            });
             fileItem.querySelector('.remove-btn').addEventListener('click', () => {
                 mergeFiles = mergeFiles.filter(f => f.id !== id);
                 fileItem.remove();
@@ -828,7 +932,7 @@
             fileItem.className = 'flex gap-3 items-end bg-slate-900/50 p-3 rounded-lg border border-slate-700';
             fileItem.id = `file-seq-${id}`;
             
-            const fileObj = { id, element: fileItem, file: null, duration: "0000:00:00", label: `Part ${sequenceFiles.length + 1}` };
+            const fileObj = { id, element: fileItem, file: null, duration: "0000:00:00", label: `Part ${sequenceFiles.length + 1}`, framerate: 'ignore' };
             sequenceFiles.push(fileObj);
 
             fileItem.innerHTML = `
@@ -848,6 +952,23 @@
                     <label class="block text-sm font-medium text-slate-300 mb-1">Duration</label>
                     <input type="text" value="0000:00:00" class="duration-input w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-center font-mono text-white" placeholder="HHHH:MM:SS" />
                 </div>
+                <div class="w-28 framerate-container">
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Framerate</label>
+                    <select class="framerate-select w-full px-2 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-white text-sm">
+                        <option value="ignore" selected>Ignore</option>
+                        <option value="23.976">23.976</option>
+                        <option value="24">24</option>
+                        <option value="25">25</option>
+                        <option value="29.97">29.97</option>
+                        <option value="30">30</option>
+                        <option value="50">50</option>
+                        <option value="59.94">59.94</option>
+                        <option value="60">60</option>
+                        <option value="120">120</option>
+                        <option value="custom">+ Custom...</option>
+                    </select>
+                    <input type="number" class="framerate-custom hidden w-full mt-1 px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-white text-sm text-center" placeholder="fps" min="1" max="240" step="0.001" />
+                </div>
                 <button class="remove-btn px-3 py-2 text-red-400 bg-transparent rounded-lg transition-colors duration-200 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                 </button>
@@ -866,6 +987,25 @@
 
             // Part label input handler
             fileItem.querySelector('.part-label').addEventListener('input', (e) => fileObj.label = e.target.value);
+            
+            // Framerate select with custom option support
+            const framerateSelect = fileItem.querySelector('.framerate-select');
+            const framerateCustom = fileItem.querySelector('.framerate-custom');
+            framerateSelect.addEventListener('change', (e) => {
+                if (e.target.value === 'custom') {
+                    framerateCustom.classList.remove('hidden');
+                    framerateCustom.focus();
+                } else {
+                    framerateCustom.classList.add('hidden');
+                    fileObj.framerate = e.target.value;
+                }
+            });
+            framerateCustom.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                if (val > 0) {
+                    fileObj.framerate = String(val);
+                }
+            });
 
             const durationInput = fileItem.querySelector('.duration-input');
             
@@ -1962,11 +2102,313 @@
             
             // Replace timing display with editable inputs
             const timingContainer = entryEl.querySelector('.timing-display');
+            const fps = getFramerate();
+            const formatLabel = fps === null ? 'HH:MM:SS' : (fps > 60 ? 'HH:MM:SS:FFF' : 'HH:MM:SS:FF');
+            const inputWidth = fps === null ? '80px' : '100px';
+            
             timingContainer.innerHTML = `
-                <input type="text" class="edit-timing-input edit-timing-start" value="${formatEditableTimecode(entry.startSeconds)}" />
+                <div class="timing-input-group">
+                    <span class="timing-format-label">${formatLabel}</span>
+                    <input type="text" class="edit-timing-input edit-timing-start" style="width: ${inputWidth}" value="${formatEditableTimecode(entry.startSeconds)}" />
+                </div>
                 <span class="timing-separator">-</span>
-                <input type="text" class="edit-timing-input edit-timing-end" value="${formatEditableTimecode(entry.endSeconds)}" />
+                <div class="timing-input-group">
+                    <span class="timing-format-label">${formatLabel}</span>
+                    <input type="text" class="edit-timing-input edit-timing-end" style="width: ${inputWidth}" value="${formatEditableTimecode(entry.endSeconds)}" />
+                </div>
             `;
+            
+            // Setup enhanced timing input behavior for both start and end inputs
+            const startInput = timingContainer.querySelector('.edit-timing-start');
+            const endInput = timingContainer.querySelector('.edit-timing-end');
+            
+            setupTimingInput(startInput, () => validateTimingPair(startInput, endInput));
+            setupTimingInput(endInput, () => validateTimingPair(startInput, endInput));
+            
+            // Initial validation
+            validateTimingPair(startInput, endInput);
+        }
+        
+        // Validate timing pair and highlight if invalid
+        function validateTimingPair(startInput, endInput) {
+            const startSeconds = parseEditableTimecode(startInput.value);
+            const endSeconds = parseEditableTimecode(endInput.value);
+            
+            if (endSeconds <= startSeconds) {
+                startInput.classList.add('invalid');
+                endInput.classList.add('invalid');
+            } else {
+                startInput.classList.remove('invalid');
+                endInput.classList.remove('invalid');
+            }
+        }
+        
+        // Setup sequencer-like input behavior for timing inputs (dynamic format based on framerate)
+        function setupTimingInput(input, onChangeCallback) {
+            const fps = getFramerate();
+            const hasFrames = fps !== null;
+            const frameDigits = hasFrames ? (fps > 60 ? 3 : 2) : 0;
+            const maxFieldIndex = hasFrames ? 3 : 2; // 3 or 4 fields
+            
+            // STATE: Track which field is being edited and digit position within field
+            let activeFieldIndex = 0;  // 0=hours, 1=minutes, 2=seconds, 3=frames (if enabled)
+            let digitPosition = 0;     // Current digit position within the field
+            let pendingDigits = '';    // Accumulated digits for current field
+            
+            // Field selection ranges - dynamic based on framerate
+            const ranges = hasFrames 
+                ? (frameDigits === 3 
+                    ? [[0, 2], [3, 5], [6, 8], [9, 12]]   // HH:MM:SS:FFF
+                    : [[0, 2], [3, 5], [6, 8], [9, 11]])  // HH:MM:SS:FF
+                : [[0, 2], [3, 5], [6, 8]];               // HH:MM:SS
+            
+            // Helper to select a specific field
+            function selectField(fieldIndex) {
+                if (fieldIndex > maxFieldIndex) fieldIndex = maxFieldIndex;
+                const [start, end] = ranges[fieldIndex];
+                input.setSelectionRange(start, end);
+                activeFieldIndex = fieldIndex;
+                digitPosition = 0;  // Reset digit position when field is selected
+                pendingDigits = ''; // Clear pending digits
+            }
+            
+            // Get field index from cursor position (for clicks)
+            function getFieldFromPosition(pos) {
+                if (pos <= 2) return 0;  // Hours (0-2)
+                if (pos <= 5) return 1;  // Minutes (3-5)
+                if (pos <= 8) return 2;  // Seconds (6-8)
+                if (hasFrames) return 3; // Frames
+                return 2; // No frames, stay on seconds
+            }
+            
+            // Parse current value into array [hours, minutes, seconds, frames?]
+            function parseValue(value) {
+                const parts = value.split(':');
+                const result = [
+                    (parts[0] || '00').padStart(2, '0'),
+                    (parts[1] || '00').padStart(2, '0'),
+                    (parts[2] || '00').padStart(2, '0')
+                ];
+                if (hasFrames) {
+                    result.push((parts[3] || '0'.repeat(frameDigits)).padStart(frameDigits, '0'));
+                }
+                return result;
+            }
+            
+            // Format array back to timecode string
+            function formatValue(parts) {
+                let result = `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}:${parts[2].padStart(2, '0')}`;
+                if (hasFrames && parts[3]) {
+                    result += `:${parts[3].padStart(frameDigits, '0')}`;
+                }
+                return result;
+            }
+            
+            // Get max value for a field
+            function _getMaxValue(fieldIndex) {
+                if (fieldIndex === 1 || fieldIndex === 2) return 59; // Minutes/Seconds
+                if (fieldIndex === 3 && hasFrames) {
+                    return Math.ceil(fps) - 1; // Max frame is fps - 1
+                }
+                return 99; // Hours
+            }
+            
+            // Get number of digits for a field
+            function _getFieldDigits(fieldIndex) {
+                if (fieldIndex === 3 && hasFrames) return frameDigits;
+                return 2;
+            }
+            
+            input.addEventListener('keydown', (e) => {
+                // Allow tab to move to next input
+                if (e.key === 'Tab') {
+                    digitPosition = 0;
+                    pendingDigits = '';
+                    return;
+                }
+                
+                // Allow Ctrl/Cmd shortcuts
+                if (e.ctrlKey || e.metaKey) {
+                    return;
+                }
+                
+                // Arrow left - move to previous field
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    if (activeFieldIndex > 0) {
+                        selectField(activeFieldIndex - 1);
+                    }
+                    return;
+                }
+                
+                // Arrow right - move to next field
+                if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    if (activeFieldIndex < 3) {
+                        selectField(activeFieldIndex + 1);
+                    }
+                    return;
+                }
+                
+                // Arrow up - increment current field
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const parts = parseValue(input.value);
+                    let val = parseInt(parts[activeFieldIndex]);
+                    const maxVal = getMaxValue(activeFieldIndex);
+                    val = Math.min(val + 1, maxVal);
+                    parts[activeFieldIndex] = String(val).padStart(2, '0');
+                    input.value = formatValue(parts);
+                    selectField(activeFieldIndex);
+                    if (onChangeCallback) onChangeCallback();
+                    return;
+                }
+                
+                // Arrow down - decrement current field
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const parts = parseValue(input.value);
+                    let val = parseInt(parts[activeFieldIndex]);
+                    val = Math.max(val - 1, 0);
+                    parts[activeFieldIndex] = String(val).padStart(2, '0');
+                    input.value = formatValue(parts);
+                    selectField(activeFieldIndex);
+                    if (onChangeCallback) onChangeCallback();
+                    return;
+                }
+                
+                // Home - select hours
+                if (e.key === 'Home') {
+                    e.preventDefault();
+                    selectField(0);
+                    return;
+                }
+                
+                // End - select last field
+                if (e.key === 'End') {
+                    e.preventDefault();
+                    selectField(maxFieldIndex);
+                    return;
+                }
+                
+                const parts = parseValue(input.value);
+                
+                // Backspace - delete one digit at a time
+                if (e.key === 'Backspace' || e.key === 'Delete') {
+                    e.preventDefault();
+                    
+                    // If we were in the middle of entering digits, just clear and stay on this field
+                    if (digitPosition > 0) {
+                        const zeroVal = _getFieldDigits(activeFieldIndex) === 3 ? '000' : '00';
+                        parts[activeFieldIndex] = zeroVal;
+                        input.value = formatValue(parts);
+                        digitPosition = 0;
+                        pendingDigits = '';
+                        selectField(activeFieldIndex);
+                        if (onChangeCallback) onChangeCallback();
+                        return;
+                    }
+                    
+                    // Check if already zero before attempting deletion
+                    const zeroVal = _getFieldDigits(activeFieldIndex) === 3 ? '000' : '00';
+                    const wasAlreadyZero = parts[activeFieldIndex] === zeroVal;
+                    
+                    if (wasAlreadyZero && activeFieldIndex > 0) {
+                        // Already at zero, move to previous field
+                        selectField(activeFieldIndex - 1);
+                    } else if (!wasAlreadyZero) {
+                        // Shift digits right (remove rightmost, pad left with 0)
+                        const currentValue = parts[activeFieldIndex];
+                        const shifted = '0' + currentValue.slice(0, -1);
+                        parts[activeFieldIndex] = shifted;
+                        
+                        input.value = formatValue(parts);
+                        if (onChangeCallback) onChangeCallback();
+                        
+                        // Check if we just made it zero - move to previous field
+                        if (parts[activeFieldIndex] === zeroVal && activeFieldIndex > 0) {
+                            selectField(activeFieldIndex - 1);
+                        } else {
+                            selectField(activeFieldIndex);
+                        }
+                    } else {
+                        // Already zero but on first field (hours), just stay
+                        selectField(activeFieldIndex);
+                    }
+                    return;
+                }
+                
+                // Handle digit input
+                if (/[0-9]/.test(e.key)) {
+                    e.preventDefault();
+                    
+                    const maxDigits = _getFieldDigits(activeFieldIndex);
+                    let fieldValue;
+                    let shouldAdvance = false;
+                    
+                    // Add digit to pending
+                    pendingDigits += e.key;
+                    digitPosition++;
+                    
+                    if (digitPosition < maxDigits) {
+                        // Still building the field value
+                        fieldValue = pendingDigits.padStart(maxDigits, '0');
+                    } else {
+                        // Field is complete
+                        fieldValue = pendingDigits.slice(-maxDigits); // Take last N digits
+                        const val = parseInt(fieldValue);
+                        const maxVal = _getMaxValue(activeFieldIndex);
+                        
+                        // Block invalid values
+                        if (val > maxVal) {
+                            // Invalid input - revert to previous digits minus last
+                            pendingDigits = pendingDigits.slice(0, -1);
+                            digitPosition--;
+                            return;
+                        }
+                        
+                        shouldAdvance = true;
+                    }
+                    
+                    parts[activeFieldIndex] = fieldValue;
+                    input.value = formatValue(parts);
+                    if (onChangeCallback) onChangeCallback();
+                    
+                    // Auto-advance to next field if appropriate
+                    if (shouldAdvance && activeFieldIndex < maxFieldIndex) {
+                        selectField(activeFieldIndex + 1);
+                    } else if (shouldAdvance) {
+                        // On last field after completing digits, re-select it
+                        selectField(activeFieldIndex);
+                    } else {
+                        // Still entering digits, position cursor BEFORE the next digit slot
+                        const [start, end] = ranges[activeFieldIndex];
+                        // Position cursor at the next digit to be entered
+                        const cursorPos = start + digitPosition;
+                        input.setSelectionRange(cursorPos, cursorPos);
+                    }
+                    return;
+                }
+                
+                // Block all other keys
+                e.preventDefault();
+            });
+            
+            // Click to select the field that was clicked
+            input.addEventListener('click', (e) => {
+                const field = getFieldFromPosition(e.target.selectionStart);
+                selectField(field);
+            });
+            
+            // Focus to select hours by default
+            input.addEventListener('focus', (e) => {
+                selectField(0);
+            });
+            
+            // Prevent pasting
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+            });
         }
         
         function disableEditing(entryEl, index) {
@@ -1981,18 +2423,67 @@
             timingContainer.innerHTML = `<span class="text-xs text-slate-500">${entry.timecode}</span>`;
         }
         
+        // Get framerate based on current mode's file(s)
+        // Returns null if "ignore", otherwise returns fps number
+        function getFramerate() {
+            if (currentMode === 'edit') {
+                const editFileEl = document.getElementById('file-edit');
+                const select = editFileEl?.querySelector('.framerate-select');
+                const customInput = editFileEl?.querySelector('.framerate-custom');
+                const val = select?.value || 'ignore';
+                if (val === 'ignore') return null;
+                if (val === 'custom') {
+                    const customVal = parseFloat(customInput?.value);
+                    return customVal > 0 ? customVal : null;
+                }
+                return parseFloat(val);
+            } else if (currentMode === 'merge') {
+                // Use first file's framerate (or could use most common)
+                const firstFile = mergeFiles[0];
+                const val = firstFile?.framerate || 'ignore';
+                return val === 'ignore' ? null : parseFloat(val);
+            } else if (currentMode === 'sequence') {
+                // Use first file's framerate
+                const firstFile = sequenceFiles[0];
+                const val = firstFile?.framerate || 'ignore';
+                return val === 'ignore' ? null : parseFloat(val);
+            }
+            return null; // Default: ignore frames
+        }
+        
+        // Get number of digits for frame display based on framerate
+        function getFrameDigits(fps) {
+            if (fps === null) return 0; // No frames
+            return fps > 60 ? 3 : 2; // 3 digits for high framerates, 2 for standard
+        }
+        
         function formatEditableTimecode(seconds) {
+            const fps = getFramerate();
             const h = Math.floor(seconds / 3600);
             const m = Math.floor((seconds % 3600) / 60);
             const s = Math.floor(seconds % 60);
-            const ff = Math.floor((seconds % 1) * 30);
-            return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}:${String(ff).padStart(2,'0')}`;
+            
+            if (fps === null) {
+                // No frames - just HH:MM:SS
+                return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            }
+            
+            const ff = Math.floor((seconds % 1) * fps);
+            const frameDigits = getFrameDigits(fps);
+            return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}:${String(ff).padStart(frameDigits,'0')}`;
         }
         
         function parseEditableTimecode(timecodeStr) {
+            const fps = getFramerate();
             const parts = timecodeStr.split(':').map(Number);
-            if (parts.length === 4) {
-                return parts[0] * 3600 + parts[1] * 60 + parts[2] + parts[3] / 30;
+            
+            if (fps === null || parts.length === 3) {
+                // No frames - just HH:MM:SS
+                if (parts.length >= 3) {
+                    return parts[0] * 3600 + parts[1] * 60 + parts[2];
+                }
+            } else if (parts.length === 4) {
+                return parts[0] * 3600 + parts[1] * 60 + parts[2] + parts[3] / fps;
             }
             return 0;
         }
