@@ -1213,15 +1213,40 @@
                     // Edit mode: single file with auto speaker detection
                     const content = await editFile.text();
                     const entries = await parseTranscript(content, null, 0); // null = use detected speakers
+                    
+                    // Normalize base timecode offset (DaVinci Resolve often starts at 01:00:00:00)
+                    if (entries.length > 0) {
+                        const baseOffset = entries[0].startSeconds;
+                        entries.forEach(entry => {
+                            entry.startSeconds = entry.startSeconds - baseOffset;
+                            entry.endSeconds = entry.endSeconds - baseOffset;
+                            entry.timecode = `[${formatTimecode(entry.startSeconds)} - ${formatTimecode(entry.endSeconds)}]`;
+                        });
+                    }
+                    
                     allEntries = entries;
                     allEntries.sort((a, b) => a.startSeconds - b.startSeconds);
                 } else if (currentMode === 'merge') {
+                    // Collect all entries first, then normalize based on the earliest timestamp
+                    let rawEntries = [];
                     for (const fileObj of mergeFiles) {
                         const content = await fileObj.file.text();
                         const entries = await parseTranscript(content, fileObj.label, 0);
-                        allEntries = allEntries.concat(entries);
+                        rawEntries = rawEntries.concat(entries);
                     }
-                    allEntries.sort((a, b) => a.startSeconds - b.startSeconds);
+                    rawEntries.sort((a, b) => a.startSeconds - b.startSeconds);
+                    
+                    // Normalize base timecode offset (DaVinci Resolve often starts at 01:00:00:00)
+                    if (rawEntries.length > 0) {
+                        const baseOffset = rawEntries[0].startSeconds;
+                        rawEntries.forEach(entry => {
+                            entry.startSeconds = entry.startSeconds - baseOffset;
+                            entry.endSeconds = entry.endSeconds - baseOffset;
+                            entry.timecode = `[${formatTimecode(entry.startSeconds)} - ${formatTimecode(entry.endSeconds)}]`;
+                        });
+                    }
+                    
+                    allEntries = rawEntries;
                 } else {
                     let currentOffset = 0;
                     let partIndex = 1;
@@ -1702,9 +1727,26 @@
             
             document.getElementById('entryCount').textContent = processedData.length;
             document.getElementById('statEntries').textContent = processedData.length;
-            const lastEntry = processedData[processedData.length - 1];
-            document.getElementById('statDuration').textContent = lastEntry ? Math.floor(lastEntry.endSeconds / 60) + 'm' : '0m';
-            document.getElementById('statSpeakers').textContent = new Set(processedData.map(e => e.speaker)).size;
+            
+            // Calculate duration based on mode
+            let durationMinutes = 0;
+            if (previewMode === 'sequence') {
+                // For sequence mode, sum the user-entered durations from the input fields
+                let totalSeconds = 0;
+                sequenceFiles.forEach(f => {
+                    totalSeconds += parseDuration(f.duration);
+                });
+                durationMinutes = Math.floor(totalSeconds / 60);
+            } else {
+                // For merge/edit mode, use the last entry's end time
+                const lastEntry = processedData[processedData.length - 1];
+                durationMinutes = lastEntry ? Math.floor(lastEntry.endSeconds / 60) : 0;
+            }
+            document.getElementById('statDuration').textContent = durationMinutes + 'm';
+            
+            // Count unique speakers, excluding [CC]
+            const speakerSet = new Set(processedData.filter(e => e.speaker !== '[CC]').map(e => e.speaker));
+            document.getElementById('statSpeakers').textContent = speakerSet.size;
 
             const previewList = document.getElementById('previewList');
             previewList.innerHTML = '';
@@ -2020,8 +2062,9 @@
                 }
             }
             
-            // Update stats
-            document.getElementById('statSpeakers').textContent = new Set(processedData.map(e => e.speaker)).size;
+            // Update stats - exclude [CC] from speaker count
+            const speakerSet = new Set(processedData.filter(e => e.speaker !== '[CC]').map(e => e.speaker));
+            document.getElementById('statSpeakers').textContent = speakerSet.size;
         }
         
         function closeAllDropdowns() {
@@ -2261,8 +2304,20 @@
             
             // Update stats
             document.getElementById('statEntries').textContent = processedData.length;
-            const lastEntry = processedData[processedData.length - 1];
-            document.getElementById('statDuration').textContent = lastEntry ? Math.floor(lastEntry.endSeconds / 60) + 'm' : '0m';
+            
+            // Calculate duration based on mode
+            let durationMinutes = 0;
+            if (previewMode === 'sequence') {
+                let totalSeconds = 0;
+                sequenceFiles.forEach(f => {
+                    totalSeconds += parseDuration(f.duration);
+                });
+                durationMinutes = Math.floor(totalSeconds / 60);
+            } else {
+                const lastEntry = processedData[processedData.length - 1];
+                durationMinutes = lastEntry ? Math.floor(lastEntry.endSeconds / 60) : 0;
+            }
+            document.getElementById('statDuration').textContent = durationMinutes + 'm';
             
             if (!silent) {
                 deselectEntry(index);
