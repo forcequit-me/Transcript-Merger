@@ -28,18 +28,24 @@ Stitch together transcripts from multiple video parts into one continuous file.
 
 ### 4. Per-File Framerate Settings
 Handle DaVinci Resolve's timecode format (HH:MM:SS:FF) with per-file framerate controls.
-- **Framerate Dropdown**: Select from common framerates (23.976, 24, 25, 29.97, 30, 50, 59.94, 60, 120) or enter a custom value.
+- **Framerate Dropdown**: Select from common framerates (23.976, 24, 25, 29.97, 30, 50, 59.94, 60, 120) or enter a custom value (max 999.999).
 - **Ignore Option**: Set to "Ignore" if your transcript uses standard HH:MM:SS format without frames.
 - **Automatic Format Detection**: The timing input fields adapt based on the selected framerate.
+- **Mismatch Warning**: Alerts you when framerates differ across files in Merge or Sequence modes, preventing processing until resolved.
 
-### 5. Multiple Export Formats
+### 5. Per-Tab Settings
+Subtitle limit settings and output options are preserved independently for each tab.
+- **No Accidental Overwriting**: Switching between Edit, Merge, and Sequence tabs saves and restores your settings.
+- **Tab-Specific Defaults**: Each mode maintains its own configuration state.
+
+### 6. Multiple Export Formats
 Export your processed transcripts in the format you need:
-- **Custom Filename**: Set a custom filename for exports.
+- **Custom Filename**: Set a custom filename for exports (defaults to tab-specific names).
 - **Copy to Clipboard**: Quick paste functionality.
 - **SRT**: Standard subtitle format.
 - **TXT**: Plain text transcript.
 
-### 6. Privacy & Security
+### 7. Privacy & Security
 - **Client-Side Only**: The entire process runs in your browser. No files are ever uploaded to a server.
 - **No Installation**: Single-file application (HTML).
 
