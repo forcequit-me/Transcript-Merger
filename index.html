@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transcript Merger</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/latest/umd/lucide.min.js"></script>
     <style>
@@ -206,11 +207,11 @@
         }
         .speaker-option.rename-option {
             border-top: 1px solid #475569;
-            color: #fbbf24;
+            color: #a78bfa;
             font-style: italic;
         }
         .speaker-option.rename-option:hover {
-            background: #422006;
+            background: #2e1065;
         }
         .speaker-custom-input {
             width: 100%;
@@ -514,15 +515,14 @@
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.9);
             z-index: 1000;
             display: flex;
             align-items: center;
             justify-content: center;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.3s ease;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
         }
         .modal-overlay.active {
             opacity: 1;
@@ -536,12 +536,13 @@
             max-height: 90vh;
             width: 95%;
             overflow-y: auto;
-            transform: scale(0.9) translateY(20px);
-            transition: transform 0.3s ease;
+            transform: translateY(20px);
+            transition: transform 0.2s ease;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            will-change: transform;
         }
         .modal-overlay.active .modal-container {
-            transform: scale(1) translateY(0);
+            transform: translateY(0);
         }
         .modal-header {
             display: flex;
@@ -583,10 +584,6 @@
         .modal-hero h2 {
             font-size: 2.5rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
             margin-bottom: 0.75rem;
         }
         .modal-hero p {
@@ -611,11 +608,10 @@
             border-radius: 0.75rem;
             padding: 1.25rem;
             text-align: center;
-            transition: all 0.2s ease;
+            transition: border-color 0.2s ease;
         }
         .feature-card:hover {
             border-color: #6366f1;
-            transform: translateY(-2px);
         }
         .feature-card-icon {
             font-size: 2rem;
@@ -672,7 +668,7 @@
             padding: 1.5rem;
         }
         .demo-section h3 {
-            color: #fbbf24;
+            color: #f8fafc;
             margin-bottom: 1rem;
         }
         .demo-grid {
@@ -749,10 +745,22 @@
                 <span>Transcript Merger</span>
             </div>
             <nav class="site-header-nav">
-                <!-- Social Links (Placeholders) -->
-                <a href="#" class="social-link" title="GitHub" target="_blank" rel="noopener">
+                <!-- Social Links -->
+                <a href="#" class="social-link" title="Website" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                </a>
+                <a href="#" class="social-link" title="YouTube" target="_blank" rel="noopener">
                     <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                </a>
+                <a href="#" class="social-link" title="Instagram" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                     </svg>
                 </a>
                 <a href="#" class="social-link" title="Twitter/X" target="_blank" rel="noopener">
@@ -760,9 +768,9 @@
                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                     </svg>
                 </a>
-                <a href="#" class="social-link" title="YouTube" target="_blank" rel="noopener">
+                <a href="#" class="social-link" title="GitHub" target="_blank" rel="noopener">
                     <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                     </svg>
                 </a>
                 <div class="w-px h-6 bg-slate-600"></div>
@@ -799,15 +807,15 @@
             <div id="instructionsEdit" class="bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-5 text-left mt-6 hidden">
                 <ol class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-300">
                     <li class="flex items-center gap-3">
-                        <span class="text-2xl font-bold text-amber-500 flex-shrink-0 leading-none">1</span>
+                        <span class="text-2xl font-bold text-violet-500 flex-shrink-0 leading-none">1</span>
                         <span class="leading-tight">Upload a single transcript file (with or without speaker detection).</span>
                     </li>
                     <li class="flex items-center gap-3">
-                        <span class="text-2xl font-bold text-amber-500 flex-shrink-0 leading-none">2</span>
+                        <span class="text-2xl font-bold text-violet-500 flex-shrink-0 leading-none">2</span>
                         <span class="leading-tight">Detected speakers are automatically preserved.</span>
                     </li>
                     <li class="flex items-center gap-3">
-                        <span class="text-2xl font-bold text-amber-500 flex-shrink-0 leading-none">3</span>
+                        <span class="text-2xl font-bold text-violet-500 flex-shrink-0 leading-none">3</span>
                         <span class="leading-tight">Edit entries, then export as TXT or SRT.</span>
                     </li>
                 </ol>
@@ -1023,7 +1031,7 @@
             <div class="modal-body">
                 <!-- Hero -->
                 <div class="modal-hero">
-                    <h2>Merge. Edit. Sequence.</h2>
+                    <h2><span style="color: #6366f1;">Merge.</span> <span style="color: #8b5cf6;">Edit.</span> <span style="color: #10b981;">Sequence.</span></h2>
                     <p>The missing tool for DaVinci Resolve transcripts.</p>
                 </div>
 
@@ -1037,23 +1045,23 @@
                     <div class="feature-card">
                         <div class="feature-card-icon">✏️</div>
                         <h3>Edit Transcripts</h3>
-                        <p>Modify speakers, text, and timing inline. Add or remove entries.</p>
+                        <p>Fix speaker labels, correct text, adjust timing. Works standalone or after merge/sequence.</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-card-icon">🎬</div>
                         <h3>Sequence Parts</h3>
-                        <p>Stitch transcripts from split clips with automatic offset calculation.</p>
+                        <p>Combine transcripts from multiple timeline segments by specifying each part's duration.</p>
                     </div>
                 </div>
 
                 <!-- Why Use This -->
                 <div class="modal-section">
-                    <h3>💡 Why Use This?</h3>
-                    <p style="color: #94a3b8; margin-bottom: 1rem;">DaVinci Resolve's built-in speaker detection is often unreliable. Editing timecodes manually is tedious and error-prone.</p>
+                    <h3>💡 Why This Tool Exists</h3>
+                    <p style="color: #94a3b8; margin-bottom: 1rem;">DaVinci Resolve has the best transcription quality compared to Adobe Premiere and Descript—but all three have unreliable speaker detection. This tool solves that problem.</p>
                     <ul>
-                        <li><strong>Separate → Transcribe → Merge:</strong> Put each speaker on their own audio track, transcribe individually, then merge here.</li>
-                        <li><strong>Split clips?</strong> Sequence mode handles the math—just enter each clip's duration.</li>
-                        <li><strong>Full inline editing:</strong> Click any entry to change speaker, text, or timing on the fly.</li>
+                        <li><strong>Bypass bad speaker detection:</strong> Record each speaker to separate audio tracks, transcribe them individually, then merge here with correct speaker labels.</li>
+                        <li><strong>Fix mistakes anywhere:</strong> Edit speaker names, correct transcription errors, or adjust timing—all inline, in any mode.</li>
+                        <li><strong>Rejoin split timelines:</strong> Transcribed clips separately? Sequence mode recalculates timecodes so everything lines up correctly.</li>
                     </ul>
                 </div>
 
@@ -1071,6 +1079,42 @@
                     </ul>
                 </div>
 
+                <!-- Feedback & Updates -->
+                <div class="modal-section" style="text-align: center;">
+                    <h3 style="justify-content: center;">📢 Feedback & Updates</h3>
+                    <p style="color: #94a3b8; margin-bottom: 1rem;">Have feedback or a feature request? Let me know on GitHub or Social Media!</p>
+                    <div style="display: flex; gap: 0.75rem; justify-content: center;">
+                        <!-- Social Links (Copied from Header) -->
+                        <a href="#" class="social-link" title="Website" target="_blank" rel="noopener">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link" title="YouTube" target="_blank" rel="noopener">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link" title="Instagram" target="_blank" rel="noopener">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link" title="Twitter/X" target="_blank" rel="noopener">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link" title="GitHub" target="_blank" rel="noopener">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
                 <!-- Demo Files Section -->
                 <div class="demo-section">
                     <h3>🧪 Try It With Demo Files</h3>
@@ -1080,7 +1124,7 @@
                             <h4>Merge Demo</h4>
                             <p>Two speaker transcript files to combine into a conversation.</p>
                             <div class="demo-card-actions" style="flex-direction: column; gap: 0.5rem;">
-                                <button class="demo-btn demo-btn-load" onclick="loadMergeDemo()">Load Demo</button>
+                                <button class="demo-btn demo-btn-load" onclick="loadMergeDemo()" style="background: #6366f1;">Load Demo</button>
                                 <div style="display: flex; gap: 0.25rem;">
                                     <button class="demo-btn demo-btn-download" onclick="downloadFile(DEMO_FILES.merge_speaker_a, 'demo_speaker_a.txt')" style="font-size: 0.65rem;">Speaker A</button>
                                     <button class="demo-btn demo-btn-download" onclick="downloadFile(DEMO_FILES.merge_speaker_b, 'demo_speaker_b.txt')" style="font-size: 0.65rem;">Speaker B</button>
@@ -1088,22 +1132,22 @@
                             </div>
                         </div>
                         <div class="demo-card">
+                            <h4>Edit Demo</h4>
+                            <p>A single transcript with mixed speakers and CC entries.</p>
+                            <div class="demo-card-actions" style="flex-direction: column; gap: 0.5rem;">
+                                <button class="demo-btn demo-btn-load" onclick="loadEditDemo()" style="background: #8b5cf6;">Load Demo</button>
+                                <button class="demo-btn demo-btn-download" onclick="downloadFile(DEMO_FILES.edit_transcript, 'demo_edit.txt')">Download</button>
+                            </div>
+                        </div>
+                        <div class="demo-card">
                             <h4>Sequence Demo</h4>
                             <p>Two transcript parts from a split timeline to sequence together.</p>
                             <div class="demo-card-actions" style="flex-direction: column; gap: 0.5rem;">
-                                <button class="demo-btn demo-btn-load" onclick="loadSequenceDemo()">Load Demo</button>
+                                <button class="demo-btn demo-btn-load" onclick="loadSequenceDemo()" style="background: #10b981;">Load Demo</button>
                                 <div style="display: flex; gap: 0.25rem;">
                                     <button class="demo-btn demo-btn-download" onclick="downloadFile(DEMO_FILES.sequence_part1, 'demo_part1.txt')" style="font-size: 0.65rem;">Part 1</button>
                                     <button class="demo-btn demo-btn-download" onclick="downloadFile(DEMO_FILES.sequence_part2, 'demo_part2.txt')" style="font-size: 0.65rem;">Part 2</button>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="demo-card">
-                            <h4>Edit Demo</h4>
-                            <p>A single transcript with mixed speakers and CC entries.</p>
-                            <div class="demo-card-actions">
-                                <button class="demo-btn demo-btn-load" onclick="loadEditDemo()">Load Demo</button>
-                                <button class="demo-btn demo-btn-download" onclick="downloadFile(DEMO_FILES.edit_transcript, 'demo_edit.txt')">Download</button>
                             </div>
                         </div>
                     </div>
@@ -1551,14 +1595,14 @@ Speaker 1
             const exportFileNameInput = document.getElementById('exportFileName');
             
             if (mode === 'edit') {
-                tabEdit.className = "px-6 py-2 rounded-full font-semibold bg-amber-600 text-white shadow-md transition hover:bg-amber-500";
+                tabEdit.className = "px-6 py-2 rounded-full font-semibold bg-violet-600 text-white shadow-md transition hover:bg-violet-500";
                 viewEdit.classList.remove('hidden');
                 instructionsEdit.classList.remove('hidden');
                 subtitleLimitsSection.classList.remove('hidden');
                 processBtn.textContent = "Edit Transcript";
                 processBtn.className = processBtn.className
-                    .replace(/bg-(indigo|emerald)-600/g, 'bg-amber-600')
-                    .replace(/hover:bg-(indigo|emerald)-500/g, 'hover:bg-amber-500');
+                    .replace(/bg-(indigo|emerald)-600/g, 'bg-violet-600')
+                    .replace(/hover:bg-(indigo|emerald)-500/g, 'hover:bg-violet-500');
                 // Set default export filename for edit mode
                 if (exportFileNameInput && (exportFileNameInput.value === 'merged_transcript' || exportFileNameInput.value === 'sequenced_transcript')) {
                     exportFileNameInput.value = 'edited_transcript';
@@ -1571,8 +1615,8 @@ Speaker 1
                 subtitleLimitsSection.classList.remove('hidden');
                 processBtn.textContent = "Merge Transcripts";
                 processBtn.className = processBtn.className
-                    .replace(/bg-(amber|emerald)-600/g, 'bg-indigo-600')
-                    .replace(/hover:bg-(amber|emerald)-500/g, 'hover:bg-indigo-500');
+                    .replace(/bg-(violet|emerald)-600/g, 'bg-indigo-600')
+                    .replace(/hover:bg-(violet|emerald)-500/g, 'hover:bg-indigo-500');
                 // Set default export filename for merge mode
                 if (exportFileNameInput && (exportFileNameInput.value === 'edited_transcript' || exportFileNameInput.value === 'sequenced_transcript')) {
                     exportFileNameInput.value = 'merged_transcript';
@@ -1585,8 +1629,8 @@ Speaker 1
                 subtitleLimitsSection.classList.remove('hidden');
                 processBtn.textContent = "Sequence Transcripts";
                 processBtn.className = processBtn.className
-                    .replace(/bg-(amber|indigo)-600/g, 'bg-emerald-600')
-                    .replace(/hover:bg-(amber|indigo)-500/g, 'hover:bg-emerald-500');
+                    .replace(/bg-(violet|indigo)-600/g, 'bg-emerald-600')
+                    .replace(/hover:bg-(violet|indigo)-500/g, 'hover:bg-emerald-500');
                 // Set default export filename for sequence mode
                 if (exportFileNameInput && (exportFileNameInput.value === 'merged_transcript' || exportFileNameInput.value === 'edited_transcript')) {
                     exportFileNameInput.value = 'sequenced_transcript';
