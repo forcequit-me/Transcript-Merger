@@ -634,7 +634,15 @@
         let sequenceFiles = [];
         let fileIdCounter = 0;
         let processedData = null;
+        let rawProcessedData = null; // Stores pre-limit data to preserve edits when limits change
         let previewMode = null; // Track which mode generated the current preview
+        
+        // PER-TAB SETTINGS AND DATA: Each tab has its own settings and preview data
+        const tabSettings = {
+            edit: { cpl: 42, maxLines: 2, minDuration: 1.5, enableLimits: true, showSpeakers: true, showCC: true, stripSilence: true, processedData: null, rawProcessedData: null },
+            merge: { cpl: 42, maxLines: 2, minDuration: 1.5, enableLimits: true, showSpeakers: true, showCC: true, stripSilence: true, processedData: null, rawProcessedData: null },
+            sequence: { cpl: 42, maxLines: 2, minDuration: 1.5, enableLimits: true, showSpeakers: true, showCC: true, stripSilence: true, processedData: null, rawProcessedData: null }
+        };
 
         // DOM ELEMENTS
         const tabEdit = document.getElementById('tabEdit');
@@ -657,8 +665,38 @@
         const inactiveTabClass = "px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 shadow-sm transition";
         
         function switchTab(mode) {
+            // SAVE CURRENT TAB SETTINGS AND DATA before switching
+            if (currentMode) {
+                tabSettings[currentMode] = {
+                    cpl: parseInt(document.getElementById('settingCpl').value) || 42,
+                    maxLines: parseInt(document.getElementById('settingMaxLines').value) || 2,
+                    minDuration: parseFloat(document.getElementById('settingMinDuration').value) || 1.5,
+                    enableLimits: document.getElementById('toggleLimits').checked,
+                    showSpeakers: document.getElementById('toggleSpeakerNames').checked,
+                    showCC: document.getElementById('toggleCC').checked,
+                    stripSilence: document.getElementById('toggleStripSilence').checked,
+                    // Save preview data for this tab
+                    processedData: processedData,
+                    rawProcessedData: rawProcessedData
+                };
+            }
+            
             currentMode = mode;
             const subtitleLimitsSection = document.getElementById('subtitleLimitsSection');
+            
+            // RESTORE NEW TAB SETTINGS AND DATA
+            const settings = tabSettings[mode];
+            document.getElementById('settingCpl').value = settings.cpl;
+            document.getElementById('settingMaxLines').value = settings.maxLines;
+            document.getElementById('settingMinDuration').value = settings.minDuration;
+            document.getElementById('toggleLimits').checked = settings.enableLimits;
+            document.getElementById('toggleSpeakerNames').checked = settings.showSpeakers;
+            document.getElementById('toggleCC').checked = settings.showCC;
+            document.getElementById('toggleStripSilence').checked = settings.stripSilence;
+            // Restore preview data for this tab
+            processedData = settings.processedData;
+            rawProcessedData = settings.rawProcessedData;
+            previewMode = processedData ? mode : null;
             
             // Reset all tabs to inactive
             tabEdit.className = inactiveTabClass;
@@ -720,11 +758,13 @@
                 }
             }
             
-            // Show/hide preview based on which mode generated it
-            if (previewMode !== null && previewMode !== mode) {
-                document.getElementById('previewSection').classList.add('hidden');
-            } else if (previewMode === mode && processedData !== null) {
+            // Show/hide and refresh preview based on per-tab data
+            if (processedData !== null) {
                 document.getElementById('previewSection').classList.remove('hidden');
+                displayPreview(true); // Re-render the preview with this tab's data
+            } else {
+                document.getElementById('previewSection').classList.add('hidden');
+                document.getElementById('previewList').innerHTML = '';
             }
             
             updateProcessButtonState();
@@ -1575,17 +1615,25 @@
                 // 1. FLATTEN TIME SLICES (Merge overlapping CC/Dialogue)
                 // Creates a linear, non-overlapping stream with composite Text
                 let flattenedEntries = flattenTracks(allEntries);
+                
+                // Assign unique IDs to each entry for tracking edits
+                flattenedEntries.forEach((entry, idx) => {
+                    entry.rawId = idx;
+                });
 
-                // 2. APPLY SUBTITLE LIMITS (All modes when enabled)
-                const cpl = parseInt(document.getElementById('settingCpl').value) || 11;
+                // 2. STORE RAW DATA (before limits) to preserve edits when limits change
+                rawProcessedData = flattenedEntries;
+
+                // 3. APPLY SUBTITLE LIMITS (All modes when enabled)
+                const cpl = parseInt(document.getElementById('settingCpl').value) || 42;
                 const maxLines = parseInt(document.getElementById('settingMaxLines').value) || 2;
                 const enableLimits = document.getElementById('toggleLimits').checked;
                 
                 // Apply limits in all modes when enabled
                 if (enableLimits) {
-                    processedData = applyLimits(flattenedEntries, cpl, maxLines);
+                    processedData = applyLimits(rawProcessedData.map(e => ({...e})), cpl, maxLines);
                 } else {
-                    processedData = flattenedEntries;
+                    processedData = rawProcessedData.map(e => ({...e}));
                 }
                 
                 previewMode = currentMode; // Store which mode generated this preview
@@ -1887,13 +1935,37 @@
                     timecode: `[${formatTimecode(currentStart)} - ${formatTimecode(pageEnd)}]`,
                     speaker: originalEntry.speaker,
                     text: pageText,
-                    partNumber: originalEntry.partNumber // Preserve part number for sequencer mode
+                    partNumber: originalEntry.partNumber, // Preserve part number for sequencer mode
+                    partLabel: originalEntry.partLabel, // Preserve part label for sequencer mode
+                    rawId: originalEntry.rawId // Preserve link to raw data for edit syncing
                 });
                 
                 currentStart = pageEnd;
             });
             
             return resultEntries;
+        }
+        
+        // Re-apply limits to rawProcessedData without re-parsing files
+        // This preserves all user edits (text, speaker, timing, added/deleted entries)
+        function reapplyLimits() {
+            if (!rawProcessedData) return;
+            
+            const cpl = parseInt(document.getElementById('settingCpl').value) || 42;
+            const maxLines = parseInt(document.getElementById('settingMaxLines').value) || 2;
+            const enableLimits = document.getElementById('toggleLimits').checked;
+            
+            // Apply limits to a copy of raw data
+            if (enableLimits) {
+                processedData = applyLimits(rawProcessedData.map(e => ({...e})), cpl, maxLines);
+            } else {
+                processedData = rawProcessedData.map(e => ({...e}));
+            }
+            
+            // Clear selection since indices may have changed
+            selectedEntryIndex = null;
+            
+            displayPreview(true); // skipScroll to prevent jumping
         }
 
         // OVERRIDE PARSER FOR SPEAKER EXTRACTION & CC SEPARATION
@@ -2738,7 +2810,7 @@
             
             let changedCount = 0;
             
-            // Update all entries with the old speaker name
+            // Update all entries with the old speaker name in processedData
             processedData.forEach((entry, idx) => {
                 if (entry.speaker === oldSpeaker) {
                     entry.speaker = newSpeaker;
@@ -2764,6 +2836,15 @@
                 }
             });
             
+            // SYNC TO RAW DATA: Update rawProcessedData as well
+            if (rawProcessedData) {
+                rawProcessedData.forEach(entry => {
+                    if (entry.speaker === oldSpeaker) {
+                        entry.speaker = newSpeaker;
+                    }
+                });
+            }
+            
             // Update stats - exclude [CC] from speaker count
             const speakerSet = new Set(processedData.filter(e => e.speaker !== '[CC]').map(e => e.speaker));
             document.getElementById('statSpeakers').textContent = speakerSet.size;
@@ -2772,7 +2853,17 @@
         }
         
         function setSpeaker(index, speaker) {
-            processedData[index].speaker = speaker;
+            const entry = processedData[index];
+            entry.speaker = speaker;
+            
+            // SYNC TO RAW DATA
+            if (entry.rawId !== undefined && rawProcessedData) {
+                const rawEntry = rawProcessedData.find(r => r.rawId === entry.rawId);
+                if (rawEntry) {
+                    rawEntry.speaker = speaker;
+                }
+            }
+            
             const entryEl = document.querySelector(`[data-index="${index}"]`);
             if (entryEl) {
                 const speakerBtn = entryEl.querySelector('.speaker-name-btn');
@@ -2883,8 +2974,20 @@
                 endSeconds: endTime,
                 timecode: `[${formatTimecode(startTime)} - ${formatTimecode(endTime)}]`,
                 speaker: isCC ? '[CC]' : refEntry.speaker,
-                text: isCC ? '(Enter description)' : 'New dialogue'
+                text: isCC ? '(Enter description)' : 'New dialogue',
+                rawId: rawProcessedData ? Math.max(...rawProcessedData.map(e => e.rawId || 0)) + 1 : 0
             };
+            
+            // Add to rawProcessedData to survive limit changes
+            if (rawProcessedData) {
+                // Find insert position based on timing
+                const rawInsertIdx = rawProcessedData.findIndex(e => e.startSeconds >= startTime);
+                if (rawInsertIdx >= 0) {
+                    rawProcessedData.splice(rawInsertIdx, 0, {...newEntry});
+                } else {
+                    rawProcessedData.push({...newEntry});
+                }
+            }
             
             processedData.splice(index, 0, newEntry);
             selectedEntryIndex = null;
@@ -2979,8 +3082,19 @@
                 endSeconds: endTime,
                 timecode: `[${formatTimecode(startTime)} - ${formatTimecode(endTime)}]`,
                 speaker: isCC ? '[CC]' : refEntry.speaker,
-                text: isCC ? '(Enter description)' : 'New dialogue'
+                text: isCC ? '(Enter description)' : 'New dialogue',
+                rawId: rawProcessedData ? Math.max(...rawProcessedData.map(e => e.rawId || 0)) + 1 : 0
             };
+            
+            // Add to rawProcessedData to survive limit changes
+            if (rawProcessedData) {
+                const rawInsertIdx = rawProcessedData.findIndex(e => e.startSeconds >= startTime);
+                if (rawInsertIdx >= 0) {
+                    rawProcessedData.splice(rawInsertIdx, 0, {...newEntry});
+                } else {
+                    rawProcessedData.push({...newEntry});
+                }
+            }
             
             processedData.splice(index + 1, 0, newEntry);
             selectedEntryIndex = null;
@@ -2996,7 +3110,18 @@
                 return;
             }
             
-            // Remove the entry
+            // Get the entry's rawId before removing
+            const entry = processedData[index];
+            
+            // Remove from rawProcessedData to persist deletion through limit changes
+            if (entry.rawId !== undefined && rawProcessedData) {
+                const rawIdx = rawProcessedData.findIndex(r => r.rawId === entry.rawId);
+                if (rawIdx >= 0) {
+                    rawProcessedData.splice(rawIdx, 1);
+                }
+            }
+            
+            // Remove from display data
             processedData.splice(index, 1);
             selectedEntryIndex = null;
             
@@ -3012,7 +3137,6 @@
             if (!entryEl) return;
             
             const entry = processedData[index];
-            const originalStartSeconds = entry.startSeconds;
             
             // Get edited text
             const textInput = entryEl.querySelector('.edit-text-input');
@@ -3037,6 +3161,19 @@
                 entry.timecode = `[${formatTimecode(entry.startSeconds)} - ${formatTimecode(entry.endSeconds)}]`;
             }
             
+            // SYNC TO RAW DATA: Find the raw entry and update it
+            // This ensures edits survive when limits are re-applied
+            if (entry.rawId !== undefined && rawProcessedData) {
+                const rawEntry = rawProcessedData.find(r => r.rawId === entry.rawId);
+                if (rawEntry) {
+                    rawEntry.text = entry.text;
+                    rawEntry.speaker = entry.speaker;
+                    rawEntry.startSeconds = entry.startSeconds;
+                    rawEntry.endSeconds = entry.endSeconds;
+                    rawEntry.timecode = entry.timecode;
+                }
+            }
+            
             // Update stats
             document.getElementById('statEntries').textContent = processedData.length;
             
@@ -3058,6 +3195,10 @@
             if (timingChanged) {
                 selectedEntryIndex = null;
                 processedData.sort((a, b) => a.startSeconds - b.startSeconds);
+                // Also re-sort raw data to keep them in sync
+                if (rawProcessedData) {
+                    rawProcessedData.sort((a, b) => a.startSeconds - b.startSeconds);
+                }
                 displayPreview();
                 return; // displayPreview handles everything, no need to deselect
             }
@@ -3262,30 +3403,55 @@
         });
 
         document.getElementById('clearBtn').addEventListener('click', () => {
-            editFile = null;
-            mergeFiles = [];
-            sequenceFiles = [];
-            fileIdCounter = 0;
-            processedData = null;
-            previewMode = null; // Reset preview mode
-            filesContainerEdit.innerHTML = '';
-            filesContainerMerge.innerHTML = '';
-            filesContainerSequence.innerHTML = '';
-            document.getElementById('previewSection').classList.add('hidden');
-            document.getElementById('previewList').innerHTML = '';
-            document.getElementById('statEntries').textContent = '0';
-            document.getElementById('statDuration').textContent = '0m';
-            document.getElementById('statSpeakers').textContent = '0';
+            // PER-TAB CLEAR: Only clear data for the current mode
+            if (currentMode === 'edit') {
+                editFile = null;
+                filesContainerEdit.innerHTML = '';
+                initEditFile();
+                // Only clear preview if it was generated by this mode
+                if (previewMode === 'edit') {
+                    processedData = null;
+                    rawProcessedData = null;
+                    previewMode = null;
+                    document.getElementById('previewSection').classList.add('hidden');
+                    document.getElementById('previewList').innerHTML = '';
+                    document.getElementById('statEntries').textContent = '0';
+                    document.getElementById('statDuration').textContent = '0m';
+                    document.getElementById('statSpeakers').textContent = '0';
+                }
+            } else if (currentMode === 'merge') {
+                mergeFiles = [];
+                filesContainerMerge.innerHTML = '';
+                addMergeFile();
+                addMergeFile();
+                if (previewMode === 'merge') {
+                    processedData = null;
+                    rawProcessedData = null;
+                    previewMode = null;
+                    document.getElementById('previewSection').classList.add('hidden');
+                    document.getElementById('previewList').innerHTML = '';
+                    document.getElementById('statEntries').textContent = '0';
+                    document.getElementById('statDuration').textContent = '0m';
+                    document.getElementById('statSpeakers').textContent = '0';
+                }
+            } else if (currentMode === 'sequence') {
+                sequenceFiles = [];
+                filesContainerSequence.innerHTML = '';
+                addSequenceFile();
+                addSequenceFile();
+                if (previewMode === 'sequence') {
+                    processedData = null;
+                    rawProcessedData = null;
+                    previewMode = null;
+                    document.getElementById('previewSection').classList.add('hidden');
+                    document.getElementById('previewList').innerHTML = '';
+                    document.getElementById('statEntries').textContent = '0';
+                    document.getElementById('statDuration').textContent = '0m';
+                    document.getElementById('statSpeakers').textContent = '0';
+                }
+            }
             
-            // Reset to default state
-            initEditFile();
-            addMergeFile();
-            addMergeFile();
-            addSequenceFile();
-            addSequenceFile();
-
-            // Maintain current mode and blur button
-            switchTab(currentMode);
+            updateProcessButtonState();
             document.getElementById('clearBtn').blur();
         });
 
@@ -3298,15 +3464,15 @@
         document.getElementById('toggleCC').addEventListener('change', () => displayPreview(true));
         document.getElementById('toggleStripSilence').addEventListener('change', () => displayPreview(true));
         document.getElementById('toggleLimits').addEventListener('change', () => {
-            if (processedData !== null) processTranscripts();
+            if (rawProcessedData !== null) reapplyLimits();
         });
         
-        // Numeric input listeners - reprocess on change for live updates
+        // Numeric input listeners - reapply limits on change (preserves edits)
         document.getElementById('settingCpl').addEventListener('input', () => {
-            if (processedData !== null) processTranscripts();
+            if (rawProcessedData !== null) reapplyLimits();
         });
         document.getElementById('settingMaxLines').addEventListener('input', () => {
-            if (processedData !== null) processTranscripts();
+            if (rawProcessedData !== null) reapplyLimits();
         });
         document.getElementById('settingMinDuration').addEventListener('input', () => {
             if (processedData !== null) displayPreview(true); // Min duration affects export, not processedData
