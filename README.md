@@ -1,6 +1,9 @@
 # Transcript Merger
 
-A powerful, browser-based tool designed to merge, edit, and sequence DaVinci Resolve transcripts. Whether you need to combine separate speaker tracks into a conversation, edit a single transcript, or stitch together transcripts from split video clips, Transcript Merger handles the timestamp adjustments and formatting for you.
+The missing tool for DaVinci Resolve transcripts.
+
+Why This Tool Exists?
+DaVinci Resolve has the best transcription quality compared to Adobe Premiere and Descript—but all three have unreliable speaker detection. This tool solves that problem.
 
 ## Features
 
@@ -17,6 +20,7 @@ Edit a single transcript file with full control over entries.
 - **Full editing support**: Modify speaker names, dialogue text, and timestamps inline.
 - **Rename speakers**: Rename a speaker to apply changes across all occurrences in the transcript.
 - **Add/Remove entries**: Insert new dialogue or CC entries, or delete existing ones.
+- **Smart CC Placement**: Automatically estimates the best time position when adding new closed caption entries.
 
 ### 3. Sequence Transcripts
 Stitch together transcripts from multiple video parts into one continuous file.
@@ -45,7 +49,10 @@ Export your processed transcripts in the format you need:
 - **SRT**: Standard subtitle format.
 - **TXT**: Plain text transcript.
 
-### 7. Privacy & Security
+### 7. Built-in Demos
+- **Try before you bring your own files**: Access the "About" menu to load sample transcripts for Merge, Edit, and Sequence modes to test the workflow.
+
+### 8. Privacy & Security
 - **Client-Side Only**: The entire process runs in your browser. No files are ever uploaded to a server.
 - **No Installation**: Single-file application (HTML).
 
@@ -102,3 +109,6 @@ Export your processed transcripts in the format you need:
 
 ## Installation
 No installation required. Simply download the `index.html` file and open it in your web browser.
+
+## Feedback & Support
+Access the **About** menu within the application to find links to my social media channels for updates, feedback, and feature requests.
