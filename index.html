@@ -373,24 +373,26 @@
         
         /* Framerate Warning Banner */
         .framerate-warning {
-            background: linear-gradient(135deg, #422006 0%, #78350f 100%);
+            background: #78350f;
             border: 1px solid #f59e0b;
             border-radius: 0.5rem;
             padding: 0.75rem 1rem;
             margin-bottom: 1rem;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 0.75rem;
             animation: slideDown 0.3s ease-out;
         }
         .framerate-warning-icon {
             color: #fbbf24;
             flex-shrink: 0;
+            display: flex;
+            align-items: center;
         }
         .framerate-warning-text {
             color: #fef3c7;
             font-size: 0.875rem;
-            flex: 1;
         }
         .framerate-warning-text strong {
             color: #fbbf24;
@@ -402,39 +404,11 @@
         
         /* Framerate Mismatch Highlight */
         .framerate-mismatch .framerate-select {
-            border-color: #ef4444 !important;
-            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3);
+            border-color: #f59e0b !important;
+            box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
         }
         
-        /* Site Header */
-        .site-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border-bottom: 1px solid #334155;
-            margin-bottom: 1.5rem;
-            border-radius: 0.75rem;
-        }
-        .site-header-logo {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #f8fafc;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .site-header-logo svg {
-            width: 1.5rem;
-            height: 1.5rem;
-            color: #818cf8;
-        }
-        .site-header-nav {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
+        /* Social Links & About Button */
         .social-link {
             display: flex;
             align-items: center;
@@ -460,8 +434,8 @@
             align-items: center;
             gap: 0.5rem;
             padding: 0.5rem 1rem;
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            color: white;
+            background: #334155;
+            color: #94a3b8;
             font-weight: 600;
             font-size: 0.875rem;
             border-radius: 8px;
@@ -470,8 +444,9 @@
             transition: all 0.2s ease;
         }
         .about-btn:hover {
+            background: #475569;
+            color: #f8fafc;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
         }
         .about-btn svg {
             width: 16px;
@@ -482,7 +457,7 @@
         .site-footer {
             margin-top: 2rem;
             padding: 1.5rem;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            background: #1e293b;
             border-top: 1px solid #334155;
             border-radius: 0.75rem;
             text-align: center;
@@ -510,6 +485,49 @@
             width: 16px;
             height: 16px;
         }
+        .footer-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #334155;
+        }
+        .footer-nav .social-link {
+            background: transparent;
+            color: #64748b;
+        }
+        .footer-nav .social-link:hover {
+            background: transparent;
+            color: #94a3b8;
+        }
+        .footer-nav .about-btn {
+            background: transparent;
+            color: #64748b;
+        }
+        .footer-nav .about-btn:hover {
+            background: transparent;
+            color: #94a3b8;
+        }
+        .footer-divider {
+            width: 1px;
+            height: 24px;
+            background: #475569;
+        }
+        .footer-meta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            color: #64748b;
+            font-size: 0.8rem;
+            flex-wrap: wrap;
+        }
+        .footer-dot {
+            color: #475569;
+        }
         
         /* About Modal */
         .modal-overlay {
@@ -529,10 +547,10 @@
             visibility: visible;
         }
         .modal-container {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            background: #1e293b;
             border: 1px solid #334155;
             border-radius: 1rem;
-            max-width: 900px;
+            max-width: 1024px;
             max-height: 90vh;
             width: 95%;
             overflow-y: auto;
@@ -544,34 +562,7 @@
         .modal-overlay.active .modal-container {
             transform: translateY(0);
         }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem;
-            border-bottom: 1px solid #334155;
-            position: sticky;
-            top: 0;
-            background: #1e293b;
-            z-index: 10;
-        }
-        .modal-close-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            background: #334155;
-            color: #94a3b8;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .modal-close-btn:hover {
-            background: #ef4444;
-            color: white;
-        }
+
         .modal-body {
             padding: 2rem;
         }
@@ -608,10 +599,24 @@
             border-radius: 0.75rem;
             padding: 1.25rem;
             text-align: center;
-            transition: border-color 0.2s ease;
+            transition: all 0.2s ease;
+            position: relative;
+            top: 0;
         }
         .feature-card:hover {
             border-color: #6366f1;
+        }
+        .feature-card.feature-card-merge:hover {
+            border-color: #6366f1;
+            top: -2px;
+        }
+        .feature-card.feature-card-edit:hover {
+            border-color: #8b5cf6;
+            top: -2px;
+        }
+        .feature-card.feature-card-sequence:hover {
+            border-color: #10b981;
+            top: -2px;
         }
         .feature-card-icon {
             font-size: 2rem;
@@ -644,6 +649,7 @@
         .modal-section ul {
             list-style: none;
             padding: 0;
+            margin: 0;
         }
         .modal-section li {
             color: #cbd5e1;
@@ -687,6 +693,21 @@
             border: 1px solid #475569;
             border-radius: 0.5rem;
             padding: 1rem;
+            transition: all 0.2s ease;
+            position: relative;
+            top: 0;
+        }
+        .demo-card.demo-card-merge:hover {
+            border-color: #6366f1;
+            top: -2px;
+        }
+        .demo-card.demo-card-edit:hover {
+            border-color: #8b5cf6;
+            top: -2px;
+        }
+        .demo-card.demo-card-sequence:hover {
+            border-color: #10b981;
+            top: -2px;
         }
         .demo-card h4 {
             color: #f8fafc;
@@ -728,62 +749,146 @@
             background: #475569;
             color: #f8fafc;
         }
+        
+        /* Tab Button Hover Effects */
+        .tab-btn {
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            position: relative;
+            top: 0;
+        }
+        .tab-btn-merge:not(.tab-active):hover {
+            border-color: #6366f1;
+            top: -2px;
+        }
+        .tab-btn-edit:not(.tab-active):hover {
+            border-color: #8b5cf6;
+            top: -2px;
+        }
+        .tab-btn-sequence:not(.tab-active):hover {
+            border-color: #10b981;
+            top: -2px;
+        }
+        
+        /* Custom Scrollbar Styling - Cross-browser compatible */
+        /* Webkit browsers (Chrome, Safari, Opera, Edge) */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 5px;
+            border: 2px solid #1e293b;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        ::-webkit-scrollbar-corner {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-button {
+            display: none;
+            height: 0;
+            width: 0;
+        }
+        /* Firefox scrollbar */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #475569 #1e293b;
+        }
+        
+        /* Number Input Spinner Styling - Cross-browser compatible */
+        /* Webkit browsers (Chrome, Safari, Opera, Edge) */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+            position: relative;
+        }
+        /* Custom spinner wrapper */
+        .number-input-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+        .number-input-wrapper input[type="number"] {
+            padding-right: 24px;
+        }
+        .number-spinner {
+            position: absolute;
+            right: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+        .number-spinner button {
+            width: 16px;
+            height: 12px;
+            padding: 0;
+            border: none;
+            background: #334155;
+            color: #94a3b8;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            transition: all 0.15s ease;
+            line-height: 1;
+        }
+        .number-spinner button:first-child {
+            border-radius: 3px 3px 0 0;
+        }
+        .number-spinner button:last-child {
+            border-radius: 0 0 3px 3px;
+        }
+        .number-spinner button:hover {
+            background: #475569;
+            color: #e2e8f0;
+        }
+        .number-spinner button:active {
+            background: #6366f1;
+            color: white;
+        }
+        
+        /* Alternative: Show styled native spinners on hover for number inputs */
+        .styled-number-input {
+            position: relative;
+        }
+        .styled-number-input::after {
+            content: '';
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: calc(100% - 8px);
+            background: linear-gradient(to bottom, 
+                #334155 0%, #334155 48%, 
+                #1e293b 48%, #1e293b 52%, 
+                #334155 52%, #334155 100%);
+            border-radius: 3px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+        .styled-number-input:hover::after {
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="bg-slate-900 p-6 min-h-screen text-slate-200">
-    <div class="max-w-4xl mx-auto">
-        <!-- Site Header -->
-        <header class="site-header">
-            <div class="site-header-logo">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                    <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
-                <span>Transcript Merger</span>
-            </div>
-            <nav class="site-header-nav">
-                <!-- Social Links -->
-                <a href="#" class="social-link" title="Website" target="_blank" rel="noopener">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="2" y1="12" x2="22" y2="12"></line>
-                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                    </svg>
-                </a>
-                <a href="#" class="social-link" title="YouTube" target="_blank" rel="noopener">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                    </svg>
-                </a>
-                <a href="#" class="social-link" title="Instagram" target="_blank" rel="noopener">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                    </svg>
-                </a>
-                <a href="#" class="social-link" title="Twitter/X" target="_blank" rel="noopener">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                    </svg>
-                </a>
-                <a href="#" class="social-link" title="GitHub" target="_blank" rel="noopener">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                    </svg>
-                </a>
-                <div class="w-px h-6 bg-slate-600"></div>
-                <button id="aboutBtn" class="about-btn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                    </svg>
-                    About
-                </button>
-            </nav>
-        </header>
+    <div class="max-w-5xl mx-auto">
 
         <!-- App Header -->
         <div class="mb-8 text-center">
@@ -792,13 +897,13 @@
             
             <!-- Tabs -->
             <div class="flex justify-center gap-2">
-                <button id="tabMerge" class="px-6 py-2 rounded-full font-semibold bg-indigo-600 text-white shadow-md transition hover:bg-indigo-500">
+                <button id="tabMerge" class="tab-btn tab-btn-merge tab-active px-6 py-2 rounded-full font-semibold bg-indigo-600 text-white shadow-md transition">
                     Merge Speakers
                 </button>
-                <button id="tabEdit" class="px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 shadow-sm transition">
+                <button id="tabEdit" class="tab-btn tab-btn-edit px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 shadow-sm transition">
                     Edit Transcripts
                 </button>
-                <button id="tabSequence" class="px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 shadow-sm transition">
+                <button id="tabSequence" class="tab-btn tab-btn-sequence px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 shadow-sm transition">
                     Sequence Transcripts
                 </button>
             </div>
@@ -892,8 +997,8 @@
                 </button>
             </div>
 
-            <!-- SUBTITLE LIMITS SETTINGS (Merge mode only) -->
-            <div id="subtitleLimitsSection" class="mb-6 bg-slate-900/50 p-4 rounded-lg border border-slate-700">
+            <!-- SUBTITLE LIMITS SETTINGS -->
+            <div id="subtitleLimitsSection" class="mb-4 bg-slate-900/50 p-4 rounded-lg border border-slate-700">
                 <div class="flex flex-col items-center gap-3 mb-4">
                     <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider text-center">Subtitle Limits</h3>
                     
@@ -905,7 +1010,7 @@
                 </div>
                 
                 <!-- Collapsible Settings Grid -->
-                <div id="limitsSettings" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div id="limitsSettings" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-300 mb-1" title="Max characters per line (approximate)">Max Characters Per Line</label>
                         <input type="number" id="settingCpl" value="42" min="1" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-slate-500" />
@@ -922,10 +1027,12 @@
                         <p class="text-xs text-slate-500 mt-1">0 = off. Extends short subtitles.</p>
                     </div>
                 </div>
+            </div>
 
-                <!-- Visibility Toggles (Centered) -->
-                <div class="flex flex-col items-center gap-2 pt-3 border-t border-slate-700">
-                    <span class="text-xs text-slate-500 uppercase tracking-wider">Output Options</span>
+            <!-- OUTPUT OPTIONS - Separate card to show independence from Subtitle Limits -->
+            <div id="outputOptionsSection" class="mb-6 bg-slate-900/50 p-4 rounded-lg border border-slate-700">
+                <div class="flex flex-col items-center gap-3">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider text-center">Output Options</h3>
                     <div class="flex items-center gap-4">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" id="toggleSpeakerNames" checked class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 bg-slate-800 border-slate-600">
@@ -1004,6 +1111,47 @@
 
         <!-- Site Footer -->
         <footer class="site-footer">
+            <!-- Social Links & About Button -->
+            <div class="footer-nav">
+                <a href="#" class="social-link" title="Website" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                </a>
+                <a href="#" class="social-link" title="YouTube" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                </a>
+                <a href="#" class="social-link" title="Instagram" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                    </svg>
+                </a>
+                <a href="#" class="social-link" title="Twitter/X" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                </a>
+                <a href="#" class="social-link" title="GitHub" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                </a>
+                <div class="footer-divider"></div>
+                <button id="aboutBtn" class="about-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    About
+                </button>
+            </div>
+            
+            <!-- Privacy Badge -->
             <p class="footer-privacy">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
@@ -1011,23 +1159,20 @@
                 </svg>
                 100% Private — All processing happens locally in your browser
             </p>
-            <p>Works in Chrome, Firefox, Edge, Safari, and Opera</p>
-            <p>Made with ♥ for the DaVinci Resolve community</p>
+            
+            <!-- Attribution -->
+            <div class="footer-meta">
+                <span>Works in Chrome, Firefox, Edge, Safari, and Opera</span>
+                <span class="footer-dot">•</span>
+                <span>Made with ♥ for the DaVinci Resolve community</span>
+            </div>
         </footer>
     </div>
 
     <!-- About Modal -->
     <div id="aboutModal" class="modal-overlay">
         <div class="modal-container">
-            <div class="modal-header">
-                <span class="text-lg font-bold text-white">About Transcript Merger</span>
-                <button id="modalCloseBtn" class="modal-close-btn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            </div>
+
             <div class="modal-body">
                 <!-- Hero -->
                 <div class="modal-hero">
@@ -1037,17 +1182,17 @@
 
                 <!-- Feature Cards -->
                 <div class="feature-cards">
-                    <div class="feature-card">
+                    <div class="feature-card feature-card-merge">
                         <div class="feature-card-icon">🎙️</div>
                         <h3>Merge Speakers</h3>
                         <p>Combine separate speaker tracks into one chronological dialogue.</p>
                     </div>
-                    <div class="feature-card">
+                    <div class="feature-card feature-card-edit">
                         <div class="feature-card-icon">✏️</div>
                         <h3>Edit Transcripts</h3>
                         <p>Fix speaker labels, correct text, adjust timing. Works standalone or after merge/sequence.</p>
                     </div>
-                    <div class="feature-card">
+                    <div class="feature-card feature-card-sequence">
                         <div class="feature-card-icon">🎬</div>
                         <h3>Sequence Parts</h3>
                         <p>Combine transcripts from multiple timeline segments by specifying each part's duration.</p>
@@ -1056,8 +1201,8 @@
 
                 <!-- Why Use This -->
                 <div class="modal-section">
-                    <h3>💡 Why This Tool Exists</h3>
-                    <p style="color: #94a3b8; margin-bottom: 1rem;">DaVinci Resolve has the best transcription quality compared to Adobe Premiere and Descript—but all three have unreliable speaker detection. This tool solves that problem.</p>
+                    <h3 style="padding-left: 1.5rem;">Why This Tool Exists</h3>
+                    <p style="color: #cbd5e1; margin-bottom: 0.5rem; padding-left: 1.5rem; font-weight: 500;">DaVinci Resolve has the best transcription quality compared to Adobe Premiere and Descript—but all three have unreliable speaker detection. This tool solves that problem.</p>
                     <ul>
                         <li><strong>Bypass bad speaker detection:</strong> Record each speaker to separate audio tracks, transcribe them individually, then merge here with correct speaker labels.</li>
                         <li><strong>Fix mistakes anywhere:</strong> Edit speaker names, correct transcription errors, or adjust timing—all inline, in any mode.</li>
@@ -1067,7 +1212,7 @@
 
                 <!-- Feature Highlights -->
                 <div class="modal-section">
-                    <h3>✨ Feature Highlights</h3>
+                    <h3 style="padding-left: 1.5rem;">Feature Highlights</h3>
                     <ul>
                         <li><strong>Per-file framerate control</strong> — Supports HH:MM:SS:FF timecode (23.976 to 120 fps, or custom up to 999.999).</li>
                         <li><strong>Framerate mismatch warning</strong> — Prevents processing if files have different framerates.</li>
@@ -1117,36 +1262,36 @@
 
                 <!-- Demo Files Section -->
                 <div class="demo-section">
-                    <h3>🧪 Try It With Demo Files</h3>
+                    <h3>Try It With Demo Files</h3>
                     <p style="color: #94a3b8; margin-bottom: 1rem;">Want to test the tool before using your own transcripts? Load these sample files:</p>
                     <div class="demo-grid">
-                        <div class="demo-card">
+                        <div class="demo-card demo-card-merge">
                             <h4>Merge Demo</h4>
                             <p>Two speaker transcript files to combine into a conversation.</p>
                             <div class="demo-card-actions" style="flex-direction: column; gap: 0.5rem;">
                                 <button class="demo-btn demo-btn-load" onclick="loadMergeDemo()" style="background: #6366f1;">Load Demo</button>
                                 <div style="display: flex; gap: 0.25rem;">
-                                    <button class="demo-btn demo-btn-download" onclick="downloadFile(DEMO_FILES.merge_speaker_a, 'demo_speaker_a.txt')" style="font-size: 0.65rem;">Speaker A</button>
-                                    <button class="demo-btn demo-btn-download" onclick="downloadFile(DEMO_FILES.merge_speaker_b, 'demo_speaker_b.txt')" style="font-size: 0.65rem;">Speaker B</button>
+                                    <button class="demo-btn demo-btn-download" onclick="downloadFile(DEMO_FILES.merge_speaker_a, 'demo_speaker_a.txt')" style="font-size: 0.7rem; display: inline-flex; align-items: center; justify-content: center; gap: 4px;"><svg style="width:11px;height:11px;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>Speaker A</button>
+                                    <button class="demo-btn demo-btn-download" onclick="downloadFile(DEMO_FILES.merge_speaker_b, 'demo_speaker_b.txt')" style="font-size: 0.7rem; display: inline-flex; align-items: center; justify-content: center; gap: 4px;"><svg style="width:11px;height:11px;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>Speaker B</button>
                                 </div>
                             </div>
                         </div>
-                        <div class="demo-card">
+                        <div class="demo-card demo-card-edit">
                             <h4>Edit Demo</h4>
                             <p>A single transcript with mixed speakers and CC entries.</p>
                             <div class="demo-card-actions" style="flex-direction: column; gap: 0.5rem;">
                                 <button class="demo-btn demo-btn-load" onclick="loadEditDemo()" style="background: #8b5cf6;">Load Demo</button>
-                                <button class="demo-btn demo-btn-download" onclick="downloadFile(DEMO_FILES.edit_transcript, 'demo_edit.txt')">Download</button>
+                                <button class="demo-btn demo-btn-download" onclick="downloadFile(DEMO_FILES.edit_transcript, 'demo_edit.txt')" style="font-size: 0.7rem; display: inline-flex; align-items: center; justify-content: center; gap: 4px;"><svg style="width:11px;height:11px;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>Download</button>
                             </div>
                         </div>
-                        <div class="demo-card">
+                        <div class="demo-card demo-card-sequence">
                             <h4>Sequence Demo</h4>
                             <p>Two transcript parts from a split timeline to sequence together.</p>
                             <div class="demo-card-actions" style="flex-direction: column; gap: 0.5rem;">
                                 <button class="demo-btn demo-btn-load" onclick="loadSequenceDemo()" style="background: #10b981;">Load Demo</button>
                                 <div style="display: flex; gap: 0.25rem;">
-                                    <button class="demo-btn demo-btn-download" onclick="downloadFile(DEMO_FILES.sequence_part1, 'demo_part1.txt')" style="font-size: 0.65rem;">Part 1</button>
-                                    <button class="demo-btn demo-btn-download" onclick="downloadFile(DEMO_FILES.sequence_part2, 'demo_part2.txt')" style="font-size: 0.65rem;">Part 2</button>
+                                    <button class="demo-btn demo-btn-download" onclick="downloadFile(DEMO_FILES.sequence_part1, 'demo_part1.txt')" style="font-size: 0.7rem; display: inline-flex; align-items: center; justify-content: center; gap: 4px;"><svg style="width:11px;height:11px;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>Part 1</button>
+                                    <button class="demo-btn demo-btn-download" onclick="downloadFile(DEMO_FILES.sequence_part2, 'demo_part2.txt')" style="font-size: 0.7rem; display: inline-flex; align-items: center; justify-content: center; gap: 4px;"><svg style="width:11px;height:11px;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>Part 2</button>
                                 </div>
                             </div>
                         </div>
@@ -1542,7 +1687,8 @@ Speaker 1
         const processBtn = document.getElementById('processBtn');
         
         // TABS LOGIC
-        const inactiveTabClass = "px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 shadow-sm transition";
+        // Base classes preserved, mode-specific classes added for hover effects
+        const inactiveTabBaseClass = "tab-btn px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 shadow-sm transition";
         
         function switchTab(mode) {
             // SAVE CURRENT TAB SETTINGS AND DATA before switching
@@ -1578,10 +1724,10 @@ Speaker 1
             rawProcessedData = settings.rawProcessedData;
             previewMode = processedData ? mode : null;
             
-            // Reset all tabs to inactive
-            tabEdit.className = inactiveTabClass;
-            tabMerge.className = inactiveTabClass;
-            tabSequence.className = inactiveTabClass;
+            // Reset all tabs to inactive with their mode-specific hover classes
+            tabEdit.className = inactiveTabBaseClass + " tab-btn-edit";
+            tabMerge.className = inactiveTabBaseClass + " tab-btn-merge";
+            tabSequence.className = inactiveTabBaseClass + " tab-btn-sequence";
             
             // Hide all views and instructions
             viewEdit.classList.add('hidden');
@@ -1595,7 +1741,7 @@ Speaker 1
             const exportFileNameInput = document.getElementById('exportFileName');
             
             if (mode === 'edit') {
-                tabEdit.className = "px-6 py-2 rounded-full font-semibold bg-violet-600 text-white shadow-md transition hover:bg-violet-500";
+                tabEdit.className = "tab-btn tab-btn-edit tab-active px-6 py-2 rounded-full font-semibold bg-violet-600 text-white shadow-md transition";
                 viewEdit.classList.remove('hidden');
                 instructionsEdit.classList.remove('hidden');
                 subtitleLimitsSection.classList.remove('hidden');
@@ -1609,7 +1755,7 @@ Speaker 1
                     exportFileNameInput.placeholder = 'edited_transcript';
                 }
             } else if (mode === 'merge') {
-                tabMerge.className = "px-6 py-2 rounded-full font-semibold bg-indigo-600 text-white shadow-md transition hover:bg-indigo-500";
+                tabMerge.className = "tab-btn tab-btn-merge tab-active px-6 py-2 rounded-full font-semibold bg-indigo-600 text-white shadow-md transition";
                 viewMerge.classList.remove('hidden');
                 instructionsMerge.classList.remove('hidden');
                 subtitleLimitsSection.classList.remove('hidden');
@@ -1623,7 +1769,7 @@ Speaker 1
                     exportFileNameInput.placeholder = 'merged_transcript';
                 }
             } else {
-                tabSequence.className = "px-6 py-2 rounded-full font-semibold bg-emerald-600 text-white shadow-md transition hover:bg-emerald-500";
+                tabSequence.className = "tab-btn tab-btn-sequence tab-active px-6 py-2 rounded-full font-semibold bg-emerald-600 text-white shadow-md transition";
                 viewSequence.classList.remove('hidden');
                 instructionsSequence.classList.remove('hidden');
                 subtitleLimitsSection.classList.remove('hidden');
@@ -1804,6 +1950,12 @@ Speaker 1
                     e.target.value = "999.999";
                 }
             });
+            framerateCustom.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.target.blur();
+                }
+            });
             
             filesContainerEdit.appendChild(fileItem);
         }
@@ -1860,7 +2012,14 @@ Speaker 1
             });
             fileItem.querySelector('.file-zone-container').appendChild(zone);
 
-            fileItem.querySelector('.speaker-label').addEventListener('input', (e) => fileObj.label = e.target.value);
+            const speakerLabelInput = fileItem.querySelector('.speaker-label');
+            speakerLabelInput.addEventListener('input', (e) => fileObj.label = e.target.value);
+            speakerLabelInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.target.blur();
+                }
+            });
             
             // Framerate select with custom option support
             const framerateSelect = fileItem.querySelector('.framerate-select');
@@ -1886,6 +2045,12 @@ Speaker 1
                     updateProcessButtonState();
                 }
             });
+            framerateCustom.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.target.blur();
+                }
+            });
             fileItem.querySelector('.remove-btn').addEventListener('click', () => {
                 mergeFiles = mergeFiles.filter(f => f.id !== id);
                 fileItem.remove();
@@ -1906,14 +2071,14 @@ Speaker 1
             sequenceFiles.push(fileObj);
 
             fileItem.innerHTML = `
-                <div class="flex flex-col items-center gap-1">
+                <div class="flex flex-col items-center justify-center self-stretch" style="margin-top: 24px;">
                     <button class="move-up text-slate-500 hover:text-slate-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg></button>
                     <span class="text-xs font-bold text-slate-500 index-badge">#${sequenceFiles.length}</span>
                     <button class="move-down text-slate-500 hover:text-slate-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
                 </div>
                 <div class="flex-1">
                     <label class="block text-sm font-medium text-slate-300 mb-1">Part Label</label>
-                    <input type="text" value="${fileObj.label}" class="part-label w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-white placeholder-slate-500" placeholder="e.g., Intro" />
+                    <div contenteditable="true" class="part-label flex items-center w-full px-4 py-2 border-2 border-dashed border-slate-600 rounded-lg cursor-text hover:border-emerald-500 transition focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-900/50 text-white text-sm" style="min-height: 40px;">${fileObj.label}</div>
                 </div>
                 <div class="flex-1 file-zone-container">
                     <label class="block text-sm font-medium text-slate-300 mb-1">Transcript File</label>
@@ -1950,16 +2115,23 @@ Speaker 1
             const zone = createUploadZone(fileObj, () => {
                 // Auto-populate label from filename when file is uploaded
                 if (fileObj.file) {
-                    const name = fileObj.file.name.replace(/\.[^/.]+$/, "");
+                    const name = fileObj.file.name;
                     fileObj.label = name;
-                    fileItem.querySelector('.part-label').value = name;
+                    fileItem.querySelector('.part-label').textContent = name;
                 }
                 updateProcessButtonState();
             });
             fileItem.querySelector('.file-zone-container').appendChild(zone);
 
             // Part label input handler
-            fileItem.querySelector('.part-label').addEventListener('input', (e) => fileObj.label = e.target.value);
+            const partLabelInput = fileItem.querySelector('.part-label');
+            partLabelInput.addEventListener('input', (e) => fileObj.label = e.target.textContent);
+            partLabelInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.target.blur();
+                }
+            });
             
             // Framerate select with custom option support
             const framerateSelect = fileItem.querySelector('.framerate-select');
@@ -1983,6 +2155,12 @@ Speaker 1
                 if (val > 0) {
                     fileObj.framerate = String(val);
                     updateProcessButtonState();
+                }
+            });
+            framerateCustom.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.target.blur();
                 }
             });
 
@@ -2184,6 +2362,13 @@ Speaker 1
                         const cursorPos = start + digitPosition;
                         e.target.setSelectionRange(cursorPos, cursorPos);
                     }
+                    return;
+                }
+                
+                // Enter key to confirm/blur
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.target.blur();
                     return;
                 }
                 
@@ -3185,6 +3370,18 @@ Speaker 1
             const textContainer = entryEl.querySelector('.dialogue-text-container');
             textContainer.innerHTML = `<textarea class="edit-text-input">${entry.text}</textarea>`;
             
+            // Add Ctrl+Enter to save and Escape to cancel for textarea
+            const textInput = textContainer.querySelector('.edit-text-input');
+            textInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    saveEntryChanges(index);
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    deselectEntry(index);
+                }
+            });
+            
             // Replace timing display with editable inputs
             const timingContainer = entryEl.querySelector('.timing-display');
             const fps = getFramerate();
@@ -3209,6 +3406,19 @@ Speaker 1
             
             setupTimingInput(startInput, () => validateTimingPair(startInput, endInput));
             setupTimingInput(endInput, () => validateTimingPair(startInput, endInput));
+            
+            // Add Enter to confirm timing and Escape to cancel for timing inputs
+            [startInput, endInput].forEach(input => {
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.target.blur(); // Just confirm the timing value, stay in edit mode
+                    } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        deselectEntry(index);
+                    }
+                });
+            });
             
             // Initial validation
             validateTimingPair(startInput, endInput);
@@ -3472,6 +3682,11 @@ Speaker 1
                         const cursorPos = start + digitPosition;
                         input.setSelectionRange(cursorPos, cursorPos);
                     }
+                    return;
+                }
+                
+                // Allow Enter and Escape to bubble up to parent handlers
+                if (e.key === 'Enter' || e.key === 'Escape') {
                     return;
                 }
                 
@@ -4347,7 +4562,25 @@ Speaker 1
             if (rawProcessedData !== null) reapplyLimits();
         });
         
+        // Export filename input - Enter to confirm
+        document.getElementById('exportFileName').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                e.target.blur();
+            }
+        });
+        
         // Numeric input listeners - reapply limits on change (preserves edits)
+        // Also add Enter key to blur these inputs
+        ['settingCpl', 'settingMaxLines', 'settingMinDuration'].forEach(id => {
+            const input = document.getElementById(id);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.target.blur();
+                }
+            });
+        });
         document.getElementById('settingCpl').addEventListener('input', () => {
             if (rawProcessedData !== null) reapplyLimits();
         });
@@ -4360,7 +4593,6 @@ Speaker 1
 
         // ABOUT MODAL EVENT LISTENERS
         document.getElementById('aboutBtn').addEventListener('click', openAboutModal);
-        document.getElementById('modalCloseBtn').addEventListener('click', closeAboutModal);
         
         // Close modal when clicking outside
         document.getElementById('aboutModal').addEventListener('click', (e) => {
