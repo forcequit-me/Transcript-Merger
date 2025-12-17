@@ -121,3 +121,15 @@ No installation required. Simply download the `index.html` file and open it in y
 
 ## Feedback & Support
 Access the **About** menu within the application to find links to my social media channels for updates, feedback, and feature requests.
+
+If you find this tool useful, consider [supporting my work on Gumroad or Patreon](https://forcequit.gumroad.com/l/donate) ☕
+(Patreon: https://www.patreon.com/ForceQuit) ☕
+
+## Connect
+
+- 🌐 [Website](https://forcequitproductions.com/)
+- 📺 [YouTube](https://www.youtube.com/@ForceQuitCreations)
+- 🐦 [X / Twitter](https://x.com/force92000)
+- 📸 [Instagram](https://www.instagram.com/forcequit_music/)
+- 🔗 [Linktree](https://linktr.ee/ForceQuit)
+- 💻 [GitHub](https://github.com/forcequit-me)

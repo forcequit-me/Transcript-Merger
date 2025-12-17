@@ -4,6 +4,18 @@ All notable changes to Transcript Merger are documented here.
 
 ---
 
+## [1.5.1] - 2025-12-17
+
+### Added
+- **ChangeLog.md**: Project changelog documenting all updates
+- **LICENSE**: CC BY-NC 4.0 license (open source, non-commercial)
+
+### Changed
+- Updated SEO metadata to focus on DaVinci Resolve speaker detection workflow
+- Refined meta descriptions, Open Graph, and Twitter Card content
+
+---
+
 ## [1.5.0] - 2025-12-17
 
 ### Added
