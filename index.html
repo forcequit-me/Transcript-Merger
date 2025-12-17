@@ -7,6 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/latest/umd/lucide.min.js"></script>
+    <script src="https://gumroad.com/js/gumroad.js"></script>
     <style>
         [data-icon] {
             display: inline-block;
@@ -451,6 +452,59 @@
         .about-btn svg {
             width: 16px;
             height: 16px;
+        }
+        
+        /* Support/Donate Button - Footer (compact) */
+        .support-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #ec4899, #f43f5e);
+            color: white !important;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none !important;
+        }
+        .support-btn:hover {
+            background: linear-gradient(135deg, #db2777, #e11d48);
+            transform: translateY(-2px);
+            text-decoration: none !important;
+        }
+        
+        /* Support/Donate Button - Modal (larger, prominent) */
+        .support-btn-modal {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #ec4899, #f43f5e);
+            color: white !important;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none !important;
+            box-shadow: 0 4px 14px rgba(236, 72, 153, 0.4);
+        }
+        .support-btn-modal:hover {
+            background: linear-gradient(135deg, #db2777, #e11d48);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.5);
+            text-decoration: none !important;
+        }
+        
+        /* Override Gumroad default button styles */
+        .gumroad-button {
+            background: none !important;
+            box-shadow: none !important;
         }
         
         /* Site Footer */
@@ -1362,6 +1416,8 @@
                     </svg>
                     About
                 </button>
+                <div class="footer-divider"></div>
+                <a class="gumroad-button support-btn" href="https://forcequit.gumroad.com/l/vkahtw" data-gumroad-overlay-checkout="true" target="_blank" rel="noopener">Support me on</a>
             </div>
             
             <!-- Privacy Badge -->
@@ -1439,8 +1495,8 @@
 
                 <!-- Feedback & Updates -->
                 <div class="modal-section" style="text-align: center;">
-                    <h3 style="justify-content: center;">📢 Feedback & Updates</h3>
-                    <p style="color: #94a3b8; margin-bottom: 1rem;">Have feedback or a feature request? Let me know on GitHub or Social Media!</p>
+                    <h3 style="justify-content: center; padding-left: 0; margin-bottom: 0.5rem;">Feedback & Updates</h3>
+                    <p style="color: #94a3b8; margin-top: 0; margin-bottom: 1rem;">Have feedback or a feature request? Let me know on GitHub or Social Media!</p>
                     <div style="display: flex; gap: 0.75rem; justify-content: center;">
                         <!-- Social Links (Copied from Header) -->
                         <a href="#" class="social-link" title="Website" target="_blank" rel="noopener">
@@ -1471,6 +1527,7 @@
                             </svg>
                         </a>
                     </div>
+                    <a class="gumroad-button support-btn-modal" href="https://forcequit.gumroad.com/l/vkahtw" data-gumroad-overlay-checkout="true" target="_blank" rel="noopener" style="margin-top: 1.25rem;">Support me on</a>
                 </div>
 
                 <!-- Demo Files Section -->
