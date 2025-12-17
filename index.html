@@ -97,8 +97,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 28px;
-            height: 28px;
+            width: 36px;
+            height: 36px;
             border-radius: 6px;
             font-size: 14px;
             font-weight: bold;
@@ -887,9 +887,207 @@
         .styled-number-input:hover::after {
             opacity: 1;
         }
+        
+        /* Mobile Responsive - Edit Mode */
+        @media (max-width: 767px) {
+            .edit-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+            .edit-btn-cc {
+                font-size: 9px;
+                padding: 0 6px;
+            }
+            .dialogue-entry.selected .edit-actions-top {
+                max-height: 40px;
+                padding-top: 0.25rem;
+            }
+            .dialogue-entry.selected .edit-actions-bottom {
+                max-height: 50px;
+                padding-top: 0.75rem;
+            }
+            .dialogue-entry.selected .edit-actions-top {
+                padding-bottom: 0.25rem;
+            }
+            .edit-timing-input {
+                width: 100% !important;
+                padding: 8px 10px;
+                font-size: 0.85rem;
+            }
+            .timing-format-label {
+                display: none; /* Hide format labels on mobile to save space */
+            }
+            .edit-text-input {
+                min-height: 80px;
+                padding: 8px 10px;
+                font-size: 0.85rem;
+            }
+            /* Stack speaker name and timing vertically on mobile */
+            .dialogue-entry .entry-content > div:first-child {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+            .dialogue-entry .speaker-name-container {
+                order: 1;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+            }
+            .dialogue-entry.selected .speaker-name-container {
+                margin-top: 1rem;
+                margin-bottom: 0.75rem;
+            }
+            .dialogue-entry .timing-container {
+                order: 2;
+                flex-direction: row;
+                align-items: center;
+                width: 100%;
+                gap: 8px;
+            }
+            .timing-input-group {
+                flex: 1;
+                width: auto;
+                max-width: 160px;
+            }
+            .timing-separator {
+                display: none; /* Hide separator dash on mobile */
+            }
+            .speaker-name-btn {
+                font-size: 0.75rem;
+                padding: 3px 0;
+            }
+            .dialogue-entry.selected .speaker-name-btn {
+                padding: 3px 8px;
+            }
+            /* Mobile: Position delete button in top-right, save button in bottom-right */
+            .dialogue-entry.selected {
+                position: relative;
+            }
+            .dialogue-entry.selected .edit-actions-top {
+                position: relative;
+            }
+            .dialogue-entry.selected .btn-delete {
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                z-index: 10;
+            }
+            .dialogue-entry.selected .edit-actions-bottom .edit-actions-right {
+                justify-content: flex-end;
+            }
+            .dialogue-entry.selected .btn-save {
+                margin-left: auto;
+            }
+            /* Export buttons on mobile */
+            #copyBtn, #downloadTxtBtn, #downloadSrtBtn {
+                justify-content: center;
+                width: 100%;
+            }
+            #copyBtn svg, #downloadTxtBtn svg, #downloadSrtBtn svg {
+                width: 18px;
+                height: 18px;
+            }
+            /* Export input - center text on mobile */
+            #exportFileName {
+                text-align: center;
+            }
+            /* Stats grid - display as row on mobile with compact spacing */
+            #previewSection .grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.5rem;
+                padding: 0.5rem;
+            }
+            #previewSection .grid > div {
+                padding: 0;
+            }
+            #previewSection .grid p.text-sm {
+                font-size: 0.65rem;
+                margin-bottom: 0;
+            }
+            #previewSection .grid p.text-2xl {
+                font-size: 1.25rem;
+            }
+            /* Footer privacy - stack on mobile */
+            .footer-privacy {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.25rem;
+            }
+            .footer-privacy svg {
+                margin: 0 auto;
+            }
+            /* Center remove button in file rows on mobile */
+            .remove-btn {
+                display: flex;
+                justify-content: center;
+                width: 100%;
+            }
+            /* Center subtitle limits labels on mobile */
+            #subtitleLimitsSection label,
+            #subtitleLimitsSection .text-xs {
+                text-align: center;
+                display: block;
+            }
+            /* Center subtitle limits input values on mobile */
+            #subtitleLimitsSection input {
+                text-align: center;
+            }
+            /* Stack output options checkboxes on mobile */
+            #outputOptionsSection .flex.flex-wrap {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            /* Hide vertical dividers between options on mobile */
+            #outputOptionsSection .w-px {
+                display: none;
+            }
+            /* Center export label on mobile */
+            #previewSection label {
+                text-align: center;
+                display: block;
+                width: 100%;
+            }
+            /* Center file upload labels on mobile */
+            .file-zone-container label,
+            .framerate-container label,
+            .speaker-label-container label,
+            .duration-container label,
+            #filesContainerMerge label,
+            #filesContainerEdit label,
+            #filesContainerSequence label,
+            .part-label-container label {
+                text-align: center;
+            }
+            /* Center sequence row controls on mobile */
+            #filesContainerSequence > div > div:first-child {
+                justify-content: center;
+                width: 100%;
+                position: relative;
+            }
+            /* Position sequence mobile remove button at top right */
+            #filesContainerSequence .remove-btn-mobile {
+                position: absolute;
+                right: 0;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+            /* Center framerate select on mobile */
+            .framerate-select {
+                text-align: center;
+                text-align-last: center;
+            }
+            /* Center part-label and speaker-label inputs on mobile */
+            .part-label,
+            .speaker-label {
+                text-align: center;
+            }
+        }
     </style>
 </head>
-<body class="bg-slate-900 p-6 min-h-screen text-slate-200">
+<body class="bg-slate-900 p-4 md:p-6 min-h-screen text-slate-200">
     <div class="max-w-5xl mx-auto">
 
         <!-- App Header -->
@@ -898,14 +1096,14 @@
             <p class="text-slate-400 mb-6">Merge, Edit, or Sequence DaVinci Resolve transcripts</p>
             
             <!-- Tabs -->
-            <div class="flex justify-center gap-2">
-                <button id="tabMerge" class="tab-btn tab-btn-merge tab-active px-6 py-2 rounded-full font-semibold bg-indigo-600 text-white shadow-md transition">
+            <div class="flex flex-col md:flex-row justify-center gap-2 md:gap-2">
+                <button id="tabMerge" class="tab-btn tab-btn-merge tab-active w-full md:w-auto px-6 py-2 rounded-full font-semibold bg-indigo-600 text-white shadow-md transition">
                     Merge Speakers
                 </button>
-                <button id="tabEdit" class="tab-btn tab-btn-edit px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 shadow-sm transition">
+                <button id="tabEdit" class="tab-btn tab-btn-edit w-full md:w-auto px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 shadow-sm transition">
                     Edit Transcripts
                 </button>
-                <button id="tabSequence" class="tab-btn tab-btn-sequence px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 shadow-sm transition">
+                <button id="tabSequence" class="tab-btn tab-btn-sequence w-full md:w-auto px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 shadow-sm transition">
                     Sequence Transcripts
                 </button>
             </div>
@@ -965,7 +1163,7 @@
         </div>
 
         <!-- Main Card -->
-        <div class="bg-slate-800 rounded-lg shadow-lg p-6 mb-6 border border-slate-700">
+        <div class="bg-slate-800 rounded-lg shadow-lg p-4 md:p-6 mb-6 border border-slate-700">
             
             <!-- EDIT VIEW -->
             <div id="viewEdit" class="hidden">
@@ -1035,7 +1233,7 @@
             <div id="outputOptionsSection" class="mb-6 bg-slate-900/50 p-4 rounded-lg border border-slate-700">
                 <div class="flex flex-col items-center gap-3">
                     <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider text-center">Output Options</h3>
-                    <div class="flex items-center gap-4">
+                    <div class="flex flex-wrap items-center justify-center gap-3 md:gap-4">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" id="toggleSpeakerNames" checked class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 bg-slate-800 border-slate-600">
                             <span class="text-sm text-slate-300">Show Speakers</span>
@@ -1055,7 +1253,7 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex gap-3">
+            <div class="flex flex-col md:flex-row gap-3">
                 <button id="processBtn" class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-500 transition disabled:bg-slate-600 disabled:text-slate-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-800">
                     Merge Transcripts
                 </button>
@@ -1066,7 +1264,7 @@
         </div>
 
         <!-- Preview Section -->
-        <div id="previewSection" class="bg-slate-800 rounded-lg shadow-lg p-8 hidden border border-slate-700">
+        <div id="previewSection" class="bg-slate-800 rounded-lg shadow-lg p-4 md:p-8 hidden border border-slate-700">
             <h2 class="text-2xl font-bold text-slate-100 text-center mb-6">
                 Preview
             </h2>
@@ -1074,7 +1272,7 @@
             <span id="entryCount" class="hidden">0</span>
 
             <!-- Export Row -->
-            <div class="flex items-center gap-3 mb-6 p-3 bg-slate-900 rounded-lg border border-slate-700">
+            <div class="flex flex-col md:flex-row items-stretch md:items-center gap-3 mb-6 p-3 bg-slate-900 rounded-lg border border-slate-700">
                 <label class="text-sm font-medium text-slate-400 whitespace-nowrap">Rename Export:</label>
                 <input type="text" id="exportFileName" value="merged_transcript" class="flex-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-slate-500 text-sm" placeholder="merged_transcript" />
                 <button id="copyBtn" class="flex items-center gap-2 px-4 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition font-medium focus:outline-none focus:ring-2 focus:ring-slate-500">
@@ -1092,7 +1290,7 @@
             </div>
 
             <!-- Stats -->
-            <div class="grid grid-cols-3 gap-4 mb-6 p-4 bg-slate-900 rounded-lg border border-slate-700">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 p-4 bg-slate-900 rounded-lg border border-slate-700">
                 <div class="text-center">
                     <p class="text-sm text-slate-400">Total Entries</p>
                     <p class="text-2xl font-bold text-slate-100" id="statEntries">0</p>
@@ -1690,7 +1888,7 @@ Speaker 1
         
         // TABS LOGIC
         // Base classes preserved, mode-specific classes added for hover effects
-        const inactiveTabBaseClass = "tab-btn px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 shadow-sm transition";
+        const inactiveTabBaseClass = "tab-btn w-full md:w-auto px-6 py-2 rounded-full font-semibold bg-slate-800 text-slate-400 shadow-sm transition";
         
         function switchTab(mode) {
             // SAVE CURRENT TAB SETTINGS AND DATA before switching
@@ -1743,7 +1941,7 @@ Speaker 1
             const exportFileNameInput = document.getElementById('exportFileName');
             
             if (mode === 'edit') {
-                tabEdit.className = "tab-btn tab-btn-edit tab-active px-6 py-2 rounded-full font-semibold bg-violet-600 text-white shadow-md transition";
+                tabEdit.className = "tab-btn tab-btn-edit tab-active w-full md:w-auto px-6 py-2 rounded-full font-semibold bg-violet-600 text-white shadow-md transition";
                 viewEdit.classList.remove('hidden');
                 instructionsEdit.classList.remove('hidden');
                 subtitleLimitsSection.classList.remove('hidden');
@@ -1757,7 +1955,7 @@ Speaker 1
                     exportFileNameInput.placeholder = 'edited_transcript';
                 }
             } else if (mode === 'merge') {
-                tabMerge.className = "tab-btn tab-btn-merge tab-active px-6 py-2 rounded-full font-semibold bg-indigo-600 text-white shadow-md transition";
+                tabMerge.className = "tab-btn tab-btn-merge tab-active w-full md:w-auto px-6 py-2 rounded-full font-semibold bg-indigo-600 text-white shadow-md transition";
                 viewMerge.classList.remove('hidden');
                 instructionsMerge.classList.remove('hidden');
                 subtitleLimitsSection.classList.remove('hidden');
@@ -1771,7 +1969,7 @@ Speaker 1
                     exportFileNameInput.placeholder = 'merged_transcript';
                 }
             } else {
-                tabSequence.className = "tab-btn tab-btn-sequence tab-active px-6 py-2 rounded-full font-semibold bg-emerald-600 text-white shadow-md transition";
+                tabSequence.className = "tab-btn tab-btn-sequence tab-active w-full md:w-auto px-6 py-2 rounded-full font-semibold bg-emerald-600 text-white shadow-md transition";
                 viewSequence.classList.remove('hidden');
                 instructionsSequence.classList.remove('hidden');
                 subtitleLimitsSection.classList.remove('hidden');
@@ -1862,11 +2060,11 @@ Speaker 1
             fileItem.id = 'file-edit';
             
             fileItem.innerHTML = `
-                <div class="flex gap-3 items-start">
+                <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-start">
                     <div class="flex-1 file-zone-container">
                         <label class="block text-sm font-medium text-slate-300 mb-1">Transcript File</label>
                     </div>
-                    <div class="w-28 framerate-container">
+                    <div class="w-full md:w-28 framerate-container">
                         <label class="block text-sm font-medium text-slate-300 mb-1">Framerate</label>
                         <select class="framerate-select w-full px-2 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-white text-sm">
                             <option value="ignore" selected>Ignore</option>
@@ -1965,7 +2163,7 @@ Speaker 1
         function addMergeFile() {
             const id = fileIdCounter++;
             const fileItem = document.createElement('div');
-            fileItem.className = 'flex gap-3 items-start bg-slate-900/50 p-3 rounded-lg border border-slate-700';
+            fileItem.className = 'flex flex-col md:flex-row gap-3 items-stretch md:items-start bg-slate-900/50 p-3 rounded-lg border border-slate-700';
             fileItem.id = `file-merge-${id}`;
             
             const fileObj = { id, element: fileItem, file: null, label: `Speaker ${mergeFiles.length + 1}`, framerate: 'ignore' };
@@ -1979,7 +2177,7 @@ Speaker 1
                 <div class="flex-1 file-zone-container">
                     <label class="block text-sm font-medium text-slate-300 mb-1">File</label>
                 </div>
-                <div class="w-28 framerate-container">
+                <div class="w-full md:w-28 framerate-container">
                     <label class="block text-sm font-medium text-slate-300 mb-1">Framerate</label>
                     <select class="framerate-select w-full px-2 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white text-sm">
                         <option value="ignore" selected>Ignore</option>
@@ -1997,7 +2195,7 @@ Speaker 1
                     <input type="number" class="framerate-custom hidden w-full mt-1 px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white text-sm text-center" placeholder="fps" min="1" max="999.999" step="0.001" />
                 </div>
                 <div class="flex flex-col">
-                    <span class="block text-sm font-medium text-transparent mb-1 select-none" aria-hidden="true">&nbsp;</span>
+                    <span class="hidden md:block text-sm font-medium text-transparent mb-1 select-none" aria-hidden="true">&nbsp;</span>
                     <button class="remove-btn px-3 py-2 text-red-400 bg-transparent rounded-lg transition-colors duration-200 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
@@ -2066,30 +2264,40 @@ Speaker 1
         function addSequenceFile() {
             const id = fileIdCounter++;
             const fileItem = document.createElement('div');
-            fileItem.className = 'flex gap-3 items-start bg-slate-900/50 p-3 rounded-lg border border-slate-700';
+            fileItem.className = 'flex flex-col md:flex-row gap-3 items-stretch md:items-start bg-slate-900/50 p-3 rounded-lg border border-slate-700 relative';
             fileItem.id = `file-seq-${id}`;
             
             const fileObj = { id, element: fileItem, file: null, duration: "0000:00:00", label: `Part ${sequenceFiles.length + 1}`, framerate: 'ignore' };
             sequenceFiles.push(fileObj);
 
             fileItem.innerHTML = `
-                <div class="flex flex-col items-center justify-center self-stretch" style="margin-top: 24px;">
+                <div class="flex md:hidden items-center justify-between w-full pb-2 border-b border-slate-700 mb-1">
+                    <div class="flex items-center gap-2">
+                        <button class="move-up-mobile text-slate-500 hover:text-slate-300 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg></button>
+                        <span class="text-xs font-bold text-slate-500 index-badge-mobile">#${sequenceFiles.length}</span>
+                        <button class="move-down-mobile text-slate-500 hover:text-slate-300 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                    </div>
+                    <button class="remove-btn-mobile px-2 py-1 text-red-400 bg-transparent rounded-lg transition-colors duration-200 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </div>
+                <div class="hidden md:flex flex-col items-center justify-center self-stretch" style="margin-top: 24px;">
                     <button class="move-up text-slate-500 hover:text-slate-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg></button>
                     <span class="text-xs font-bold text-slate-500 index-badge">#${sequenceFiles.length}</span>
                     <button class="move-down text-slate-500 hover:text-slate-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
                 </div>
                 <div class="flex-1">
                     <label class="block text-sm font-medium text-slate-300 mb-1">Part Label</label>
-                    <div contenteditable="true" class="part-label flex items-center w-full px-4 py-2 border-2 border-dashed border-slate-600 rounded-lg cursor-text hover:border-emerald-500 transition focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-900/50 text-white text-sm" style="min-height: 40px;">${fileObj.label}</div>
+                    <input type="text" value="${fileObj.label}" class="part-label w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-white placeholder-slate-500" placeholder="e.g., Part 1" />
                 </div>
                 <div class="flex-1 file-zone-container">
                     <label class="block text-sm font-medium text-slate-300 mb-1">Transcript File</label>
                 </div>
-                <div class="w-36">
+                <div class="w-full md:w-36">
                     <label class="block text-sm font-medium text-slate-300 mb-1">Duration</label>
                     <input type="text" value="0000:00:00" class="duration-input w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-center font-mono text-white" placeholder="HHHH:MM:SS" />
                 </div>
-                <div class="w-28 framerate-container">
+                <div class="w-full md:w-28 framerate-container">
                     <label class="block text-sm font-medium text-slate-300 mb-1">Framerate</label>
                     <select class="framerate-select w-full px-2 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-white text-sm">
                         <option value="ignore" selected>Ignore</option>
@@ -2106,9 +2314,9 @@ Speaker 1
                     </select>
                     <input type="number" class="framerate-custom hidden w-full mt-1 px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-white text-sm text-center" placeholder="fps" min="1" max="999.999" step="0.001" />
                 </div>
-                <div class="flex flex-col">
-                    <span class="block text-sm font-medium text-transparent mb-1 select-none" aria-hidden="true">&nbsp;</span>
-                    <button class="remove-btn px-3 py-2 text-red-400 bg-transparent rounded-lg transition-colors duration-200 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500">
+                <div class="hidden md:flex flex-row md:flex-col justify-between md:justify-start items-center md:items-stretch gap-2">
+            <span class="hidden md:block text-sm font-medium text-transparent mb-1 select-none" aria-hidden="true">&nbsp;</span>
+            <button class="remove-btn px-3 py-2 text-red-400 bg-transparent rounded-lg transition-colors duration-200 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
                 </div>
@@ -2119,7 +2327,7 @@ Speaker 1
                 if (fileObj.file) {
                     const name = fileObj.file.name;
                     fileObj.label = name;
-                    fileItem.querySelector('.part-label').textContent = name;
+                    fileItem.querySelector('.part-label').value = name;
                 }
                 updateProcessButtonState();
             });
@@ -2127,7 +2335,7 @@ Speaker 1
 
             // Part label input handler
             const partLabelInput = fileItem.querySelector('.part-label');
-            partLabelInput.addEventListener('input', (e) => fileObj.label = e.target.textContent);
+            partLabelInput.addEventListener('input', (e) => fileObj.label = e.target.value);
             partLabelInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -2401,11 +2609,24 @@ Speaker 1
                 }
             });
             
-            // Reordering Logic
+            // Reordering Logic - Desktop
             fileItem.querySelector('.move-up').addEventListener('click', () => moveFile(id, -1));
             fileItem.querySelector('.move-down').addEventListener('click', () => moveFile(id, 1));
+            
+            // Reordering Logic - Mobile
+            fileItem.querySelector('.move-up-mobile').addEventListener('click', () => moveFile(id, -1));
+            fileItem.querySelector('.move-down-mobile').addEventListener('click', () => moveFile(id, 1));
 
+            // Remove button - Desktop
             fileItem.querySelector('.remove-btn').addEventListener('click', () => {
+                sequenceFiles = sequenceFiles.filter(f => f.id !== id);
+                fileItem.remove();
+                updateSequenceIndices();
+                updateProcessButtonState();
+            });
+            
+            // Remove button - Mobile
+            fileItem.querySelector('.remove-btn-mobile').addEventListener('click', () => {
                 sequenceFiles = sequenceFiles.filter(f => f.id !== id);
                 fileItem.remove();
                 updateSequenceIndices();
@@ -2446,6 +2667,10 @@ Speaker 1
         function updateSequenceIndices() {
             sequenceFiles.forEach((f, idx) => {
                 f.element.querySelector('.index-badge').textContent = `#${idx + 1}`;
+                const mobileIndexBadge = f.element.querySelector('.index-badge-mobile');
+                if (mobileIndexBadge) {
+                    mobileIndexBadge.textContent = `#${idx + 1}`;
+                }
             });
         }
 
@@ -3254,7 +3479,7 @@ Speaker 1
                         </div>
                         <div class="edit-actions-right">
                             <button class="edit-btn edit-btn-save btn-save" title="Save changes">✓</button>
-                            <button class="edit-btn edit-btn-delete btn-delete" title="Delete entry">✕</button>
+                            <button class="edit-btn edit-btn-delete btn-delete" title="Delete entry"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
                         </div>
                     </div>
                 `;
