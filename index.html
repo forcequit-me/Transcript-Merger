@@ -553,7 +553,7 @@
             max-width: 1024px;
             max-height: 90vh;
             width: 95%;
-            overflow-y: auto;
+            overflow: hidden;
             transform: translateY(20px);
             transition: transform 0.2s ease;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
@@ -565,6 +565,8 @@
 
         .modal-body {
             padding: 2rem;
+            max-height: calc(90vh - 2px);
+            overflow-y: auto;
         }
         
         /* Modal Content Sections */
