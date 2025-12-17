@@ -48,6 +48,8 @@ Export your processed transcripts in the format you need:
 - **Copy to Clipboard**: Quick paste functionality.
 - **SRT**: Standard subtitle format.
 - **TXT**: Plain text transcript.
+- **CSV**: Spreadsheet-compatible format with speaker, timing, and text columns.
+- **JSON**: Structured data format for programmatic use.
 
 ### 7. Built-in Demos
 - **Try before you bring your own files**: Access the "About" menu to load sample transcripts for Merge, Edit, and Sequence modes to test the workflow.
@@ -55,6 +57,13 @@ Export your processed transcripts in the format you need:
 ### 8. Privacy & Security
 - **Client-Side Only**: The entire process runs in your browser. No files are ever uploaded to a server.
 - **No Installation**: Single-file application (HTML).
+
+### 9. Keyboard Shortcuts
+Navigate and edit efficiently with keyboard shortcuts:
+- **Enter**: Confirm input fields (speaker labels, part labels, timing inputs, export filename, settings).
+- **Ctrl+Enter** (or **Cmd+Enter**): Save changes when editing a dialogue entry's text.
+- **Escape**: Cancel editing the current entry, or close the About modal.
+- **Arrow Up/Down**: Increment or decrement values in timing fields.
 
 ## Usage Guide
 
@@ -91,7 +100,7 @@ Export your processed transcripts in the format you need:
 2. **Set Framerate** (Optional): If your transcript uses timecode format (HH:MM:SS:FF), select the appropriate framerate.
 3. **Process**: Click **Edit Transcript** to load and preview.
 4. **Edit**: Click any entry to modify speaker, text, or timing. Use "Rename Speaker" to apply changes globally.
-5. **Export**: Use the export buttons to download as TXT or SRT.
+5. **Export**: Use the export buttons to download as TXT, SRT, CSV, or JSON.
 
 ### How to Sequence Transcripts
 1. **Upload**: Drag and drop your transcript parts into the **Sequence Transcripts** tab.

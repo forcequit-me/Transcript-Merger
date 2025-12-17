@@ -3,7 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transcript Merger</title>
+    <title>Transcript Merger - Free Online Tool to Merge, Edit & Sequence SRT Subtitles</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Free browser-based tool to merge, edit, and sequence SRT subtitle files. Combine multiple speakers, edit timings, add closed captions, and create multi-part sequences. No uploads required - 100% private, works offline.">
+    <meta name="keywords" content="SRT merger, subtitle editor, merge subtitles, combine SRT files, subtitle sequencer, closed captions, CC editor, subtitle timing, free subtitle tool, online subtitle editor">
+    <meta name="author" content="Force Quit Productions">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://transcript-merger.pages.dev/">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://transcript-merger.pages.dev/">
+    <meta property="og:title" content="Transcript Merger - Free Online SRT Subtitle Tool">
+    <meta property="og:description" content="Merge, edit, and sequence SRT subtitle files with this free browser-based tool. Combine speakers, edit timings, and create multi-part sequences. 100% private - no uploads required.">
+    <meta property="og:image" content="https://transcript-merger.pages.dev/favicon.svg">
+    <meta property="og:site_name" content="Force Quit Productions">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://transcript-merger.pages.dev/">
+    <meta name="twitter:title" content="Transcript Merger - Free Online SRT Subtitle Tool">
+    <meta name="twitter:description" content="Merge, edit, and sequence SRT subtitle files. Combine speakers, edit timings, and create multi-part sequences. Free & private.">
+    <meta name="twitter:image" content="https://transcript-merger.pages.dev/favicon.svg">
+    <meta name="twitter:creator" content="@force92000">
+    
+    <!-- Structured Data / JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Transcript Merger",
+        "description": "Free browser-based tool to merge, edit, and sequence SRT subtitle files. Combine multiple speakers, edit timings, add closed captions, and create multi-part sequences.",
+        "url": "https://transcript-merger.pages.dev/",
+        "applicationCategory": "Multimedia",
+        "operatingSystem": "Any",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "featureList": [
+            "Merge multiple SRT subtitle files",
+            "Edit subtitle text and timings",
+            "Add closed caption indicators",
+            "Sequence multi-part subtitles",
+            "Export to SRT, CSV, or JSON",
+            "Works offline - no uploads required"
+        ],
+        "author": {
+            "@type": "Organization",
+            "name": "Force Quit Productions",
+            "url": "https://forcequitproductions.com/"
+        },
+        "browserRequirements": "Requires JavaScript",
+        "softwareVersion": "1.0"
+    }
+    </script>
+    
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/latest/umd/lucide.min.js"></script>
@@ -505,6 +562,8 @@
         .gumroad-button {
             background: none !important;
             box-shadow: none !important;
+            border: none !important;
+            outline: none !important;
         }
         
         /* Site Footer */
@@ -1048,11 +1107,11 @@
                 margin-left: auto;
             }
             /* Export buttons on mobile */
-            #copyBtn, #downloadTxtBtn, #downloadSrtBtn {
+            #copyBtn, #downloadTxtBtn, #downloadSrtBtn, #downloadCsvBtn, #downloadJsonBtn {
                 justify-content: center;
                 width: 100%;
             }
-            #copyBtn svg, #downloadTxtBtn svg, #downloadSrtBtn svg {
+            #copyBtn svg, #downloadTxtBtn svg, #downloadSrtBtn svg, #downloadCsvBtn svg, #downloadJsonBtn svg {
                 width: 18px;
                 height: 18px;
             }
@@ -1354,6 +1413,14 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"></path></svg>
                     SRT
                 </button>
+                <button id="downloadCsvBtn" class="flex items-center gap-2 px-4 py-2 bg-amber-700 text-white rounded-lg hover:bg-amber-600 transition font-medium focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                    CSV
+                </button>
+                <button id="downloadJsonBtn" class="flex items-center gap-2 px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition font-medium focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                    JSON
+                </button>
             </div>
 
             <!-- Stats -->
@@ -1380,31 +1447,36 @@
         <footer class="site-footer">
             <!-- Social Links & About Button -->
             <div class="footer-nav">
-                <a href="#" class="social-link" title="Website" target="_blank" rel="noopener">
+                <a href="https://forcequitproductions.com/" class="social-link" title="Website" target="_blank" rel="noopener">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="2" y1="12" x2="22" y2="12"></line>
                         <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
                     </svg>
                 </a>
-                <a href="#" class="social-link" title="YouTube" target="_blank" rel="noopener">
+                <a href="https://www.youtube.com/@ForceQuitCreations" class="social-link" title="YouTube" target="_blank" rel="noopener">
                     <svg viewBox="0 0 24 24" fill="currentColor">
                         <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                     </svg>
                 </a>
-                <a href="#" class="social-link" title="Instagram" target="_blank" rel="noopener">
+                <a href="https://www.instagram.com/forcequit_music/" class="social-link" title="Instagram" target="_blank" rel="noopener">
                     <svg viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                     </svg>
                 </a>
-                <a href="#" class="social-link" title="Twitter/X" target="_blank" rel="noopener">
+                <a href="https://x.com/force92000" class="social-link" title="Twitter/X" target="_blank" rel="noopener">
                     <svg viewBox="0 0 24 24" fill="currentColor">
                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                     </svg>
                 </a>
-                <a href="#" class="social-link" title="GitHub" target="_blank" rel="noopener">
+                <a href="https://github.com/forcequit-me" class="social-link" title="GitHub" target="_blank" rel="noopener">
                     <svg viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                </a>
+                <a href="https://linktr.ee/ForceQuit" class="social-link" title="Linktree" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M7.953 15.066l-.038-4.044-4.044-.02v2.084l2.115-.02.02 2.138zM15.83 9.092l-.02 2.114-2.114-.02v-2.085l-1.907 1.945 1.927 2.01v6.907h2.066V13.09l1.946-1.897-1.898-2.102zM20.129 15.066l.02-2.138 2.115.02V10.864l-4.044.02-.039 4.044-2.009-1.965-1.965 1.946 3.955 4.025v-3.868h1.967zM7.953 8.954l2.009 2.05-2.02 1.955-1.945-1.916v-2.09H3.871V7.001l4.074-.039v2.032l-2.038-.02v.02zM12.05 2l-2.01 2.058v4.035l2.01 2.01 2.029-2.01v-4.15l-2.029-1.943z"/>
                     </svg>
                 </a>
                 <div class="footer-divider"></div>
@@ -1489,7 +1561,8 @@
                         <li><strong>Inline editing</strong> — Modify speaker, text, timing; add/remove entries without leaving the page.</li>
                         <li><strong>Rename speakers globally</strong> — One change applies to all occurrences.</li>
                         <li><strong>Subtitle limits</strong> — Set max characters per line, max lines, and minimum duration.</li>
-                        <li><strong>Multiple exports</strong> — Download as SRT or TXT, or copy to clipboard.</li>
+                        <li><strong>Multiple exports</strong> — Download as SRT, TXT, CSV, JSON, or copy to clipboard.</li>
+                        <li><strong>Keyboard shortcuts</strong> — Enter to confirm, Ctrl+Enter to save edits, Escape to cancel, Arrow keys for timing.</li>
                     </ul>
                 </div>
 
@@ -1499,31 +1572,36 @@
                     <p style="color: #94a3b8; margin-top: 0; margin-bottom: 1rem;">Have feedback or a feature request? Let me know on GitHub or Social Media!</p>
                     <div style="display: flex; gap: 0.75rem; justify-content: center;">
                         <!-- Social Links (Copied from Header) -->
-                        <a href="#" class="social-link" title="Website" target="_blank" rel="noopener">
+                        <a href="https://forcequitproductions.com/" class="social-link" title="Website" target="_blank" rel="noopener">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <line x1="2" y1="12" x2="22" y2="12"></line>
                                 <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
                             </svg>
                         </a>
-                        <a href="#" class="social-link" title="YouTube" target="_blank" rel="noopener">
+                        <a href="https://www.youtube.com/@ForceQuitCreations" class="social-link" title="YouTube" target="_blank" rel="noopener">
                             <svg viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                             </svg>
                         </a>
-                        <a href="#" class="social-link" title="Instagram" target="_blank" rel="noopener">
+                        <a href="https://www.instagram.com/forcequit_music/" class="social-link" title="Instagram" target="_blank" rel="noopener">
                             <svg viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                             </svg>
                         </a>
-                        <a href="#" class="social-link" title="Twitter/X" target="_blank" rel="noopener">
+                        <a href="https://x.com/force92000" class="social-link" title="Twitter/X" target="_blank" rel="noopener">
                             <svg viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                             </svg>
                         </a>
-                        <a href="#" class="social-link" title="GitHub" target="_blank" rel="noopener">
+                        <a href="https://github.com/forcequit-me" class="social-link" title="GitHub" target="_blank" rel="noopener">
                             <svg viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </a>
+                        <a href="https://linktr.ee/ForceQuit" class="social-link" title="Linktree" target="_blank" rel="noopener">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M7.953 15.066l-.038-4.044-4.044-.02v2.084l2.115-.02.02 2.138zM15.83 9.092l-.02 2.114-2.114-.02v-2.085l-1.907 1.945 1.927 2.01v6.907h2.066V13.09l1.946-1.897-1.898-2.102zM20.129 15.066l.02-2.138 2.115.02V10.864l-4.044.02-.039 4.044-2.009-1.965-1.965 1.946 3.955 4.025v-3.868h1.967zM7.953 8.954l2.009 2.05-2.02 1.955-1.945-1.916v-2.09H3.871V7.001l4.074-.039v2.032l-2.038-.02v.02zM12.05 2l-2.01 2.058v4.035l2.01 2.01 2.029-2.01v-4.15l-2.029-1.943z"/>
                             </svg>
                         </a>
                     </div>
@@ -4735,6 +4813,131 @@ Speaker 1
             });
             const fileName = document.getElementById('exportFileName').value.trim() || 'merged_transcript';
             download(content, `${fileName}.srt`, 'text/plain');
+        });
+
+        document.getElementById('downloadCsvBtn').addEventListener('click', () => {
+            if (!processedData) return;
+            const showSpeakers = document.getElementById('toggleSpeakerNames').checked;
+            const showCC = document.getElementById('toggleCC').checked;
+            const stripSilence = document.getElementById('toggleStripSilence').checked;
+            
+            // STEP 1: Strip (Silence) entries if enabled
+            const isSilence = (entry) => /^\(\s*silence\s*\)$/i.test(entry.text.trim());
+            const noSilenceData = stripSilence ? processedData.filter(e => !isSilence(e)) : processedData;
+            
+            // STEP 2: Filter out CC entries if CC toggle is off
+            const isCC = (entry) => entry.speaker === '[CC]' || (entry.text.startsWith('(') && entry.text.endsWith(')'));
+            const filteredData = showCC ? noSilenceData : noSilenceData.filter(e => !isCC(e));
+            
+            // STEP 3: Clone and apply timing corrections (linearization + min duration)
+            const csvData = filteredData.map(entry => ({ ...entry }));
+            const minDuration = parseFloat(document.getElementById('settingMinDuration').value) || 0;
+            
+            let lastEnd = 0;
+            csvData.forEach((entry) => {
+                // Fix overlaps
+                if (entry.startSeconds < lastEnd) {
+                    entry.startSeconds = lastEnd;
+                }
+                // Apply minimum duration
+                if (minDuration > 0) {
+                    const currentDuration = entry.endSeconds - entry.startSeconds;
+                    if (currentDuration < minDuration) {
+                        entry.endSeconds = entry.startSeconds + minDuration;
+                    }
+                } else {
+                    if (entry.startSeconds >= entry.endSeconds) {
+                        entry.endSeconds = entry.startSeconds + 0.1;
+                    }
+                }
+                lastEnd = entry.endSeconds;
+            });
+            
+            // CSV Helper: Escape values containing commas, quotes, or newlines
+            const escapeCSV = (val) => {
+                const str = String(val);
+                if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                    return `"${str.replace(/"/g, '""')}"`;
+                }
+                return str;
+            };
+            
+            // Build CSV content
+            let content = showSpeakers 
+                ? 'Speaker,Start,End,Text\n' 
+                : 'Start,End,Text\n';
+            
+            csvData.forEach(entry => {
+                const start = formatTimecode(entry.startSeconds);
+                const end = formatTimecode(entry.endSeconds);
+                if (showSpeakers) {
+                    content += `${escapeCSV(entry.speaker)},${escapeCSV(start)},${escapeCSV(end)},${escapeCSV(entry.text)}\n`;
+                } else {
+                    content += `${escapeCSV(start)},${escapeCSV(end)},${escapeCSV(entry.text)}\n`;
+                }
+            });
+            
+            const fileName = document.getElementById('exportFileName').value.trim() || 'merged_transcript';
+            download(content, `${fileName}.csv`, 'text/csv');
+        });
+
+        document.getElementById('downloadJsonBtn').addEventListener('click', () => {
+            if (!processedData) return;
+            const showSpeakers = document.getElementById('toggleSpeakerNames').checked;
+            const showCC = document.getElementById('toggleCC').checked;
+            const stripSilence = document.getElementById('toggleStripSilence').checked;
+            
+            // STEP 1: Strip (Silence) entries if enabled
+            const isSilence = (entry) => /^\(\s*silence\s*\)$/i.test(entry.text.trim());
+            const noSilenceData = stripSilence ? processedData.filter(e => !isSilence(e)) : processedData;
+            
+            // STEP 2: Filter out CC entries if CC toggle is off
+            const isCC = (entry) => entry.speaker === '[CC]' || (entry.text.startsWith('(') && entry.text.endsWith(')'));
+            const filteredData = showCC ? noSilenceData : noSilenceData.filter(e => !isCC(e));
+            
+            // STEP 3: Clone and apply timing corrections (linearization + min duration)
+            const jsonData = filteredData.map(entry => ({ ...entry }));
+            const minDuration = parseFloat(document.getElementById('settingMinDuration').value) || 0;
+            
+            let lastEnd = 0;
+            jsonData.forEach((entry) => {
+                // Fix overlaps
+                if (entry.startSeconds < lastEnd) {
+                    entry.startSeconds = lastEnd;
+                }
+                // Apply minimum duration
+                if (minDuration > 0) {
+                    const currentDuration = entry.endSeconds - entry.startSeconds;
+                    if (currentDuration < minDuration) {
+                        entry.endSeconds = entry.startSeconds + minDuration;
+                    }
+                } else {
+                    if (entry.startSeconds >= entry.endSeconds) {
+                        entry.endSeconds = entry.startSeconds + 0.1;
+                    }
+                }
+                lastEnd = entry.endSeconds;
+            });
+            
+            // Build JSON structure
+            const output = jsonData.map((entry, index) => {
+                const obj = {
+                    index: index + 1,
+                    startTime: formatTimecode(entry.startSeconds),
+                    endTime: formatTimecode(entry.endSeconds),
+                    startSeconds: parseFloat(entry.startSeconds.toFixed(3)),
+                    endSeconds: parseFloat(entry.endSeconds.toFixed(3)),
+                    text: entry.text
+                };
+                if (showSpeakers) {
+                    obj.speaker = entry.speaker;
+                }
+                return obj;
+            });
+            
+            const content = JSON.stringify(output, null, 2);
+            const fileName = document.getElementById('exportFileName').value.trim() || 'merged_transcript';
+            download(content, `${fileName}.json`, 'application/json');
         });
 
         document.getElementById('copyBtn').addEventListener('click', () => {
