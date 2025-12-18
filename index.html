@@ -3527,8 +3527,8 @@ Speaker 1
             const showCC = document.getElementById('toggleCC').checked;
             const stripSilence = document.getElementById('toggleStripSilence').checked;
             
-            // Helper to check if entry is a silence marker
-            const isSilence = (entry) => /^\(\s*silence\s*\)$/i.test(entry.text.trim());
+            // Helper to check if entry is a silence marker (Silence) or (Blank Audio)
+            const isSilence = (entry) => /^\(\s*(silence|blank\s*audio)\s*\)$/i.test(entry.text.trim());
             
             document.getElementById('entryCount').textContent = processedData.length;
             document.getElementById('statEntries').textContent = processedData.length;
@@ -4695,8 +4695,8 @@ Speaker 1
             const showCC = document.getElementById('toggleCC').checked;
             const stripSilence = document.getElementById('toggleStripSilence').checked;
             
-            // STEP 1: Strip (Silence) entries if enabled
-            const isSilence = (entry) => /^\(\s*silence\s*\)$/i.test(entry.text.trim());
+            // STEP 1: Strip (Silence) and (Blank Audio) entries if enabled
+            const isSilence = (entry) => /^\(\s*(silence|blank\s*audio)\s*\)$/i.test(entry.text.trim());
             const noSilenceData = stripSilence ? processedData.filter(e => !isSilence(e)) : processedData;
             
             // STEP 2: Filter out CC entries if CC toggle is off
@@ -4752,8 +4752,8 @@ Speaker 1
             // If Line B overlaps Line A, Line B starts when Line A ends.
             // Ensure minimum display duration so entries don't get compressed to nothing.
             
-            // STEP 1: Strip (Silence) entries if enabled - frees up timing space
-            const isSilence = (entry) => /^\(\s*silence\s*\)$/i.test(entry.text.trim());
+            // STEP 1: Strip (Silence) and (Blank Audio) entries if enabled - frees up timing space
+            const isSilence = (entry) => /^\(\s*(silence|blank\s*audio)\s*\)$/i.test(entry.text.trim());
             const noSilenceData = stripSilence ? processedData.filter(e => !isSilence(e)) : processedData;
             
             // STEP 2: Filter out CC entries if CC toggle is off
@@ -4821,8 +4821,8 @@ Speaker 1
             const showCC = document.getElementById('toggleCC').checked;
             const stripSilence = document.getElementById('toggleStripSilence').checked;
             
-            // STEP 1: Strip (Silence) entries if enabled
-            const isSilence = (entry) => /^\(\s*silence\s*\)$/i.test(entry.text.trim());
+            // STEP 1: Strip (Silence) and (Blank Audio) entries if enabled
+            const isSilence = (entry) => /^\(\s*(silence|blank\s*audio)\s*\)$/i.test(entry.text.trim());
             const noSilenceData = stripSilence ? processedData.filter(e => !isSilence(e)) : processedData;
             
             // STEP 2: Filter out CC entries if CC toggle is off
@@ -4887,8 +4887,8 @@ Speaker 1
             const showCC = document.getElementById('toggleCC').checked;
             const stripSilence = document.getElementById('toggleStripSilence').checked;
             
-            // STEP 1: Strip (Silence) entries if enabled
-            const isSilence = (entry) => /^\(\s*silence\s*\)$/i.test(entry.text.trim());
+            // STEP 1: Strip (Silence) and (Blank Audio) entries if enabled
+            const isSilence = (entry) => /^\(\s*(silence|blank\s*audio)\s*\)$/i.test(entry.text.trim());
             const noSilenceData = stripSilence ? processedData.filter(e => !isSilence(e)) : processedData;
             
             // STEP 2: Filter out CC entries if CC toggle is off
@@ -4946,8 +4946,8 @@ Speaker 1
             const showCC = document.getElementById('toggleCC').checked;
             const stripSilence = document.getElementById('toggleStripSilence').checked;
             
-            // STEP 1: Strip (Silence) entries if enabled
-            const isSilence = (entry) => /^\(\s*silence\s*\)$/i.test(entry.text.trim());
+            // STEP 1: Strip (Silence) and (Blank Audio) entries if enabled
+            const isSilence = (entry) => /^\(\s*(silence|blank\s*audio)\s*\)$/i.test(entry.text.trim());
             const noSilenceData = stripSilence ? processedData.filter(e => !isSilence(e)) : processedData;
             
             // STEP 2: Filter out CC entries if CC toggle is off
