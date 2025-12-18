@@ -4,6 +4,14 @@ All notable changes to Transcript Merger are documented here.
 
 ---
 
+## [1.5.2] - 2025-12-18
+
+### Changed
+- **Enhanced Strip Silence**: Now also filters out `(Blank Audio)` entries in addition to `(Silence)` markers
+- **README Updates**: Added dedicated "Output Options" feature section explaining Show Speakers, Show CC, and Strip Silence functionality
+
+---
+
 ## [1.5.1] - 2025-12-17
 
 ### Added
