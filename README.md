@@ -135,7 +135,7 @@ If you find this tool useful, consider [supporting my work on Gumroad or Patreon
 
 - 🌐 [Website](https://forcequitproductions.com/)
 - 📺 [YouTube](https://www.youtube.com/@ForceQuitCreations)
-- 🐦 [X / Twitter](https://x.com/force92000)
+- 🐦 [X / Twitter](https://x.com/ForceQuit_YT)
 - 📸 [Instagram](https://www.instagram.com/forcequit_music/)
 - 🔗 [Linktree](https://linktr.ee/ForceQuit)
 - 💻 [GitHub](https://github.com/forcequit-me)
