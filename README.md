@@ -2,6 +2,8 @@
 
 The missing tool for DaVinci Resolve transcripts.
 
+[**Use Hosted Version**](https://transcript-merger.pages.dev)
+
 Why This Tool Exists?
 DaVinci Resolve has the best transcription quality compared to Adobe Premiere and Descript—but all three have unreliable speaker detection. This tool solves that problem.
 
@@ -123,7 +125,10 @@ Navigate and edit efficiently with keyboard shortcuts:
 - Internet connection (required for loading TailwindCSS and Icon libraries via CDN).
 
 ## Installation
-No installation required. Simply download the `index.html` file and open it in your web browser.
+No installation required. 
+
+- **Hosted**: Use the [online version here](https://transcript-merger.pages.dev).
+- **Local**: Simply download the `index.html` file and open it in your web browser.
 
 ## Feedback & Support
 Access the **About** menu within the application to find links to my social media channels for updates, feedback, and feature requests.
