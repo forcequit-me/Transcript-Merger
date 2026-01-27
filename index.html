@@ -1369,6 +1369,11 @@
                     <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider text-center">Output Options</h3>
                     <div class="flex flex-wrap items-center justify-center gap-3 md:gap-4">
                         <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="toggleTranscription" checked class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 bg-slate-800 border-slate-600">
+                            <span class="text-sm text-slate-300">Show Transcription</span>
+                        </label>
+                        <div class="w-px h-4 bg-slate-700"></div>
+                        <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" id="toggleSpeakerNames" checked class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 bg-slate-800 border-slate-600">
                             <span class="text-sm text-slate-300">Show Speakers</span>
                         </label>
@@ -1459,7 +1464,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="2" y1="12" x2="22" y2="12"></line>
-                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"></path>
                     </svg>
                 </a>
                 <a href="https://www.youtube.com/@ForceQuitCreations" class="social-link" title="YouTube" target="_blank" rel="noopener">
@@ -1571,11 +1576,12 @@
                         <li><strong>Subtitle limits</strong> — Set max characters per line, max lines, and minimum duration.</li>
                         <li><strong>Multiple exports</strong> — Download as SRT, TXT, CSV, JSON, or copy to clipboard.</li>
                         <li><strong>Keyboard shortcuts</strong> — Enter to confirm, Ctrl+Enter to save edits, Escape to cancel, Arrow keys for timing.</li>
+                        <li><strong>Export CC Only</strong> — Uncheck "Show Transcription" to export only closed captions.</li>
                     </ul>
                 </div>
-
                 <!-- Feedback & Updates -->
                 <div class="modal-section" style="text-align: center;">
+
                     <h3 style="justify-content: center; padding-left: 0; margin-bottom: 0.5rem;">Feedback & Updates</h3>
                     <p style="color: #94a3b8; margin-top: 0; margin-bottom: 1rem;">Have feedback or a feature request? Let me know on GitHub or Social Media!</p>
                     <div style="display: flex; gap: 0.75rem; justify-content: center;">
@@ -1670,10 +1676,11 @@
         
         // PER-TAB SETTINGS AND DATA: Each tab has its own settings and preview data
         const tabSettings = {
-            edit: { cpl: 42, maxLines: 2, minDuration: 1.5, enableLimits: true, showSpeakers: true, showCC: true, stripSilence: true, processedData: null, rawProcessedData: null },
-            merge: { cpl: 42, maxLines: 2, minDuration: 1.5, enableLimits: true, showSpeakers: true, showCC: true, stripSilence: true, processedData: null, rawProcessedData: null },
-            sequence: { cpl: 42, maxLines: 2, minDuration: 1.5, enableLimits: true, showSpeakers: true, showCC: true, stripSilence: true, processedData: null, rawProcessedData: null }
+            edit: { cpl: 42, maxLines: 2, minDuration: 1.5, enableLimits: true, showSpeakers: true, showCC: true, showTranscription: true, stripSilence: true, processedData: null, rawProcessedData: null },
+            merge: { cpl: 42, maxLines: 2, minDuration: 1.5, enableLimits: true, showSpeakers: true, showCC: true, showTranscription: true, stripSilence: true, processedData: null, rawProcessedData: null },
+            sequence: { cpl: 42, maxLines: 2, minDuration: 1.5, enableLimits: true, showSpeakers: true, showCC: true, showTranscription: true, stripSilence: true, processedData: null, rawProcessedData: null }
         };
+
 
         // DEMO FILE DATA (embedded for single-file portability)
         // Format matches DaVinci Resolve transcript export: [START - END] \n Speaker \n text
@@ -3533,6 +3540,7 @@ Speaker 1
             // Filter based on toggles
             const showSpeakers = document.getElementById('toggleSpeakerNames').checked;
             const showCC = document.getElementById('toggleCC').checked;
+            const showTranscription = document.getElementById('toggleTranscription').checked;
             const stripSilence = document.getElementById('toggleStripSilence').checked;
             
             // Helper to check if entry is a silence marker (Silence) or (Blank Audio)
@@ -3572,6 +3580,7 @@ Speaker 1
                 
                 // VISIBILITY CHECK
                 if (isCC && !showCC) return; // Skip if CC hidden
+                if (!isCC && !showTranscription) return; // Skip if Transcription hidden
                 if (stripSilence && isSilence(entry)) return; // Skip silence entries if Strip Silence enabled
                 
                 // ADD PART SEPARATOR for Sequencer mode when entering a new part
@@ -4707,9 +4716,16 @@ Speaker 1
             const isSilence = (entry) => /^\(\s*(silence|blank\s*audio)\s*\)$/i.test(entry.text.trim());
             const noSilenceData = stripSilence ? processedData.filter(e => !isSilence(e)) : processedData;
             
-            // STEP 2: Filter out CC entries if CC toggle is off
+            // STEP 2: Filter based on visibility toggles
+            const showTranscription = document.getElementById('toggleTranscription').checked;
             const isCC = (entry) => entry.speaker === '[CC]' || (entry.text.startsWith('(') && entry.text.endsWith(')'));
-            const filteredData = showCC ? noSilenceData : noSilenceData.filter(e => !isCC(e));
+            
+            const filteredData = noSilenceData.filter(e => {
+                if (isCC(e) && !showCC) return false;
+                if (!isCC(e) && !showTranscription) return false;
+                return true;
+            });
+
             
             // STEP 3: Clone and apply timing corrections (linearization + min duration)
             const txtData = filteredData.map(entry => ({ ...entry }));
@@ -4764,9 +4780,16 @@ Speaker 1
             const isSilence = (entry) => /^\(\s*(silence|blank\s*audio)\s*\)$/i.test(entry.text.trim());
             const noSilenceData = stripSilence ? processedData.filter(e => !isSilence(e)) : processedData;
             
-            // STEP 2: Filter out CC entries if CC toggle is off
+            // STEP 2: Filter based on visibility toggles
+            const showTranscription = document.getElementById('toggleTranscription').checked;
             const isCC = (entry) => entry.speaker === '[CC]' || (entry.text.startsWith('(') && entry.text.endsWith(')'));
-            const filteredData = showCC ? noSilenceData : noSilenceData.filter(e => !isCC(e));
+            
+            const filteredData = noSilenceData.filter(e => {
+                if (isCC(e) && !showCC) return false;
+                if (!isCC(e) && !showTranscription) return false;
+                return true;
+            });
+
             
             const srtData = filteredData.map(entry => ({ ...entry }));
             
@@ -4833,9 +4856,16 @@ Speaker 1
             const isSilence = (entry) => /^\(\s*(silence|blank\s*audio)\s*\)$/i.test(entry.text.trim());
             const noSilenceData = stripSilence ? processedData.filter(e => !isSilence(e)) : processedData;
             
-            // STEP 2: Filter out CC entries if CC toggle is off
+            // STEP 2: Filter based on visibility toggles
+            const showTranscription = document.getElementById('toggleTranscription').checked;
             const isCC = (entry) => entry.speaker === '[CC]' || (entry.text.startsWith('(') && entry.text.endsWith(')'));
-            const filteredData = showCC ? noSilenceData : noSilenceData.filter(e => !isCC(e));
+            
+            const filteredData = noSilenceData.filter(e => {
+                if (isCC(e) && !showCC) return false;
+                if (!isCC(e) && !showTranscription) return false;
+                return true;
+            });
+
             
             // STEP 3: Clone and apply timing corrections (linearization + min duration)
             const csvData = filteredData.map(entry => ({ ...entry }));
@@ -4899,9 +4929,16 @@ Speaker 1
             const isSilence = (entry) => /^\(\s*(silence|blank\s*audio)\s*\)$/i.test(entry.text.trim());
             const noSilenceData = stripSilence ? processedData.filter(e => !isSilence(e)) : processedData;
             
-            // STEP 2: Filter out CC entries if CC toggle is off
+            // STEP 2: Filter based on visibility toggles
+            const showTranscription = document.getElementById('toggleTranscription').checked;
             const isCC = (entry) => entry.speaker === '[CC]' || (entry.text.startsWith('(') && entry.text.endsWith(')'));
-            const filteredData = showCC ? noSilenceData : noSilenceData.filter(e => !isCC(e));
+            
+            const filteredData = noSilenceData.filter(e => {
+                if (isCC(e) && !showCC) return false;
+                if (!isCC(e) && !showTranscription) return false;
+                return true;
+            });
+
             
             // STEP 3: Clone and apply timing corrections (linearization + min duration)
             const jsonData = filteredData.map(entry => ({ ...entry }));
@@ -4958,9 +4995,16 @@ Speaker 1
             const isSilence = (entry) => /^\(\s*(silence|blank\s*audio)\s*\)$/i.test(entry.text.trim());
             const noSilenceData = stripSilence ? processedData.filter(e => !isSilence(e)) : processedData;
             
-            // STEP 2: Filter out CC entries if CC toggle is off
+            // STEP 2: Filter based on visibility toggles
+            const showTranscription = document.getElementById('toggleTranscription').checked;
             const isCC = (entry) => entry.speaker === '[CC]' || (entry.text.startsWith('(') && entry.text.endsWith(')'));
-            const filteredData = showCC ? noSilenceData : noSilenceData.filter(e => !isCC(e));
+            
+            const filteredData = noSilenceData.filter(e => {
+                if (isCC(e) && !showCC) return false;
+                if (!isCC(e) && !showTranscription) return false;
+                return true;
+            });
+
             
             // STEP 3: Clone and apply timing corrections (linearization + min duration)
             const copyData = filteredData.map(entry => ({ ...entry }));
@@ -5064,7 +5108,9 @@ Speaker 1
 
         // Toggle Listeners - skipScroll=true to prevent viewport jumping when adjusting settings
         document.getElementById('toggleSpeakerNames').addEventListener('change', () => displayPreview(true));
+        document.getElementById('toggleTranscription').addEventListener('change', () => displayPreview(true));
         document.getElementById('toggleCC').addEventListener('change', () => displayPreview(true));
+
         document.getElementById('toggleStripSilence').addEventListener('change', () => displayPreview(true));
         document.getElementById('toggleLimits').addEventListener('change', () => {
             if (rawProcessedData !== null) reapplyLimits();
