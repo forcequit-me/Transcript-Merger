@@ -880,42 +880,48 @@
 
         /* Tab Header Action Buttons */
         .tab-header-actions {
-            position: relative;
-            display: flex;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
             align-items: center;
-            min-height: 40px;
+            width: 100%;
         }
         .tab-header-actions h2 {
             text-align: center;
             margin: 0;
+            grid-column: 2;
         }
-        .tab-header-actions .tab-header-btn:first-child {
-            position: absolute;
-            left: 0;
+        .tab-header-actions .demo-load-btn-merge,
+        .tab-header-actions .demo-load-btn-edit,
+        .tab-header-actions .demo-load-btn-sequence {
+            grid-column: 1;
+            justify-self: start;
         }
         .tab-header-actions .help-btn {
-            position: absolute;
-            right: 0;
+            grid-column: 3;
+            justify-self: end;
         }
-        @media (max-width: 640px) {
+        @media (max-width: 540px) {
             .tab-header-actions {
-                flex-direction: column;
-                gap: 0.75rem;
-                padding-top: 2.5rem;
-            }
-            .tab-header-actions .tab-header-btn:first-child {
-                position: absolute;
-                left: 0;
-                top: 0;
-            }
-            .tab-header-actions .help-btn {
-                position: absolute;
-                right: 0;
-                top: 0;
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto auto;
+                gap: 0.5rem;
             }
             .tab-header-actions h2 {
-                font-size: 1.25rem;
+                grid-column: 1 / -1;
+                grid-row: 2;
+                font-size: 1.125rem;
+            }
+            .tab-header-actions .demo-load-btn-merge,
+            .tab-header-actions .demo-load-btn-edit,
+            .tab-header-actions .demo-load-btn-sequence {
+                grid-column: 1;
+                grid-row: 1;
+                justify-self: start;
+            }
+            .tab-header-actions .help-btn {
+                grid-column: 2;
+                grid-row: 1;
+                justify-self: end;
             }
         }
         .tab-header-btn {
@@ -1409,7 +1415,7 @@
                 <div class="mb-6">
                     <div class="tab-header-actions">
                         <button class="tab-header-btn demo-load-btn-edit" onclick="loadEditDemo()">Load Demo</button>
-                        <h2 class="text-2xl font-bold text-slate-100">Edit Transcript</h2>
+                        <h2 class="text-2xl font-bold text-slate-100">Upload and Edit Existing Transcripts</h2>
                         <button class="tab-header-btn help-btn help-btn-edit" onclick="openAboutModal()" title="About / Help">?</button>
                     </div>
                 </div>
