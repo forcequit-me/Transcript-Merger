@@ -880,14 +880,43 @@
 
         /* Tab Header Action Buttons */
         .tab-header-actions {
+            position: relative;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
+            min-height: 40px;
         }
         .tab-header-actions h2 {
-            flex: 1;
             text-align: center;
             margin: 0;
+        }
+        .tab-header-actions .tab-header-btn:first-child {
+            position: absolute;
+            left: 0;
+        }
+        .tab-header-actions .help-btn {
+            position: absolute;
+            right: 0;
+        }
+        @media (max-width: 640px) {
+            .tab-header-actions {
+                flex-direction: column;
+                gap: 0.75rem;
+                padding-top: 2.5rem;
+            }
+            .tab-header-actions .tab-header-btn:first-child {
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+            .tab-header-actions .help-btn {
+                position: absolute;
+                right: 0;
+                top: 0;
+            }
+            .tab-header-actions h2 {
+                font-size: 1.25rem;
+            }
         }
         .tab-header-btn {
             display: inline-flex;
@@ -923,20 +952,35 @@
             background: #10b981;
         }
         .help-btn {
-            background: #1e1b4b;
-            color: #a5b4fc;
             width: 28px;
             height: 28px;
             padding: 0;
             justify-content: center;
             font-size: 0.875rem;
             font-weight: 700;
-            border: 1px solid #4338ca;
+            border-radius: 50%;
+            border: none;
         }
-        .help-btn:hover {
+        .help-btn-merge {
             background: #4338ca;
-            color: #fff;
-            border-color: #6366f1;
+            color: white;
+        }
+        .help-btn-merge:hover {
+            background: #6366f1;
+        }
+        .help-btn-edit {
+            background: #7c3aed;
+            color: white;
+        }
+        .help-btn-edit:hover {
+            background: #8b5cf6;
+        }
+        .help-btn-sequence {
+            background: #059669;
+            color: white;
+        }
+        .help-btn-sequence:hover {
+            background: #10b981;
         }
 
         /* Tab Button Hover Effects */
@@ -1366,7 +1410,7 @@
                     <div class="tab-header-actions">
                         <button class="tab-header-btn demo-load-btn-edit" onclick="loadEditDemo()">Load Demo</button>
                         <h2 class="text-2xl font-bold text-slate-100">Edit Transcript</h2>
-                        <button class="tab-header-btn help-btn" onclick="openAboutModal()" title="About / Help">?</button>
+                        <button class="tab-header-btn help-btn help-btn-edit" onclick="openAboutModal()" title="About / Help">?</button>
                     </div>
                 </div>
                 <div id="filesContainerEdit" class="space-y-3 mb-6"></div>
@@ -1378,7 +1422,7 @@
                     <div class="tab-header-actions">
                         <button class="tab-header-btn demo-load-btn-merge" onclick="loadMergeDemo()">Load Demo</button>
                         <h2 class="text-2xl font-bold text-slate-100">Upload Speaker Transcriptions</h2>
-                        <button class="tab-header-btn help-btn" onclick="openAboutModal()" title="About / Help">?</button>
+                        <button class="tab-header-btn help-btn help-btn-merge" onclick="openAboutModal()" title="About / Help">?</button>
                     </div>
                 </div>
                 <div id="filesContainerMerge" class="space-y-3 mb-6"></div>
@@ -1394,7 +1438,7 @@
                     <div class="tab-header-actions">
                         <button class="tab-header-btn demo-load-btn-sequence" onclick="loadSequenceDemo()">Load Demo</button>
                         <h2 class="text-2xl font-bold text-slate-100">Upload Transcripts and Sequence Them</h2>
-                        <button class="tab-header-btn help-btn" onclick="openAboutModal()" title="About / Help">?</button>
+                        <button class="tab-header-btn help-btn help-btn-sequence" onclick="openAboutModal()" title="About / Help">?</button>
                     </div>
                 </div>
                 <div id="filesContainerSequence" class="space-y-3 mb-6"></div>
@@ -1760,7 +1804,7 @@
         const DEMO_FILES = {
             merge_speaker_a: `[00:00:00:00 - 00:00:02:00]
 Speaker 1
-[Intro music playing]
+ (Intro music)
 
 [00:00:02:00 - 00:00:08:00]
 Speaker 1
@@ -1769,6 +1813,10 @@ Hey, welcome to the show! Thanks for joining us today.
 [00:00:08:15 - 00:00:16:00]
 Speaker 1
 So I wanted to talk about something really interesting that happened last week.
+
+[00:00:16:00 - 00:00:18:00]
+Speaker 1
+ (Silence)
 
 [00:00:18:00 - 00:00:28:00]
 Speaker 1
@@ -1798,6 +1846,10 @@ Thanks for having me! I'm excited to be here.
 Speaker 1
 Oh really? What happened?
 
+[00:00:20:00 - 00:00:23:08]
+Speaker 1
+ (Silence)
+
 [00:00:23:08 - 00:00:35:00]
 Speaker 1
 That's awesome! I saw some of the posts online.
@@ -1808,7 +1860,7 @@ Absolutely. It really shows what's possible when people collaborate.
 
 [00:00:40:00 - 00:00:48:00]
 Speaker 1
-[Both laughing]
+ (Laughter)
 
 [00:00:48:06 - 00:00:58:00]
 Speaker 1
@@ -1824,7 +1876,7 @@ Definitely. I've started using transcripts for all my projects now.
 `,
             sequence_part1: `[01:00:00:00 - 01:00:03:00]
 Speaker 1
-[Upbeat intro music]
+ (Upbeat intro music)
 
 [01:00:03:00 - 01:00:08:00]
 Speaker 1
@@ -1836,7 +1888,7 @@ Today we're going to cover the basics of color grading.
 
 [01:00:18:00 - 01:00:20:00]
 Speaker 1
-[Mouse clicking]
+ (Mouse clicking)
 
 [01:00:20:00 - 01:00:32:00]
 Speaker 1
@@ -1849,6 +1901,10 @@ You'll notice the node graph on the right side of the screen.
 [01:00:45:00 - 01:01:02:00]
 Speaker 1
 This is where all the magic happens.
+
+[01:01:02:00 - 01:01:02:18]
+Speaker 1
+ (Silence)
 
 [01:01:02:18 - 01:01:15:00]
 Speaker 1
@@ -1902,9 +1958,13 @@ Now I can adjust just this selected region.
 Speaker 1
 This is incredibly powerful for fixing problem areas.
 
-[01:01:52:00 - 01:01:58:00]
+[01:01:52:00 - 01:01:54:00]
 Speaker 1
-[Keyboard typing sounds]
+ (Silence)
+
+[01:01:54:00 - 01:01:58:00]
+Speaker 1
+ (Keyboard typing)
 
 [01:01:58:00 - 01:02:05:00]
 Speaker 1
@@ -1912,7 +1972,7 @@ And that wraps up our tutorial series!
 
 [01:02:05:00 - 01:02:10:00]
 Speaker 1
-[Outro music playing]
+ (Outro music)
 `,
             edit_transcript: `[00:00:03:00 - 00:00:10:00]
 Speaker 1
@@ -1944,7 +2004,7 @@ That's fascinating. Tell us more about that experience.
 
 [00:01:02:00 - 00:01:05:00]
 Speaker 1
-(Silence)
+ (Silence)
 
 [00:01:05:12 - 00:01:18:00]
 Speaker 2
@@ -1952,7 +2012,7 @@ I took a class that completely changed my perspective.
 
 [00:01:18:00 - 00:01:22:00]
 Speaker 1
-[Background music playing]
+ (Background music)
 
 [00:01:22:00 - 00:01:32:00]
 Speaker 1
@@ -1964,7 +2024,7 @@ It was a long journey, but here we are!
 
 [00:01:45:00 - 00:01:50:00]
 Speaker 1
-[Applause]
+ (Applause)
 `
         };
 
